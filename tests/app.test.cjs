@@ -190,6 +190,16 @@ test("teclado cambia pestañas, búsqueda anuncia resultados y cierre devuelve f
       bubbles: true,
     }),
   );
+  assert.equal(app.get("tab-list").getAttribute("aria-selected"), "true");
+  assert.equal(app.window.document.activeElement.id, "tab-list");
+  app
+    .get("tab-list")
+    .dispatchEvent(
+      new app.window.KeyboardEvent("keydown", {
+        key: "ArrowRight",
+        bubbles: true,
+      }),
+    );
   assert.equal(app.get("tab-student").getAttribute("aria-selected"), "true");
   assert.equal(app.window.document.activeElement.id, "tab-student");
   assert.equal(app.get("report").tabIndex, 0);

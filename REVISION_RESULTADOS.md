@@ -1,5 +1,15 @@
 # Revisión de ISAT
 
+## Actualización 0.4.0: carga, grupos, listas e individuales
+
+La carga de Excel y hoja está separada de la consulta. El recorrido ofrece ficha de grupo, lista de estudiantes y ficha individual. Volver a los datos conserva la consulta si no se sustituye el archivo o la hoja. La lista muestra toda la clase, prioriza petición propia o dos o más menciones, permite buscar/filtrar/ordenar y presenta páginas de 50 filas. Las ausencias quedan al final en ambos sentidos. Las tres respuestas de bienestar se mantienen separadas, sin importar una escala de felicidad de PBIS. La lista aclara que las menciones recibidas proceden de personas distintas de todo el Excel.
+
+La revisión de datos admite OK, Revisar y Me sorprende; la confianza de −5 a +5 conserva «Sin valorar» como estado distinto de 0. La utilidad y el comentario de cada vista permanecen en memoria. El cierre retira el Excel y las fichas y puede mostrar un resumen con código de sesión, códigos G001/G002… de grupo y los códigos de estudiante del Excel, sin nombres ni respuestas adjuntas. El texto libre se muestra literal y escapado; se pide no incluir nombres. El resumen también se retira al cerrarlo o abandonar la página. ISAT sigue sin cuentas, llaves, ejemplos incluidos, correo ni almacenamiento persistente.
+
+Verificación: **55 pruebas automáticas superadas**. Se añadieron regresiones de separación de pantallas, prioridad de ayuda, filtro, orden numérico y ausencias, homónimos, retorno a lista, valoraciones, confianza neutra, resumen codificado, escape de comentarios, sustitución, historial y paginación. En navegador se comprobó el recorrido con un Excel sintético de 24 registros y dos clases: menciones de otra clase, revisión por dato, confianza, ficha/retorno, comentario y cierre. A 320 píxeles no se observó desbordamiento de la página; las tablas amplias permiten desplazamiento dentro de su propia región. Se comprobó también el ancho de escritorio, con las columnas complementarias. El archivo de control queda fuera del repositorio y del artefacto público.
+
+Las revisiones siguientes describen versiones anteriores. Los significados confirmados de UCE y ayuda prevalecen sobre las interpretaciones iniciales.
+
 ## Actualización 0.3.1: paleta y comunicación
 
 Se observaron los estilos aplicados en https://www.uloyola.es/ el 5 de octubre de 2026. Se trasladaron a ISAT el azul marino `#192A67`, el azul claro `#8CD1E7`, el azul de enlaces `#023E83`, el texto azul `#243162` y el fondo `#DEF7FF`, con tonos secundarios derivados. Cabeceras, controles, fichas, barras, matriz y favicon utilizan la paleta local. Los colores de las celdas se acompañan de etiquetas explícitas.

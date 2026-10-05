@@ -1,8 +1,8 @@
 {
   "name": "isat-visualizador",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
-  "description": "Visualizador ISAT con carga local de Excel, fichas de clase y de estudiante.",
+  "description": "Visualizador ISAT con carga separada de Excel, grupos, listas e informes individuales.",
   "scripts": {
     "start": "node tools/serve.mjs",
     "test": "node --test tests/*.test.cjs",

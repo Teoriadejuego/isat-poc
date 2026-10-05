@@ -20,9 +20,9 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.3.1" />
-    <script src="src/core.js?v=0.3.1" defer></script>
-    <script src="src/app.js?v=0.3.1" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.4.0" />
+    <script src="src/core.js?v=0.4.0" defer></script>
+    <script src="src/app.js?v=0.4.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -37,6 +37,8 @@
         <div class="top-actions">
           <span class="pill"
             ><span class="dot"></span>Procesamiento en tu navegador</span
+          ><button id="show-data" class="btn secondary" type="button" hidden>
+            Datos cargados</button
           ><button id="clear" class="btn secondary" type="button" hidden>
             Cerrar consulta
           </button>
@@ -44,52 +46,74 @@
       </div>
     </header>
     <main id="main" class="main">
-      <div class="workspace-title">
-        <span class="eyebrow">ESPACIO DE CONSULTA</span>
-        <h1>Consulta las peticiones y menciones de ayuda.</h1>
-        <p>
-          Selecciona el Excel del cuestionario ISAT. Consulta las peticiones
-          propias y las respuestas en las que otras personas indican que un
-          estudiante necesita ayuda, clase a clase.
-        </p>
-      </div>
-      <section class="upload-area" aria-labelledby="upload-title">
-        <div class="upload-title">
-          <div>
-            <h2 id="upload-title">Cuestionario ISAT</h2>
-            <p>
-              Selecciona el Excel y revisa la hoja que contiene las respuestas.
-            </p>
-          </div>
-          <span class="upload-badge" aria-hidden="true">EXCEL</span>
-        </div>
-        <div class="upload-controls">
-          <label class="file-button" for="file"
-            >Seleccionar Excel<input
-              id="file"
-              type="file"
-              accept=".xlsx,.xls"
-              aria-label="Seleccionar Excel" /></label
-          ><span id="filename" class="filename"
-            >Ningún archivo seleccionado</span
-          ><label id="sheet-field" class="field" hidden
-            >Hoja con respuestas<select
-              id="sheet"
-              aria-label="Hoja con respuestas del Excel"
-            ></select></label
-          ><button id="open" class="btn" type="button" disabled>
-            Abrir fichas <span aria-hidden="true">→</span>
+      <div id="data-screen">
+        <div class="workspace-title">
+          <span class="eyebrow">PASO 1 · CARGA DE DATOS</span>
+          <h1>Abre el cuestionario ISAT.</h1>
+          <p>
+            Selecciona el Excel del cuestionario ISAT. Consulta las peticiones
+            propias y las menciones de ayuda en tres vistas: grupo, lista de
+            estudiantes y ficha individual.
+          </p>
+          <button
+            id="back-consultation"
+            class="back-to-class"
+            type="button"
+            hidden
+          >
+            ← Volver a la consulta
           </button>
         </div>
-        <p class="upload-note">
-          El Excel se procesa en este navegador y no se envía al servidor. El
-          archivo original no se modifica. Formatos .xlsx y .xls, hasta 20 MB.
-        </p>
-        <p id="status" class="status" aria-live="polite" aria-atomic="true"></p>
-        <p id="error" class="error" role="alert" aria-atomic="true"></p>
-        <p id="quality" class="quality-notice" role="note"></p>
-      </section>
+        <section class="upload-area" aria-labelledby="upload-title">
+          <div class="upload-title">
+            <div>
+              <h2 id="upload-title">Cuestionario ISAT</h2>
+              <p>
+                Selecciona el Excel y revisa la hoja que contiene las
+                respuestas.
+              </p>
+            </div>
+            <span class="upload-badge" aria-hidden="true">EXCEL</span>
+          </div>
+          <div class="upload-controls">
+            <label class="file-button" for="file"
+              >Seleccionar Excel<input
+                id="file"
+                type="file"
+                accept=".xlsx,.xls"
+                aria-label="Seleccionar Excel" /></label
+            ><span id="filename" class="filename"
+              >Ningún archivo seleccionado</span
+            ><label id="sheet-field" class="field" hidden
+              >Hoja con respuestas<select
+                id="sheet"
+                aria-label="Hoja con respuestas del Excel"
+              ></select></label
+            ><button id="open" class="btn" type="button" disabled>
+              Abrir fichas <span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <p class="upload-note">
+            El Excel se procesa en este navegador y no se envía al servidor. El
+            archivo original no se modifica. Formatos .xlsx y .xls, hasta 20 MB.
+          </p>
+          <p
+            id="status"
+            class="status"
+            aria-live="polite"
+            aria-atomic="true"
+          ></p>
+          <p id="error" class="error" role="alert" aria-atomic="true"></p>
+          <p id="quality" class="quality-notice" role="note"></p>
+        </section>
+      </div>
       <div id="consultation" hidden>
+        <div class="consultation-heading">
+          <span class="eyebrow">PASO 2 · CONSULTA</span>
+          <h1>Consulta las peticiones y menciones de ayuda.</h1>
+          <p id="dataset-summary"></p>
+          <p id="consultation-quality" class="quality-notice" role="note"></p>
+        </div>
         <div class="tabs" role="tablist" aria-label="Tipo de ficha">
           <button
             id="tab-group"
@@ -98,7 +122,16 @@
             aria-selected="true"
             aria-controls="report"
           >
-            Ficha de clase</button
+            Ficha de grupo</button
+          ><button
+            id="tab-list"
+            role="tab"
+            class="tab"
+            aria-selected="false"
+            aria-controls="report"
+            tabindex="-1"
+          >
+            Lista de estudiantes</button
           ><button
             id="tab-student"
             role="tab"
@@ -137,6 +170,7 @@
         role="region"
         aria-label="Ficha de consulta"
         tabindex="-1"
+        hidden
       >
         <section class="empty-state">
           <span class="empty-icon" aria-hidden="true">↗</span>
@@ -152,6 +186,44 @@
         ><span>Respuestas para orientar el acompañamiento.</span>
       </footer>
     </main>
+    <dialog
+      id="cell-review"
+      class="review-popover"
+      aria-labelledby="cell-review-title"
+    >
+      <button
+        id="cell-review-close"
+        class="dialog-close"
+        type="button"
+        aria-label="Cerrar valoración"
+      >
+        ×
+      </button>
+      <h2 id="cell-review-title">Valorar este dato</h2>
+      <p id="cell-review-context"></p>
+      <div class="reaction-options">
+        <button type="button" data-reaction="OK">OK</button>
+        <button type="button" data-reaction="Revisar">Revisar</button>
+        <button type="button" data-reaction="Me sorprende">Me sorprende</button>
+      </div>
+      <button id="remove-reaction" class="text-button" type="button">
+        Quitar valoración
+      </button>
+    </dialog>
+    <dialog
+      id="review-summary"
+      class="review-summary"
+      aria-labelledby="review-summary-title"
+    >
+      <div class="summary-heading">
+        <h2 id="review-summary-title">Resumen de tu revisión</h2>
+        <button id="summary-close" class="btn secondary" type="button">
+          Cerrar resumen
+        </button>
+      </div>
+      <p id="summary-note"></p>
+      <div id="review-content"></div>
+    </dialog>
     <noscript
       ><p>
         Activa JavaScript para leer el Excel y consultar las fichas.

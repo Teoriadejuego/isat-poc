@@ -1,6 +1,6 @@
 # ISAT
 
-Visualizador ISAT centrado en las solicitudes de ayuda y los señalamientos para la Unidad de Cuidado del Estudiante, derivado de la interfaz PBIS. Permite cargar un único Excel y consultar fichas de clase e individuales, con las relaciones y la adaptación académica como información complementaria. No incorpora datos de ejemplo, credenciales ni llave de nombres. El proyecto PBIS permanece separado.
+Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda para la Unidad de Cuidado del Estudiante, derivado de la interfaz PBIS. La carga de un único Excel está separada de la consulta, organizada en **grupos → listas de estudiantes → fichas individuales**. Las relaciones y la adaptación académica aportan información complementaria. No incorpora datos de ejemplo, credenciales ni llave de nombres. El proyecto PBIS permanece separado.
 
 **Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
 
@@ -8,10 +8,13 @@ Visualizador ISAT centrado en las solicitudes de ayuda y los señalamientos para
 
 1. Selecciona un archivo `.xlsx` o `.xls` de hasta 20 MB.
 2. Elige la hoja `Users` del cuestionario y pulsa **Abrir fichas**.
-3. Elige **Ficha de clase** o **Ficha individual**. Selecciona la clase/titulación y, en la ficha individual, busca por nombre o código.
+3. Al abrir las fichas se oculta la carga de datos. Elige **Ficha de grupo**, **Lista de estudiantes** o **Ficha individual** y selecciona la clase/titulación. **Datos cargados** vuelve al Excel; **Volver a la consulta** conserva la vista y las valoraciones si no cambias el archivo ni la hoja.
 4. Consulta el estado destacado de la encuesta: completada, en curso o sin inicio registrado.
    En **Solicitudes y señales de ayuda** verás los casos de la clase para la Unidad de Cuidado del Estudiante. **Ver ficha** abre la ficha individual; **Volver a la ficha de clase** regresa al mismo grupo.
-5. **Cancelar lectura**, **Cancelar preparación**, **Retirar archivo** o **Cerrar consulta** interrumpen el proceso correspondiente y retiran los datos de la aplicación. Sustituir el Excel también invalida la consulta anterior.
+5. La lista incluye toda la clase, con las peticiones propias o dos o más menciones primero. Se puede buscar por nombre/código, filtrar por ese criterio y ordenar cada columna en ambos sentidos. **Bienestar y relaciones** muestra las columnas complementarias. «Sin datos» queda al final de cualquier orden. Las filas se muestran en páginas de 50; la búsqueda y los recuentos abarcan toda la clase.
+6. Pulsa un dato para marcar **OK**, **Revisar** o **Me sorprende**. Puedes modificar o quitar la marca y valorar tu confianza de −5 a +5, conservando «Sin valorar» como estado distinto de 0. El nombre/código abre la ficha individual y el retorno conserva el filtro, la búsqueda, el orden y la página de la lista.
+7. Las fichas y la lista permiten guardar una valoración de utilidad de 1 a 5 y un comentario opcional. Estas opiniones y las marcas permanecen en memoria durante la consulta; no alteran el Excel ni se envían.
+8. **Cancelar lectura**, **Cancelar preparación**, **Retirar archivo** o **Cerrar consulta** interrumpen el proceso y retiran los datos de la aplicación. Al cerrar una consulta con valoraciones aparece un resumen con código aleatorio de sesión, códigos de grupo G001, G002… y los códigos de estudiante del Excel, sin adjuntar nombres ni respuestas. No hay una cuenta que identificar. El comentario se muestra tal como se ha escrito; se pide no incluir nombres. **Cerrar resumen** retira también ese contenido. Sustituir el archivo o la hoja inicia una nueva consulta y descarta las valoraciones anteriores. Salir de la página retira los datos sin generar un resumen.
 
 Los nombres se leen del propio Excel, cuando existen. Los códigos se conservan como texto y permiten distinguir nombres iguales. La historia aparece al final de la ficha individual. Las preguntas de contexto familiar no se muestran. En pantalla, «menciones de ayuda» designa las respuestas en las que otras personas indican que un estudiante necesita ayuda; no designa personas a quienes acudir.
 
@@ -38,7 +41,7 @@ Las normalizaciones de etiquetas, duplicados y referencias se realizan en memori
 
 ## Datos y publicación
 
-El Excel se lee en el navegador y no se envía al servidor. No hay comentarios, correo, analítica, almacenamiento local ni servicios externos. La política CSP bloquea conexiones salientes desde la página. Tanto la lectura como la preparación de indicadores se ejecutan en un Web Worker local, que se termina al cancelar, cerrar o sustituir el archivo.
+El Excel se lee en el navegador y no se envía al servidor. Las reacciones, la confianza y las opiniones se guardan solo en memoria durante la consulta. No hay correo, analítica, almacenamiento local ni servicios externos. La política CSP bloquea conexiones salientes desde la página. Tanto la lectura como la preparación de indicadores se ejecutan en un Web Worker local, que se termina al cancelar, cerrar o sustituir el archivo.
 
 Límites del lector: 20 hojas, 10 000 registros por hoja, 200 columnas, 1,5 millones de posiciones de celdas entre las hojas admitidas y 10 millones de caracteres. La preparación dispone de un tiempo máximo de 30 segundos. Las hojas no admitidas no se ofrecen para consulta.
 
