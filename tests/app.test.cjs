@@ -108,13 +108,14 @@ test("ficha individual sin familia, historia al final y estado de encuesta desta
     /Contexto familiar|Número de hermanos|Número de hermanas|Posición entre/,
   );
   assert.equal(
-    app.window.document.querySelector("#report .section-panel:last-child h3")
-      .textContent,
+    app.window.document.querySelector(
+      "#report .report-body > .section-panel:last-child h3",
+    ).textContent,
     "Su historia",
   );
   assert.equal(
     app.window.document.querySelector(
-      "#report .section-panel:last-child .section-number",
+      "#report .report-body > .section-panel:last-child .section-number",
     ).textContent,
     "04",
   );
@@ -192,14 +193,12 @@ test("teclado cambia pestañas, búsqueda anuncia resultados y cierre devuelve f
   );
   assert.equal(app.get("tab-list").getAttribute("aria-selected"), "true");
   assert.equal(app.window.document.activeElement.id, "tab-list");
-  app
-    .get("tab-list")
-    .dispatchEvent(
-      new app.window.KeyboardEvent("keydown", {
-        key: "ArrowRight",
-        bubbles: true,
-      }),
-    );
+  app.get("tab-list").dispatchEvent(
+    new app.window.KeyboardEvent("keydown", {
+      key: "ArrowRight",
+      bubbles: true,
+    }),
+  );
   assert.equal(app.get("tab-student").getAttribute("aria-selected"), "true");
   assert.equal(app.window.document.activeElement.id, "tab-student");
   assert.equal(app.get("report").tabIndex, 0);

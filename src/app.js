@@ -13,9 +13,13 @@
     returnView = "group",
     listState = newListState(),
     review = newReview(),
-    activeCell = null;
+    activeCell = null,
+    lastActivity = null,
+    summaryReturn = null;
   const viewTypes = ["group", "list", "student"];
   const PAGE_SIZE = 50;
+  const IDLE_LIMIT = 15 * 60 * 1000;
+  const expandedStudents = new Set();
   function newListState() {
     return {
       query: "",
@@ -73,8 +77,13 @@
     returnView = "group";
     listState = newListState();
     review = newReview();
+    expandedStudents.clear();
+    lastActivity = Date.now();
+    $("idle-warning").hidden = true;
     closeCellReview(false);
     closeSummary(false);
+    closeHelp(false);
+    syncReviewButton();
     $("consultation").hidden = true;
     $("report").hidden = true;
     $("data-screen").hidden = false;
@@ -98,6 +107,7 @@
     stopReading();
     book = null;
     removeModel();
+    lastActivity = null;
     $("file").value = "";
     $("filename").textContent = "Ningún archivo seleccionado";
     $("sheet").innerHTML = "";
@@ -134,6 +144,43 @@
   }
   $("show-data").onclick = showData;
   $("back-consultation").onclick = showConsultation;
+  function hasSessionContent() {
+    return !!(model || book || worker || $("review-summary").open);
+  }
+  function checkInactivity() {
+    if (!hasSessionContent() || lastActivity === null) {
+      $("idle-warning").hidden = true;
+      return false;
+    }
+    const elapsed = Date.now() - lastActivity;
+    if (elapsed >= IDLE_LIMIT) {
+      reset();
+      $("status").textContent =
+        "La consulta se ha cerrado tras 15 minutos sin actividad. Vuelve a cargar el Excel para continuar.";
+      $("file").focus();
+      return true;
+    }
+    $("idle-warning").hidden = elapsed < IDLE_LIMIT - 60 * 1000;
+    return false;
+  }
+  function recordActivity() {
+    if (checkInactivity() || !hasSessionContent()) return;
+    lastActivity = Date.now();
+    $("idle-warning").hidden = true;
+  }
+  for (const event of [
+    "pointerdown",
+    "keydown",
+    "input",
+    "wheel",
+    "touchstart",
+  ])
+    document.addEventListener(event, recordActivity, { passive: true });
+  setInterval(checkInactivity, 5000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkInactivity();
+  });
+  $("idle-continue").onclick = recordActivity;
   $("file").onchange = async () => {
     const version = ++generation;
     stopReading();
@@ -163,7 +210,7 @@
     try {
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
-      const parser = new Worker("src/parser-worker.js?v=0.4.1");
+      const parser = new Worker("src/parser-worker.js?v=0.5.0");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -278,6 +325,7 @@
   };
   function useModel(result) {
     model = result;
+    lastActivity = Date.now();
     const studies = [...new Set(model.groups.map((g) => g.study))];
     $("study-field").hidden = studies.length <= 1;
     $("study").innerHTML = options(
@@ -779,6 +827,11 @@
   function reviewCount() {
     return review.cells.size + review.confidence.size + review.opinions.size;
   }
+  function syncReviewButton() {
+    $("review-open").hidden = !model;
+    $("review-open").disabled = !reviewCount();
+    $("review-open").textContent = `Mi revisión (${reviewCount()})`;
+  }
   function openDialog(dialog) {
     if (dialog.showModal) dialog.showModal();
     else dialog.setAttribute("open", "");
@@ -788,6 +841,27 @@
     if (dialog.close) dialog.close();
     else dialog.removeAttribute("open");
   }
+  let helpReturn = null;
+  $("help-open").onclick = () => {
+    helpReturn = document.activeElement;
+    closeCellReview(false);
+    closeSummary(false);
+    openDialog($("help-dialog"));
+    $("help-close").focus();
+  };
+  function closeHelp(restore = true) {
+    closeDialog($("help-dialog"));
+    if (restore && helpReturn?.isConnected) helpReturn.focus();
+    helpReturn = null;
+  }
+  $("help-close").onclick = () => closeHelp();
+  $("help-dialog").addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeHelp();
+  });
+  $("review-open").onclick = () => {
+    if (model && reviewCount()) showSummary(reviewSummary(), false);
+  };
   function focusCell(key) {
     Array.from($("report").querySelectorAll("[data-cell-key]"))
       .find((el) => el.dataset.cellKey === key)
@@ -821,6 +895,7 @@
   function saveReaction(value) {
     if (!activeCell || !model) return;
     const key = activeCell.key;
+    if (review.cells.get(key) === value) value = null;
     if (value === null) review.cells.delete(key);
     else if (["OK", "Revisar", "Me sorprende"].includes(value))
       review.cells.set(key, value);
@@ -884,6 +959,7 @@
       rating,
       comment,
     });
+    syncReviewButton();
     form.querySelector(".feedback-note").textContent =
       "Valoración guardada durante esta consulta.";
     const summaryButton = $("report").querySelector("[data-review-summary]");
@@ -927,6 +1003,9 @@
     return `<p class="session-code">Código de sesión: ${E(review.code)}</p>${cells.length ? `<h3>Reacciones a datos (${cells.length})</h3>${table(["Grupo", "Código de estudiante", "Indicador", "Reacción"], cells)}` : ""}${confidence.length ? `<h3>Confianza en los datos (${confidence.length})</h3>${table(["Grupo", "Código de estudiante", "Confianza"], confidence)}` : ""}${opinions.length ? `<h3>Opiniones sobre las fichas (${opinions.length})</h3>${table(["Grupo", "Código de estudiante", "Vista", "Utilidad", "Comentario"], opinions)}` : ""}${!reviewCount() ? "<p>No has guardado valoraciones en esta consulta.</p>" : ""}`;
   }
   function showSummary(html, closed) {
+    summaryReturn = closed ? null : document.activeElement;
+    closeHelp(false);
+    lastActivity = Date.now();
     $("review-content").innerHTML = html;
     $("summary-note").textContent = closed
       ? "Consulta cerrada. Se han retirado el Excel y las fichas. Este resumen muestra códigos y tus valoraciones, sin adjuntar respuestas ni nombres del Excel. Cierra el resumen para retirarlo de la página."
@@ -935,10 +1014,20 @@
     $("summary-close").focus();
   }
   function closeSummary(restore = true) {
+    const returnTarget = summaryReturn;
+    summaryReturn = null;
     closeDialog($("review-summary"));
     $("review-content").innerHTML = "";
     $("summary-note").textContent = "";
-    if (restore) (model ? $("report") : $("file")).focus();
+    if (restore) {
+      if (
+        model &&
+        returnTarget?.isConnected &&
+        !returnTarget.closest("[hidden]")
+      )
+        returnTarget.focus();
+      else (model ? $("report") : $("file")).focus();
+    }
   }
   $("summary-close").onclick = () => closeSummary();
   $("review-summary").addEventListener("cancel", (event) => {
@@ -953,18 +1042,49 @@
     ${section("03", "Participación y motivos", `<div class="distribution-grid">${["activities", "subjectReasons", "dropoutReasons"].map((f) => dist(f, a.distributions[f])).join("")}</div><p class="section-note">En las preguntas con varias opciones, una persona puede elegir más de una. Los porcentajes no tienen que sumar 100 %.</p>`)}
     <p class="report-footer">Las historias y circunstancias personales se consultan únicamente en la ficha individual. Una respuesta ausente conserva el estado «Sin datos».</p>${sheetFeedback("group", g)}</div></article>`;
   }
+  function studentOverview(s) {
+    const rows = (items) =>
+      `<dl>${items.map(([label, value]) => `<div class="overview-item"><dt>${E(label)}</dt><dd>${E(value)}</dd></div>`).join("")}</dl>`;
+    return `<section class="student-overview" aria-labelledby="overview-title"><h3 id="overview-title">En un vistazo</h3><div class="overview-grid"><section class="overview-panel"><h4>Bienestar en la última semana</h4>${rows(["alone", "fun", "general"].map((field) => [C.FIELDS[field], s.responses[field] ?? "Sin datos"]))}<p>Soledad tiene sentido opuesto a disfrute y experiencia universitaria. Se muestran como respuestas independientes.</p></section><section class="overview-panel"><h4>Relaciones en la clase</h4>${rows(
+      [
+        ["Positivas recibidas", num(s.metrics.friendsReceived)],
+        ["Positivas declaradas", num(s.metrics.friendsDeclared)],
+        ["Negativas recibidas", num(s.metrics.rejectionsReceived)],
+        ["Negativas declaradas", num(s.metrics.rejectionsDeclared)],
+      ],
+    )}<p>Los recuentos recibidos reflejan las respuestas disponibles.${s.relations === null ? " Falta una respuesta propia interpretable; no significa que no tenga amistades." : !s.quality.relations.complete ? " La respuesta propia es parcial; los recuentos declarados son mínimos observados." : ""}</p></section></div></section>`;
+  }
+  $("report").addEventListener(
+    "toggle",
+    (event) => {
+      const details = event.target;
+      if (
+        !details.matches?.("details[data-extra-student]") ||
+        !details.isConnected ||
+        !model
+      )
+        return;
+      const id = details.dataset.extraStudent;
+      if (!group()?.rows.some((s) => s.id === id)) return;
+      if (details.open) expandedStudents.add(id);
+      else expandedStudents.delete(id);
+    },
+    true,
+  );
   function studentReport(s, g) {
     const m = s.metrics;
     const coverage = `De las otras ${m.peers} personas de la clase, ${m.relationsCoverage} tienen una respuesta de relaciones al menos parcialmente interpretable.`;
     return `<article class="report">${hero(name(s), `${className(g)} · ${g.rows.length} estudiantes`, "Ficha individual", surveyStatus(s))}<div class="report-body"><button class="back-to-class" type="button" data-return-class>← Volver a ${returnView === "list" ? "la lista de estudiantes" : "la ficha de clase"}</button>${studentCare(s)}<div class="reading"><span>${s.name ? `Código: ${E(s.id)}` : "Los códigos se muestran tal como figuran en el Excel."}</span><span class="coverage">${E(s.lastDate ? `Finalización: ${dateLabel(s.lastDate)}` : "Finalización sin registrar")}</span></div>
+    ${studentOverview(s)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, predicciones, contactos y adaptación académica</span></summary>
     ${section("01", "Relaciones e integración", `${relationshipNote(s)}<div class="metric-grid">${metric("Relaciones positivas recibidas observadas", m.friendsReceived, coverage)}${metric("Relaciones positivas declaradas", m.friendsDeclared, declaredDescription(s, true))}${metric("Relaciones positivas recíprocas observadas", m.friendsMutual, reciprocalDescription(s, true))}${metric("Relaciones negativas recibidas observadas", m.rejectionsReceived, coverage)}${metric("Relaciones negativas declaradas", m.rejectionsDeclared, declaredDescription(s, false))}${metric("Relaciones negativas recíprocas observadas", m.rejectionsMutual, reciprocalDescription(s, false))}</div><p class="prediction-intro">Las predicciones expresan cómo cree que otras personas valoran su relación con este estudiante. Los aciertos se comprueban con las respuestas de esas personas, no con las relaciones que declara este estudiante.</p><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
-    ${section("02", "Bienestar y contactos", `<div class="response-grid">${["alone", "fun", "general"].map((f) => responseCard(f, s)).join("")}</div><div class="metric-grid compact">${metric("Nominaciones como persona popular", m.popularVotes, "Veces que otras personas de su clase la señalan como popular.")}${metric("Nominaciones como conexión entre grupos", m.connectorVotes, "Veces que otras personas de su clase la señalan como conectora.")}${metric("Contactos previos identificados", s.contacts?.length ?? null, "Personas señaladas en la pregunta de conocidos, incluidas otras clases.")}${metric("Contactos fuera de la clase", s.outsideCount, "Selecciones de la pregunta de contactos en otros grupos.")}</div>`)}
+    ${section("02", "Contactos y papel en el grupo", `<div class="metric-grid">${metric("Nominaciones como persona popular", m.popularVotes, "Veces que otras personas de su clase la señalan como popular.")}${metric("Nominaciones como conexión entre grupos", m.connectorVotes, "Veces que otras personas de su clase la señalan como conectora.")}${metric("Contactos previos identificados", s.contacts?.length ?? null, "Personas señaladas en la pregunta de conocidos, incluidas otras clases.")}${metric("Contactos fuera de la clase", s.outsideCount, "Selecciones de la pregunta de contactos en otros grupos.")}</div>`)}
     ${section("03", "Adaptación académica", `<div class="response-grid">${["time", "workload", "difficulty", "dropout", "activities"].map((f) => responseCard(f, s)).join("")}</div><div class="response-details">${["subjects", "subjectReasons", "subjectOther", "dropoutReasons", "dropoutOther"].map((f) => responseCard(f, s)).join("")}</div>`, "neutral")}
-    ${sheetFeedback("student", g, s)}${s.story === null ? "" : section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story">${E(s.story)}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
+    </details><p class="individual-reading-note">La ficha orienta el acompañamiento con contexto profesional. No establece diagnósticos ni decisiones automáticas.</p>${sheetFeedback("student", g, s)}${s.story === null ? "" : section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story">${E(s.story)}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
     </div></article>`;
   }
   function render() {
     if (!model) return;
+    syncReviewButton();
     const g = group();
     if (!g) {
       $("report").innerHTML = empty();

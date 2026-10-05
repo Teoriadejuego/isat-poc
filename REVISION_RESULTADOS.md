@@ -1,5 +1,21 @@
 # Revisión de ISAT
 
+## Actualización 0.5.0: mejoras de PBIS adaptadas a ISAT
+
+Se verificó mediante la referencia remota de main que la última versión pública de PBIS corresponde a **acb5a7a9c3bf4ea0ca7f0f10895d8a94c2fbf889**. Se revisaron su código, guía, lista de clase y recorrido individual. La copia de PBIS tenía cambios locales previos en site-src/index.html y tools/build.mjs; no se modificaron. La lista ordenable, reacciones, confianza y opiniones ya estaban incorporadas en ISAT.
+
+Se adaptaron estas mejoras:
+
+- Ficha individual resumida: ayuda primero; después, bienestar y relaciones «En un vistazo». Los indicadores detallados están en «Ver más indicadores», cuya apertura se recuerda por estudiante durante la consulta. La historia continúa fuera del desplegable y al final, con el filtro de cuatro letras. No se duplica el resumen de bienestar dentro de los detalles.
+- Guía integrada «Ayuda», con el recorrido, criterios de consulta, ausencias, predicciones, revisión y cierre. Se puede cerrar con Escape y recuperar el foco.
+- «Mi revisión» en la cabecera, con recuento actualizado, disponible desde fichas, lista y pantalla de datos. El cierre del resumen devuelve el foco a su control de origen.
+- Pulsar de nuevo la misma reacción retira la marca, como en PBIS. Se mantiene también la acción explícita de quitar valoración.
+- Cierre tras quince minutos sin actividad, con aviso en el último minuto y opción para continuar. La comprobación al regresar a una pestaña oculta evita depender solo de los temporizadores. Caducar retira archivo leído, Worker, modelo, valoraciones y cuadros; también caduca un resumen dejado abierto tras el cierre manual. Una interacción posterior al límite no recupera la consulta.
+
+Se conservaron el foco de UCE, la matriz, los recuentos de ayuda sin identidades, las tres respuestas independientes de bienestar, las predicciones verificables y la distinción entre ausencia y cero. El visualizador sigue leyendo un único Excel en el navegador; no se importan los perfiles, llave, ejemplos, índice de felicidad ni servicio de correo de PBIS.
+
+Verificación: **72 pruebas automáticas superadas**. Diez nuevas regresiones cubren resumen y detalle, conservación de las últimas correcciones, apertura por estudiante, reacciones reversibles, guía y foco, acceso global a la revisión, límite exacto de inactividad, renovación, retorno de una pestaña, resumen posterior al cierre y retiro de un lector antiguo. Se ajustaron las comprobaciones de historia para referirse a la sección final de la ficha, fuera del nuevo desplegable. En navegador se comprobaron la guía por Escape, las fichas y sus historias, apertura recordada, reacciones y resumen desde la pantalla de datos. A 320 píxeles no se observaron desbordamientos de página, tarjetas ni guía. Los archivos de control y las capturas permanecen fuera del repositorio y de la web publicada.
+
 ## Actualización 0.4.1: interpretación de relaciones, ayuda e historias
 
 Se comprobó en local el caso comunicado: falta la respuesta propia a las preguntas de relaciones, pero hay ocho predicciones positivas, cinco verificables y tres aciertos. No había una selección de recorrido errónea. Los aciertos se verifican con las respuestas de otras personas y no requieren que exista la respuesta propia de relaciones. Se conservan esos cálculos y la ficha explica que «Sin datos» no significa cero amistades. Presenta **3 de 5 verificables**, las ocho predicciones emitidas y las tres sin comprobar. También distingue una respuesta parcial y un recuento mínimo observado. Sin predicciones de ese tipo en una respuesta interpretable, se muestra «No procede».

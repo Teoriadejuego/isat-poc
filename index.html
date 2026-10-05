@@ -20,9 +20,9 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.4.1" />
-    <script src="src/core.js?v=0.4.1" defer></script>
-    <script src="src/app.js?v=0.4.1" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.5.0" />
+    <script src="src/core.js?v=0.5.0" defer></script>
+    <script src="src/app.js?v=0.5.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -37,6 +37,22 @@
         <div class="top-actions">
           <span class="pill"
             ><span class="dot"></span>Procesamiento en tu navegador</span
+          ><button
+            id="help-open"
+            class="btn secondary"
+            type="button"
+            aria-haspopup="dialog"
+          >
+            Ayuda</button
+          ><button
+            id="review-open"
+            class="btn secondary"
+            type="button"
+            aria-haspopup="dialog"
+            hidden
+            disabled
+          >
+            Mi revisión (0)</button
           ><button id="show-data" class="btn secondary" type="button" hidden>
             Datos cargados</button
           ><button id="clear" class="btn secondary" type="button" hidden>
@@ -46,6 +62,15 @@
       </div>
     </header>
     <main id="main" class="main">
+      <aside id="idle-warning" class="idle-warning" role="status" hidden>
+        <p>
+          El contenido de esta consulta se retirará en menos de un minuto por
+          inactividad.
+        </p>
+        <button id="idle-continue" class="btn secondary" type="button">
+          Continuar consulta
+        </button>
+      </aside>
       <div id="data-screen">
         <div class="workspace-title">
           <span class="eyebrow">PASO 1 · CARGA DE DATOS</span>
@@ -206,6 +231,9 @@
         <button type="button" data-reaction="Revisar">Revisar</button>
         <button type="button" data-reaction="Me sorprende">Me sorprende</button>
       </div>
+      <p class="review-toggle-note">
+        Pulsa de nuevo la misma opción para quitar la marca.
+      </p>
       <button id="remove-reaction" class="text-button" type="button">
         Quitar valoración
       </button>
@@ -223,6 +251,66 @@
       </div>
       <p id="summary-note"></p>
       <div id="review-content"></div>
+    </dialog>
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <div class="summary-heading">
+        <h2 id="help-title">Cómo consultar ISAT</h2>
+        <button id="help-close" class="btn secondary" type="button">
+          Cerrar ayuda
+        </button>
+      </div>
+      <ol class="help-steps">
+        <li>
+          <strong>Abre tus datos.</strong> Selecciona el Excel del cuestionario,
+          elige la hoja Users y pulsa «Abrir fichas». El archivo se procesa en
+          este navegador.
+        </li>
+        <li>
+          <strong>Empieza por el grupo.</strong> Los recuentos y la matriz
+          cruzan la petición propia con las menciones de otras personas. El
+          listado reúne petición propia o menciones de al menos dos personas
+          distintas.
+        </li>
+        <li>
+          <strong>Revisa la lista.</strong> Busca por nombre o código, filtra y
+          ordena los encabezados. Pulsa un dato para marcar OK, Revisar o Me
+          sorprende; repetir la misma opción retira la marca. La confianza va de
+          −5 a +5 y «Sin valorar» es distinto de 0.
+        </li>
+        <li>
+          <strong>Profundiza en cada estudiante.</strong> Su ficha muestra
+          primero la ayuda, el bienestar y las relaciones. «Ver más indicadores»
+          abre los detalles. La historia aparece al final si la respuesta tiene
+          al menos cuatro letras.
+        </li>
+      </ol>
+      <div class="help-reading">
+        <h3>Cómo leer los resultados</h3>
+        <p>
+          «Sin datos» no equivale a cero ni a «No». Las predicciones se
+          comprueban con las respuestas de otras personas; pueden verificarse
+          aunque falte la respuesta propia de relaciones. En ayuda solo se
+          muestra el número de personas que emiten menciones.
+        </p>
+        <p>
+          La información orienta el acompañamiento. No establece diagnósticos ni
+          decisiones automáticas.
+        </p>
+      </div>
+      <div class="help-reading">
+        <h3>Tu revisión y el cierre</h3>
+        <p>
+          «Mi revisión» reúne tus marcas, confianza y opiniones usando códigos.
+          Permanecen durante esta consulta y no se envían. «Cerrar consulta»
+          retira el archivo y las fichas; si has valorado, permite consultar un
+          resumen hasta que lo cierres.
+        </p>
+        <p>
+          Tras 15 minutos sin actividad se retiran también las valoraciones y
+          cualquier resumen abierto. Aparece un aviso durante el último minuto.
+          El Excel original permanece en su ubicación.
+        </p>
+      </div>
     </dialog>
     <noscript
       ><p>

@@ -4,12 +4,13 @@ const { JSDOM } = require("jsdom");
 const C = require("../../src/core.js");
 const root = path.resolve(__dirname, "../..");
 
-function createApp(t) {
+function createApp(t, options = {}) {
   const dom = new JSDOM(
     fs.readFileSync(path.join(root, "index.html"), "utf8"),
     { url: "http://localhost/", runScripts: "outside-only" },
   );
   const window = dom.window;
+  options.setup?.(window);
   const workers = [];
   class TestWorker {
     constructor(url) {

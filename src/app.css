@@ -117,7 +117,9 @@ select:focus-visible {
 .top-actions {
   display: flex;
   align-items: center;
-  gap: 18px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .pill {
   display: inline-flex;
@@ -721,7 +723,7 @@ progress::-moz-progress-bar {
   .top-actions .btn {
     font-size: 11px;
     padding: 9px 12px;
-    min-height: 35px;
+    min-height: 44px;
   }
   .main {
     padding: 25px 15px 20px;
@@ -1708,6 +1710,150 @@ dialog::backdrop {
 }
 .student-care h4 {
   font-size: 14px;
+}
+.student-overview {
+  margin: 20px 0;
+}
+.student-overview > h3 {
+  font-size: 27px;
+  margin-bottom: 16px;
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.overview-panel {
+  padding: 22px;
+  background: var(--neutral-soft);
+  border-radius: 12px;
+  min-width: 0;
+}
+.overview-panel h4 {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.overview-panel dl {
+  margin: 0;
+}
+.overview-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.overview-item dt {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.overview-item dd {
+  margin: 0;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.overview-panel p {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 14px;
+}
+.expanded-indicators {
+  margin: 24px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 18px;
+}
+.expanded-indicators > summary {
+  padding: 20px 0;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+.expanded-indicators > summary span {
+  display: block;
+  margin: 6px 0 0 17px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.expanded-indicators > summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.expanded-indicators[open] > summary {
+  margin-bottom: 18px;
+}
+.individual-reading-note,
+.review-toggle-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.review-toggle-note {
+  margin: 12px 0;
+}
+.help-dialog {
+  max-width: 700px;
+}
+.help-steps {
+  padding-left: 22px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.help-steps li {
+  margin-top: 15px;
+}
+.help-reading {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.help-reading h3 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.help-reading p {
+  font-size: 13px;
+  margin-top: 10px;
+}
+.idle-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 18px;
+  background: var(--blue-soft);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.idle-warning p {
+  flex: 1 1 220px;
+  font-size: 13px;
+}
+@media (max-width: 720px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .overview-panel {
+    padding: 17px;
+  }
+  .expanded-indicators {
+    padding: 0 12px;
+  }
+  .help-dialog {
+    padding: 20px;
+  }
 }
 @media (max-width: 420px) {
   .student-care .response-grid {

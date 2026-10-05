@@ -172,7 +172,9 @@ test("historia desaparece y vuelve al cambiar estudiante con umbral exacto de cu
   app.change("student", "P002");
   assert.equal(app.get("report").querySelector(".story").textContent, "¡Álex!");
   assert.equal(
-    app.get("report").querySelector(".section-panel:last-child h3").textContent,
+    app
+      .get("report")
+      .querySelector(".report-body > .section-panel:last-child h3").textContent,
     "Su historia",
   );
   app.change("student", "P003");
