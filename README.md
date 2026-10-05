@@ -2,6 +2,8 @@
 
 Visualizador de integración social y adaptación académica, derivado de la interfaz PBIS. Se abre directamente en la carga de Excel y permite consultar fichas de clase e individuales. No incorpora datos de ejemplo, credenciales ni llave de nombres.
 
+**Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
+
 ## Uso
 
 1. Abre la web y selecciona un archivo `.xlsx` o `.xls` de hasta 20 MB.
