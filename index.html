@@ -1,14 +1,155 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="referrer" content="no-referrer"><meta name="description" content="ISAT: fichas de integración social y adaptación académica por clase y estudiante.">
-<meta property="og:title" content="ISAT · Integración y adaptación"><meta property="og:description" content="Consulta las fichas de clase y de cada estudiante a partir de tu Excel."><meta property="og:type" content="website">
-<title>ISAT · Integración y adaptación</title><link rel="icon" href="src/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="src/app.css">
-<script src="src/core.js" defer></script><script src="src/app.js" defer></script></head>
-<body><a href="#main" class="skip">Saltar al contenido</a><header class="topbar"><div class="topbar-inner"><div><a class="brand" href="./" aria-label="ISAT, inicio"><span class="brand-mark" aria-hidden="true">▥</span>ISAT</a><p class="brand-caption">Integración social y adaptación académica</p></div><div class="top-actions"><span class="pill"><span class="dot"></span>Consulta en tu navegador</span><button id="clear" class="btn secondary" type="button" hidden>Cerrar consulta</button></div></div></header>
-<main id="main" class="main"><div class="workspace-title"><span class="eyebrow">ESPACIO DE CONSULTA</span><h1>Una mirada a la experiencia de cada estudiante.</h1><p>Carga el cuestionario para explorar las relaciones del grupo y su adaptación a la universidad.</p></div>
-<section class="upload-area" aria-labelledby="upload-title"><div class="upload-title"><div><h2 id="upload-title">El Excel de tu consulta</h2><p>Selecciona el archivo del cuestionario ISAT.</p></div><span class="upload-badge" aria-hidden="true">XLSX</span></div><div class="upload-controls"><label class="file-button" for="file">Seleccionar Excel<input id="file" type="file" accept=".xlsx,.xls" aria-label="Seleccionar Excel"></label><span id="filename" class="filename">Ningún archivo seleccionado</span><label id="sheet-field" class="field" hidden>Hoja<select id="sheet" aria-label="Hoja del Excel"></select></label><button id="open" class="btn" type="button" disabled>Abrir fichas <span aria-hidden="true">→</span></button></div><p class="upload-note">El archivo se procesa en este navegador. Se admiten .xlsx y .xls de hasta 20 MB.</p><p id="status" class="status" aria-live="polite"></p><p id="error" class="error" role="alert"></p></section>
-<div id="consultation" hidden><div class="tabs" role="tablist" aria-label="Tipo de ficha"><button id="tab-group" role="tab" class="tab" aria-selected="true" aria-controls="report">Ficha de clase</button><button id="tab-student" role="tab" class="tab" aria-selected="false" aria-controls="report" tabindex="-1">Ficha individual</button></div><div id="filters" class="filters"><label id="study-field" class="field" hidden>Estudio<select id="study"></select></label><label class="field">Clase o titulación<select id="class"></select></label><label id="search-field" class="field" hidden>Buscar estudiante<input id="search" type="search" placeholder="Nombre o código" autocomplete="off"></label><label id="student-field" class="field" hidden>Estudiante<select id="student"></select></label></div></div>
-<div id="report" role="tabpanel" aria-labelledby="tab-group"><section class="empty-state"><span class="empty-icon" aria-hidden="true">↗</span><h2>Empieza con tu Excel.</h2><p>Después podrás elegir una clase y consultar su ficha o acercarte a la experiencia de cada estudiante.</p></section></div>
-<footer class="bottom"><span>ISAT · Integración y adaptación</span><span>Las respuestas se interpretan con contexto profesional.</span></footer></main>
-<noscript><p>Activa JavaScript para leer el Excel y consultar las fichas.</p></noscript></body></html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      name="description"
+      content="ISAT: fichas de integración social y adaptación académica por clase y estudiante."
+    />
+    <meta property="og:title" content="ISAT · Integración y adaptación" />
+    <meta
+      property="og:description"
+      content="Consulta las fichas de clase y de cada estudiante a partir de tu Excel."
+    />
+    <meta property="og:type" content="website" />
+    <title>ISAT · Integración y adaptación</title>
+    <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="src/app.css?v=0.2.0" />
+    <script src="src/core.js?v=0.2.0" defer></script>
+    <script src="src/app.js?v=0.2.0" defer></script>
+  </head>
+  <body>
+    <a href="#main" class="skip">Saltar al contenido</a>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div>
+          <a class="brand" href="./" aria-label="ISAT, inicio"
+            ><span class="brand-mark" aria-hidden="true">▥</span>ISAT</a
+          >
+          <p class="brand-caption">Integración social y adaptación académica</p>
+        </div>
+        <div class="top-actions">
+          <span class="pill"
+            ><span class="dot"></span>Consulta en tu navegador</span
+          ><button id="clear" class="btn secondary" type="button" hidden>
+            Cerrar consulta
+          </button>
+        </div>
+      </div>
+    </header>
+    <main id="main" class="main">
+      <div class="workspace-title">
+        <span class="eyebrow">ESPACIO DE CONSULTA</span>
+        <h1>Una mirada a la experiencia de cada estudiante.</h1>
+        <p>
+          Carga el cuestionario para explorar las relaciones del grupo y su
+          adaptación a la universidad.
+        </p>
+      </div>
+      <section class="upload-area" aria-labelledby="upload-title">
+        <div class="upload-title">
+          <div>
+            <h2 id="upload-title">El Excel de tu consulta</h2>
+            <p>Selecciona el archivo del cuestionario ISAT.</p>
+          </div>
+          <span class="upload-badge" aria-hidden="true">XLSX</span>
+        </div>
+        <div class="upload-controls">
+          <label class="file-button" for="file"
+            >Seleccionar Excel<input
+              id="file"
+              type="file"
+              accept=".xlsx,.xls"
+              aria-label="Seleccionar Excel" /></label
+          ><span id="filename" class="filename"
+            >Ningún archivo seleccionado</span
+          ><label id="sheet-field" class="field" hidden
+            >Hoja<select id="sheet" aria-label="Hoja del Excel"></select></label
+          ><button id="open" class="btn" type="button" disabled>
+            Abrir fichas <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <p class="upload-note">
+          El archivo se procesa en este navegador. Se admiten .xlsx y .xls de
+          hasta 20 MB.
+        </p>
+        <p id="status" class="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="error" class="error" role="alert" aria-atomic="true"></p>
+        <p id="quality" class="quality-notice" role="note"></p>
+      </section>
+      <div id="consultation" hidden>
+        <div class="tabs" role="tablist" aria-label="Tipo de ficha">
+          <button
+            id="tab-group"
+            role="tab"
+            class="tab"
+            aria-selected="true"
+            aria-controls="report"
+          >
+            Ficha de clase</button
+          ><button
+            id="tab-student"
+            role="tab"
+            class="tab"
+            aria-selected="false"
+            aria-controls="report"
+            tabindex="-1"
+          >
+            Ficha individual
+          </button>
+        </div>
+        <div id="filters" class="filters">
+          <label id="study-field" class="field" hidden
+            >Estudio<select id="study"></select></label
+          ><label class="field"
+            >Clase o titulación<select id="class"></select></label
+          ><label id="search-field" class="field" hidden
+            >Buscar estudiante<input
+              id="search"
+              type="search"
+              placeholder="Nombre o código"
+              autocomplete="off" /></label
+          ><label id="student-field" class="field" hidden
+            >Estudiante<select id="student"></select
+          ></label>
+        </div>
+      </div>
+      <p
+        id="view-announcement"
+        class="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      ></p>
+      <div
+        id="report"
+        role="region"
+        aria-label="Ficha de consulta"
+        tabindex="-1"
+      >
+        <section class="empty-state">
+          <span class="empty-icon" aria-hidden="true">↗</span>
+          <h2>Empieza con tu Excel.</h2>
+          <p>
+            Después podrás elegir una clase y consultar su ficha o acercarte a
+            la experiencia de cada estudiante.
+          </p>
+        </section>
+      </div>
+      <footer class="bottom">
+        <span>ISAT · Integración y adaptación</span
+        ><span>Las respuestas se interpretan con contexto profesional.</span>
+      </footer>
+    </main>
+    <noscript
+      ><p>
+        Activa JavaScript para leer el Excel y consultar las fichas.
+      </p></noscript
+    >
+  </body>
+</html>

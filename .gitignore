@@ -15,5 +15,6 @@ node_modules/
 .env.*
 private/
 outputs/
+public/
 .DS_Store
 Thumbs.db

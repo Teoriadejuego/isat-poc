@@ -1,74 +1,420 @@
-(function(){
-  'use strict';
-  const C=window.IsatCore,E=C.escape,$=id=>document.getElementById(id);
-  let book=null,model=null,tab='group',worker=null,generation=0;
-  const num=x=>x===null||x===undefined?'Sin datos':new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(x);
-  const pct=x=>x===null?'Sin datos':num(x)+' %';
-  const name=s=>s.name||s.id;
-  const className=g=>g.course+(g.group==='.'?'':' · '+g.group);
-  const options=(list,selected)=>list.map(([v,label])=>`<option value="${E(v)}"${v===selected?' selected':''}>${E(label)}</option>`).join('');
-  function empty(){return '<section class="empty-state"><span class="empty-icon" aria-hidden="true">↗</span><h2>Empieza con tu Excel.</h2><p>Después podrás elegir una clase y consultar su ficha o acercarte a la experiencia de cada estudiante.</p></section>';}
-  function removeModel(){model=null;$('consultation').hidden=true;$('clear').hidden=true;$('report').innerHTML=empty();$('error').textContent='';}
-  function reset(){generation++;worker?.terminate();worker=null;book=null;removeModel();$('file').value='';$('filename').textContent='Ningún archivo seleccionado';$('sheet').innerHTML='';$('sheet-field').hidden=true;$('open').disabled=true;$('status').textContent='Consulta cerrada.';}
-  $('clear').onclick=reset;
-  $('file').onchange=async()=>{
-    const version=++generation;worker?.terminate();book=null;removeModel();$('open').disabled=true;$('sheet-field').hidden=true;$('sheet').innerHTML='';
-    const file=$('file').files[0];$('filename').textContent=file?.name||'Ningún archivo seleccionado';$('status').textContent='';if(!file)return;
-    if(!/\.(xlsx|xls)$/i.test(file.name)){ $('error').textContent='Selecciona un archivo Excel .xlsx o .xls.';return; }
-    if(file.size>20*1024*1024){$('error').textContent='El archivo supera 20 MB. Prepara un libro con las hojas necesarias.';return;}
-    $('status').textContent='Leyendo el Excel…';
-    try{
-      const bytes=await file.arrayBuffer();if(version!==generation)return;
-      const parser=new Worker('src/parser-worker.js');worker=parser;
-      const timeout=setTimeout(()=>{parser.terminate();if(version===generation){$('status').textContent='';$('error').textContent='La lectura ha tardado demasiado. Reduce el tamaño del libro y vuelve a intentarlo.';}},30000);
-      parser.onmessage=e=>{clearTimeout(timeout);parser.terminate();if(version!==generation)return;worker=null;const result=e.data;
-        if(result.error){$('error').textContent=result.error;$('status').textContent='';return;}
-        book=result;const preferred=result.sheets.find(s=>s.name==='Users'&&!s.unsupported)||result.sheets.find(s=>!s.unsupported);
-        if(!preferred){$('error').textContent='Las hojas superan los límites de 10.000 filas o 200 columnas.';$('status').textContent='';book=null;return;}
-        $('sheet').innerHTML=options(result.sheets.filter(s=>!s.unsupported).map(s=>[s.name,s.name]),preferred.name);$('sheet-field').hidden=false;$('open').disabled=false;$('status').textContent='Archivo leído. Selecciona la hoja y pulsa «Abrir fichas».';
-      };
-      parser.onerror=()=>{clearTimeout(timeout);parser.terminate();if(version===generation){$('error').textContent='No se pudo iniciar el lector. Recarga la página y vuelve a seleccionar el Excel.';$('status').textContent='';}};
-      parser.postMessage(bytes,[bytes]);
-    }catch{if(version===generation){$('status').textContent='';$('error').textContent='No se pudo acceder al archivo. Vuelve a seleccionarlo.';}}
-  };
-  $('sheet').onchange=()=>{removeModel();$('status').textContent='La hoja ha cambiado. Pulsa «Abrir fichas» para continuar.';};
-  $('open').onclick=()=>{
+(function () {
+  "use strict";
+  const C = window.IsatCore,
+    E = C.escape,
+    $ = (id) => document.getElementById(id);
+  let book = null,
+    model = null,
+    tab = "group",
+    worker = null,
+    generation = 0,
+    readingTimer = null;
+  const num = (x) =>
+    x === null || x === undefined
+      ? "Sin datos"
+      : new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(x);
+  const pct = (x) =>
+    x === null ? "Sin datos" : x > 0 && x < 0.1 ? "<0,1 %" : num(x) + " %";
+  const dateLabel = (value) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? value.slice(8, 10) + "/" + value.slice(5, 7) + "/" + value.slice(0, 4)
+      : value;
+  const name = (s) => s.name || s.id;
+  const className = (g) => g.course + (g.group === "." ? "" : " · " + g.group);
+  const options = (list, selected) =>
+    list
+      .map(
+        ([v, label]) =>
+          `<option value="${E(v)}"${v === selected ? " selected" : ""}>${E(label)}</option>`,
+      )
+      .join("");
+  function empty() {
+    return '<section class="empty-state"><span class="empty-icon" aria-hidden="true">↗</span><h2>Empieza con tu Excel.</h2><p>Después podrás elegir una clase y consultar su ficha o acercarte a la experiencia de cada estudiante.</p></section>';
+  }
+  function clearTimer() {
+    clearTimeout(readingTimer);
+    readingTimer = null;
+  }
+  function stopReading() {
+    clearTimer();
+    worker?.terminate();
+    worker = null;
+  }
+  function removeModel() {
+    model = null;
+    $("consultation").hidden = true;
+    $("report").innerHTML = empty();
+    $("report").setAttribute("role", "region");
+    $("report").setAttribute("aria-label", "Ficha de consulta");
+    $("report").removeAttribute("aria-labelledby");
+    $("report").tabIndex = -1;
+    $("error").textContent = "";
+    $("quality").textContent = "";
+    $("view-announcement").textContent = "";
+    for (const id of ["study", "class", "student"]) $(id).innerHTML = "";
+    $("search").value = "";
+  }
+  function reset() {
+    generation++;
+    stopReading();
+    book = null;
     removeModel();
-    try{model=C.parseTable(book.sheets.find(s=>s.name===$('sheet').value)?.rows);const studies=[...new Set(model.groups.map(g=>g.study))];$('study-field').hidden=studies.length<=1;$('study').innerHTML=options(studies.map(v=>[v,v]),studies[0]);$('search').value='';tab='group';setTab();updateClasses();$('consultation').hidden=false;$('clear').hidden=false;
-      $('status').textContent=`${model.students.length} estudiantes · ${model.groups.length} clases o titulaciones. ${model.students.filter(s=>s.status==='Completado').length} cuestionarios completados.`;
-    }catch(e){model=null;$('error').textContent=e.message||'No se reconoce el formato de la hoja.';$('status').textContent='';}
+    $("file").value = "";
+    $("filename").textContent = "Ningún archivo seleccionado";
+    $("sheet").innerHTML = "";
+    $("sheet-field").hidden = true;
+    $("sheet").disabled = false;
+    $("open").disabled = true;
+    $("clear").hidden = true;
+    $("report").setAttribute("aria-busy", "false");
+    $("status").textContent = "Consulta cerrada.";
+  }
+  $("clear").onclick = () => {
+    reset();
+    $("file").focus();
   };
-  function setTab(){for(const type of ['group','student']){$('tab-'+type).setAttribute('aria-selected',String(tab===type));$('tab-'+type).tabIndex=tab===type?0:-1;}$('report').setAttribute('aria-labelledby','tab-'+tab);$('search-field').hidden=tab!=='student';$('student-field').hidden=tab!=='student';}
-  function chooseTab(type){tab=type;setTab();updateStudents();render();}
-  for(const type of ['group','student']){$('tab-'+type).onclick=()=>chooseTab(type);$('tab-'+type).onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();chooseTab(e.key==='Home'?'group':e.key==='End'?'student':type==='group'?'student':'group');$('tab-'+tab).focus();}};}
-  function group(){return model?.groups.find(g=>g.key===$('class').value);}
-  function updateClasses(){const gs=model.groups.filter(g=>g.study===$('study').value);$('class').innerHTML=options(gs.map(g=>[g.key,className(g)]),gs[0]?.key);updateStudents();render();}
-  function updateStudents(){const old=$('student').value,q=C.norm($('search').value),rows=group()?.rows.filter(s=>C.norm(name(s)+' '+s.id).includes(q))||[];const sorted=[...rows].sort((a,b)=>name(a).localeCompare(name(b),'es',{numeric:true}));$('student').innerHTML=options(sorted.map(s=>[s.id,s.name?`${s.name} · ${s.id}`:s.id]),rows.some(s=>s.id===old)?old:sorted[0]?.id);}
-  $('study').onchange=updateClasses;$('class').onchange=()=>{ $('search').value='';updateStudents();render();};$('search').oninput=()=>{updateStudents();render();};$('student').onchange=render;
-  function section(number,title,body,style='blue'){return `<section class="section-panel panel-${style}"><div class="section-label"><span class="section-number">${number}</span><h3>${E(title)}</h3></div>${body}</section>`;}
-  function hero(title,subtitle,type){return `<div class="report-hero"><div><span class="eyebrow">ISAT · INTEGRACIÓN Y ADAPTACIÓN</span><h2>${E(title)}</h2><p>${E(subtitle)}</p></div><span class="hero-type">${E(type)}</span></div>`;}
-  function progress(value,total,label){if(value===null||!total)return '<span class="missing">Sin datos suficientes</span>';const p=Math.min(100,Math.max(0,100*value/total));return `<progress max="100" value="${p}" aria-label="${E(label)}">${num(p)} %</progress>`;}
-  function rateCard(title,r,context){return `<div class="rate-card"><h4>${E(title)}</h4><div class="big-value">${pct(r.percent)}</div>${progress(r.count,r.denominator,title)}<p>${r.denominator?`${num(r.count)} de ${num(r.denominator)} ${r.unit||'respuestas válidas'}`:'Sin respuestas disponibles'}</p>${context?`<p class="small-note">${E(context)}</p>`:''}</div>`;}
-  function dist(field,d){return `<div class="distribution"><h4>${E(C.FIELDS[field])}</h4><p class="coverage">${d.denominator} respuestas válidas</p>${d.items.length?d.items.map(x=>`<div class="distribution-row"><div><span>${E(x.label)}</span><strong>${x.count} <small>· ${pct(x.percent)}</small></strong></div>${progress(x.count,d.denominator,x.label)}</div>`).join(''):'<p class="missing">Sin datos</p>'}</div>`;}
-  function metric(title,value,description,denominator){return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong>${num(value)}</strong>${denominator?`<span>${E(denominator)}</span>`:''}</div><p>${E(description)}</p></div>`;}
-  function responseCard(field,s){const value=s.responses[field];return `<div class="response-card"><h4>${E(C.FIELDS[field])}</h4><p class="response-value${value===null?' missing':''}">${E(value??'Sin datos')}</p></div>`;}
-  function contactNames(list){if(list===null)return 'Sin datos';if(!list.length)return 'Nadie señalado';return list.map(x=>{const s=model.students.find(t=>t.id===x.id);return name(s)+(x.sameClass?'':' · otra clase');}).join(' · ');}
-  function predictionDescription(m,kind){const emitted=m[kind+'Predictions'],evaluable=m[kind+'Evaluable'];if(emitted===null)return 'No hay predicciones registradas.';if(emitted===0)return 'No se han señalado predicciones de este tipo.';if(!evaluable)return `Las ${num(emitted)} predicciones emitidas todavía no pueden verificarse.`;return `${num(evaluable)} predicciones verificables de ${num(emitted)} emitidas.`;}
-  function groupReport(g){const a=C.summary(g.rows);return `<article class="report">${hero(className(g),`${a.n} estudiantes · ${a.completed} cuestionarios completados`,'Ficha de clase')}<div class="report-body"><div class="reading"><span>Resultados descriptivos · porcentajes sobre respuestas válidas</span><span class="coverage">${a.started} en curso · ${a.notStarted} sin iniciar</span></div>
-    ${section('01','Integración y bienestar',`<div class="rate-grid">${rateCard('Soledad frecuente',a.loneliness,'Casi siempre o siempre en la última semana.')}${rateCard('Identifican a quién acudir',a.support,'Han señalado al menos una persona en la pregunta de apoyo.')}${rateCard('Relaciones negativas declaradas',a.rejection,'Nominaciones dentro de la clase, sobre las elecciones posibles de quienes responden.')}</div><div class="distribution-grid">${['alone','fun','general'].map(f=>dist(f,a.distributions[f])).join('')}</div><p class="section-note">Las redes se leen con ${a.relationCoverage} de ${a.n} respuestas disponibles. Los resultados recibidos pueden cambiar cuando se completen las respuestas pendientes.</p>`)}
-    ${section('02','Adaptación académica',`<div class="rate-grid four">${rateCard('Dificultades en asignaturas',a.difficulty)}${rateCard('Se han planteado abandonar',a.dropout)}${rateCard('Organización del tiempo difícil',a.time,'Respuestas Mal o Muy mal.')}${rateCard('Carga de trabajo alta',a.workload,'Respuestas Alta o Muy alta.')}</div><div class="distribution-grid">${['time','workload','dropout'].map(f=>dist(f,a.distributions[f])).join('')}</div>`,'lime')}
-    ${section('03','Participación y motivos',`<div class="distribution-grid">${['activities','subjectReasons','dropoutReasons'].map(f=>dist(f,a.distributions[f])).join('')}</div><p class="section-note">En las preguntas con varias opciones, una persona puede elegir más de una. Los porcentajes no tienen que sumar 100 %.</p>`)}
-    <p class="report-footer">Las historias y circunstancias personales se consultan únicamente en la ficha individual. Una respuesta ausente conserva el estado «Sin datos».</p></div></article>`;}
-  function studentReport(s,g){const m=s.metrics;const coverage=`${m.relationsCoverage} de ${m.peers} personas de la clase tienen respuesta de relaciones disponible.`;
-    return `<article class="report">${hero(name(s),`${className(g)} · ${g.rows.length} estudiantes · ${s.status}`,'Ficha individual')}<div class="report-body"><div class="reading"><span>${s.name?`Código: ${E(s.id)}`:'Los códigos se muestran tal como figuran en el Excel.'}</span><span class="coverage">${E(s.lastDate?`Finalizado: ${s.lastDate}`:'Finalización sin registrar')}</span></div>
-    ${section('01','Relaciones e integración',`<div class="metric-grid">${metric('Relaciones positivas recibidas',m.friendsReceived,coverage)}${metric('Relaciones positivas declaradas',m.friendsDeclared,'Personas de su clase valoradas con Buena o Muy buena relación.')}${metric('Relaciones positivas recíprocas observadas',m.friendsMutual,m.mutualComplete?'Elecciones positivas correspondidas.':'Vínculos observados; hay respuestas pendientes de otras personas.')}${metric('Relaciones negativas recibidas',m.rejectionsReceived,coverage)}${metric('Relaciones negativas declaradas',m.rejectionsDeclared,'Personas de su clase valoradas con Mala o Muy mala relación.')}${metric('Relaciones negativas recíprocas observadas',m.rejectionsMutual,m.mutualComplete?'Elecciones negativas correspondidas.':'Vínculos observados; hay respuestas pendientes de otras personas.')}</div><div class="metric-grid compact">${metric('Aciertos de predicciones positivas',m.friendCorrect,predictionDescription(m,'friend'))}${metric('Aciertos de predicciones negativas',m.rejectionCorrect,predictionDescription(m,'rejection'))}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
-    ${section('02','Bienestar y red de apoyo',`<div class="response-grid">${['alone','fun','general'].map(f=>responseCard(f,s)).join('')}</div><div class="metric-grid compact">${metric('Nominaciones como persona popular',m.popularVotes,'Veces que otras personas de su clase la señalan como popular.')}${metric('Nominaciones como conexión entre grupos',m.connectorVotes,'Veces que otras personas de su clase la señalan como conectora.')}${metric('Nominaciones como referente de apoyo',m.helpVotes,'Veces que otras personas de su clase la señalan para pedir ayuda.')}${metric('Contactos previos identificados',s.contacts?.length??null,'Personas señaladas en la pregunta de conocidos, incluidas otras clases.')}${metric('Contactos fuera de la clase',s.outsideCount,'Selecciones de la pregunta de contactos en otros grupos.')}</div><div class="support-box"><h4>Personas a quienes acudir</h4><p>${E(contactNames(s.help))}</p></div><div class="response-grid">${responseCard('uce',s)}</div>`)}
-    ${section('03','Adaptación académica',`<div class="response-grid">${['time','workload','difficulty','dropout','activities'].map(f=>responseCard(f,s)).join('')}</div><div class="response-details">${['subjects','subjectReasons','subjectOther','dropoutReasons','dropoutOther'].map(f=>responseCard(f,s)).join('')}</div>`,'lime')}
-    ${section('04','Contexto familiar',`<div class="response-grid">${['siblings','brothers','sisters','position'].map(f=>responseCard(f,s)).join('')}</div>`)}
-    ${section('05','Su historia',`<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story${s.story===null?' missing':''}">${E(s.story??'No hay un texto registrado para este estudiante.')}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`,'story')}
+  $("file").onchange = async () => {
+    const version = ++generation;
+    stopReading();
+    book = null;
+    removeModel();
+    $("open").disabled = true;
+    $("sheet-field").hidden = true;
+    $("sheet").innerHTML = "";
+    $("sheet").disabled = false;
+    const file = $("file").files[0];
+    $("filename").textContent = file?.name || "Ningún archivo seleccionado";
+    $("status").textContent = "";
+    $("clear").hidden = !file;
+    $("clear").textContent = "Retirar archivo";
+    if (!file) return;
+    if (!/\.(xlsx|xls)$/i.test(file.name)) {
+      $("error").textContent = "Selecciona un archivo Excel .xlsx o .xls.";
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      $("error").textContent =
+        "El archivo supera 20 MB. Prepara un libro con las hojas necesarias.";
+      return;
+    }
+    $("status").textContent = "Leyendo el Excel…";
+    $("clear").textContent = "Cancelar lectura";
+    try {
+      const bytes = await file.arrayBuffer();
+      if (version !== generation) return;
+      const parser = new Worker("src/parser-worker.js?v=0.2.0");
+      worker = parser;
+      startTimeout(version);
+      parser.onmessage = (e) => {
+        const result = e.data;
+        if (parser !== worker || result.requestId !== generation) return;
+        clearTimer();
+        $("report").setAttribute("aria-busy", "false");
+        $("clear").textContent = "Retirar archivo";
+        $("sheet").disabled = false;
+        if (result.error) {
+          $("error").textContent = result.error;
+          $("status").textContent = "";
+          $("open").disabled = !book;
+          if (result.operation === "read") {
+            book = null;
+            stopReading();
+          }
+          return;
+        }
+        if (result.type === "parsed") {
+          useModel(result.model);
+          return;
+        }
+        book = result;
+        const preferred =
+          result.sheets.find((s) => s.name === "Users" && !s.unsupported) ||
+          result.sheets.find((s) => !s.unsupported);
+        if (!preferred) {
+          $("error").textContent =
+            "Las hojas superan los límites de filas, columnas o celdas. Reduce el libro.";
+          $("status").textContent = "";
+          book = null;
+          stopReading();
+          return;
+        }
+        $("sheet").innerHTML = options(
+          result.sheets
+            .filter((s) => !s.unsupported)
+            .map((s) => [s.name, s.name]),
+          preferred.name,
+        );
+        $("sheet-field").hidden = false;
+        $("open").disabled = false;
+        $("status").textContent =
+          "Archivo leído. Selecciona la hoja y pulsa «Abrir fichas».";
+      };
+      parser.onerror = () => {
+        if (parser === worker) {
+          book = null;
+          stopReading();
+          $("sheet").disabled = false;
+          $("open").disabled = true;
+          $("report").setAttribute("aria-busy", "false");
+          $("clear").textContent = "Retirar archivo";
+          $("error").textContent =
+            "No se pudo iniciar el lector. Recarga la página y vuelve a seleccionar el Excel.";
+          $("status").textContent = "";
+        }
+      };
+      parser.postMessage({ type: "read", requestId: version, bytes }, [bytes]);
+    } catch {
+      if (version === generation) {
+        stopReading();
+        $("clear").textContent = "Retirar archivo";
+        $("status").textContent = "";
+        $("error").textContent =
+          "No se pudo acceder al archivo. Vuelve a seleccionarlo.";
+      }
+    }
+  };
+  function startTimeout(version) {
+    clearTimer();
+    $("report").setAttribute("aria-busy", "true");
+    readingTimer = setTimeout(() => {
+      if (version === generation) {
+        book = null;
+        stopReading();
+        $("sheet").disabled = false;
+        $("open").disabled = true;
+        $("report").setAttribute("aria-busy", "false");
+        $("clear").textContent = "Retirar archivo";
+        $("status").textContent = "";
+        $("error").textContent =
+          "La preparación ha tardado demasiado. Reduce el libro y vuelve a seleccionar el archivo.";
+      }
+    }, 30000);
+  }
+  $("sheet").onchange = () => {
+    generation++;
+    clearTimer();
+    removeModel();
+    $("report").setAttribute("aria-busy", "false");
+    $("open").disabled = !book;
+    $("clear").textContent = "Retirar archivo";
+    $("status").textContent =
+      "La hoja ha cambiado. Pulsa «Abrir fichas» para continuar.";
+  };
+  $("open").onclick = () => {
+    if (!worker || !book) return;
+    removeModel();
+    const version = ++generation;
+    $("open").disabled = true;
+    $("sheet").disabled = true;
+    $("clear").textContent = "Cancelar preparación";
+    $("status").textContent = "Preparando las fichas…";
+    startTimeout(version);
+    worker.postMessage({
+      type: "parse",
+      requestId: version,
+      sheet: $("sheet").value,
+    });
+  };
+  function useModel(result) {
+    model = result;
+    const studies = [...new Set(model.groups.map((g) => g.study))];
+    $("study-field").hidden = studies.length <= 1;
+    $("study").innerHTML = options(
+      studies.map((v) => [v, v]),
+      studies[0],
+    );
+    $("search").value = "";
+    tab = "group";
+    setTab();
+    updateClasses();
+    $("consultation").hidden = false;
+    $("clear").hidden = false;
+    $("clear").textContent = "Cerrar consulta";
+    $("open").disabled = false;
+    $("status").textContent =
+      `${model.students.length} estudiantes · ${model.groups.length} clases o titulaciones. ${model.students.filter((s) => s.status === "Completado").length} cuestionarios completados.`;
+    const w = model.warnings,
+      issues =
+        w.unresolved + w.categories + w.conflicts + w.routes + w.academic;
+    $("quality").textContent = issues
+      ? `${issues === 1 ? "Se ha detectado 1 incidencia" : `Se han detectado ${issues} incidencias`} de lectura. Las referencias, rutas o categorías no interpretables se excluyen de los indicadores afectados; las respuestas originales permanecen visibles cuando es posible.`
+      : "";
+    $("tab-group").focus();
+  }
+  function setTab() {
+    for (const type of ["group", "student"]) {
+      $("tab-" + type).setAttribute("aria-selected", String(tab === type));
+      $("tab-" + type).tabIndex = tab === type ? 0 : -1;
+    }
+    $("report").setAttribute("role", "tabpanel");
+    $("report").removeAttribute("aria-label");
+    $("report").tabIndex = 0;
+    $("report").setAttribute("aria-labelledby", "tab-" + tab);
+    $("search-field").hidden = tab !== "student";
+    $("student-field").hidden = tab !== "student";
+  }
+  function chooseTab(type) {
+    tab = type;
+    setTab();
+    updateStudents();
+    render();
+  }
+  for (const type of ["group", "student"]) {
+    $("tab-" + type).onclick = () => chooseTab(type);
+    $("tab-" + type).onkeydown = (e) => {
+      if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
+        e.preventDefault();
+        chooseTab(
+          e.key === "Home"
+            ? "group"
+            : e.key === "End"
+              ? "student"
+              : type === "group"
+                ? "student"
+                : "group",
+        );
+        $("tab-" + tab).focus();
+      }
+    };
+  }
+  function group() {
+    return model?.groups.find((g) => g.key === $("class").value);
+  }
+  function updateClasses() {
+    const gs = model.groups.filter((g) => g.study === $("study").value);
+    $("class").innerHTML = options(
+      gs.map((g) => [g.key, className(g)]),
+      gs[0]?.key,
+    );
+    updateStudents();
+    render();
+  }
+  function updateStudents() {
+    const old = $("student").value,
+      q = C.norm($("search").value),
+      rows =
+        group()?.rows.filter((s) => C.norm(name(s) + " " + s.id).includes(q)) ||
+        [];
+    const sorted = [...rows].sort((a, b) =>
+      name(a).localeCompare(name(b), "es", { numeric: true }),
+    );
+    $("student").innerHTML = options(
+      sorted.map((s) => [s.id, s.name ? `${s.name} · ${s.id}` : s.id]),
+      rows.some((s) => s.id === old) ? old : sorted[0]?.id,
+    );
+  }
+  $("study").onchange = updateClasses;
+  $("class").onchange = () => {
+    $("search").value = "";
+    updateStudents();
+    render();
+  };
+  $("search").oninput = () => {
+    updateStudents();
+    render();
+  };
+  $("student").onchange = render;
+  function section(number, title, body, style = "blue") {
+    return `<section class="section-panel panel-${style}"><div class="section-label"><span class="section-number">${number}</span><h3>${E(title)}</h3></div>${body}</section>`;
+  }
+  function surveyStatus(s) {
+    const state =
+      s.status === "Completado"
+        ? ["complete", "Encuesta completada"]
+        : s.status === "En curso"
+          ? ["progress", "Encuesta en curso"]
+          : ["pending", "Encuesta sin iniciar"];
+    return `<span class="survey-status survey-${state[0]}">${state[1]}</span>`;
+  }
+  function surveySummary(a) {
+    return `<div class="survey-summary" aria-label="Estado de participación"><div><strong>${a.completed}</strong><span>Completadas</span></div><div><strong>${a.started}</strong><span>En curso</span></div><div><strong>${a.notStarted}</strong><span>Sin iniciar</span></div></div>`;
+  }
+  function hero(title, subtitle, type, status = "") {
+    return `<div class="report-hero"><div><span class="eyebrow">ISAT · INTEGRACIÓN Y ADAPTACIÓN</span><h2>${E(title)}</h2><p>${E(subtitle)}</p></div><div class="hero-meta"><span class="hero-type">${E(type)}</span>${status}</div></div>`;
+  }
+  function progress(value, total, label) {
+    if (value === null || !total)
+      return '<span class="missing">Sin datos suficientes</span>';
+    const p = Math.min(100, Math.max(0, (100 * value) / total));
+    return `<progress max="100" value="${p}" aria-label="${E(label)}">${num(p)} %</progress>`;
+  }
+  function rateCard(title, r, context) {
+    return `<div class="rate-card"><h4>${E(title)}</h4><div class="big-value">${pct(r.percent)}</div>${progress(r.count, r.denominator, title)}<p>${r.denominator ? `${num(r.count)} de ${num(r.denominator)} ${r.unit || "respuestas válidas"}` : "Sin respuestas disponibles"}</p>${context ? `<p class="small-note">${E(context)}</p>` : ""}</div>`;
+  }
+  function supportCard(a) {
+    return `<div class="rate-card"><h4>Selecciones de apoyo registradas</h4><div class="big-value">${a.support.count === null ? 0 : a.support.count}</div><p>Estudiantes que han señalado al menos una persona a quien acudir.</p><p class="small-note">${a.support.denominator} con respuesta de selección · ${a.supportMissing} sin selección interpretable. ${a.supportReached} con marca de acceso a la pregunta.</p><p class="small-note">Una selección ausente no significa que la persona carezca de apoyo.</p></div>`;
+  }
+  function dist(field, d) {
+    return `<div class="distribution"><h4>${E(C.FIELDS[field])}</h4><p class="coverage">${d.denominator} ${d.denominator === 1 ? "respuesta registrada" : "respuestas registradas"}</p>${d.items.length ? d.items.map((x) => `<div class="distribution-row"><div><span>${E(x.label)}</span><strong>${x.count} <small>· ${pct(x.percent)}</small></strong></div>${progress(x.count, d.denominator, x.label)}</div>`).join("") : '<p class="missing">Sin datos</p>'}</div>`;
+  }
+  function metric(title, value, description, denominator) {
+    return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong>${num(value)}</strong>${denominator ? `<span>${E(denominator)}</span>` : ""}</div><p>${E(description)}</p></div>`;
+  }
+  function responseCard(field, s) {
+    const value = s.responses[field];
+    return `<div class="response-card"><h4>${E(C.FIELDS[field])}</h4><p class="response-value${value === null ? " missing" : ""}">${E(value ?? "Sin datos")}</p>${field === "uce" ? '<p class="small-note">Etiqueta del cuestionario; significado pendiente de confirmar.</p>' : ""}</div>`;
+  }
+  function contactNames(list) {
+    if (list === null) return "Sin selección registrada";
+    if (!list.length) return "Nadie señalado";
+    return list
+      .map((x) => {
+        const s = model.students.find((t) => t.id === x.id);
+        return name(s) + (x.sameClass ? "" : " · otra clase");
+      })
+      .join(" · ");
+  }
+  function predictionDescription(m, kind) {
+    const emitted = m[kind + "Predictions"],
+      evaluable = m[kind + "Evaluable"];
+    if (emitted === null)
+      return "No hay predicciones interpretables disponibles.";
+    if (emitted === 0) return "No se han señalado predicciones de este tipo.";
+    if (!evaluable)
+      return `Las ${num(emitted)} predicciones emitidas todavía no pueden verificarse.`;
+    return `${num(evaluable)} predicciones verificables de ${num(emitted)} emitidas.`;
+  }
+  function groupReport(g) {
+    const a = g.summary;
+    return `<article class="report">${hero(className(g), `${a.n} estudiantes`, "Ficha de clase")}<div class="report-body">${surveySummary(a)}<div class="reading"><span>Resultados descriptivos · cada indicador muestra su base de cálculo</span></div>
+    ${section("01", "Integración y bienestar", `<div class="rate-grid">${rateCard("Soledad frecuente", a.loneliness, "Casi siempre o siempre en la última semana.")}${rateCard("Poco disfrute con sus amistades", a.lowEnjoyment, "Nunca o casi nunca en la última semana.")}${rateCard("Experiencia universitaria poco positiva", a.lowUniversity, "Nunca o casi nunca en la última semana.")}</div><p class="direction-note">En soledad, una mayor frecuencia es menos favorable. En disfrute y experiencia universitaria, una menor frecuencia es menos favorable.</p><div class="rate-grid two">${supportCard(a)}${rateCard("Densidad de relaciones negativas observadas", a.rejection, "Nominaciones dentro de la clase, sobre las elecciones posibles de quienes tienen una respuesta interpretable.")}</div><div class="distribution-grid">${["alone", "fun", "general"].map((f) => dist(f, a.distributions[f])).join("")}</div><p class="section-note">Las redes tienen ${a.relationCoverage} de ${a.n} respuestas completamente interpretables. Los recuentos recibidos incluyen los vínculos reconocidos y pueden cambiar al completar o corregir respuestas.</p>`)}
+    ${section("02", "Adaptación académica", `<div class="rate-grid four">${rateCard("Dificultades en asignaturas", a.difficulty)}${rateCard("Se han planteado abandonar", a.dropout)}${rateCard("Organización del tiempo difícil", a.time, "Respuestas Mal o Muy mal.")}${rateCard("Carga de trabajo alta", a.workload, "Respuestas Alta o Muy alta.")}</div><div class="distribution-grid">${["time", "workload", "dropout"].map((f) => dist(f, a.distributions[f])).join("")}</div>`, "lime")}
+    ${section("03", "Participación y motivos", `<div class="distribution-grid">${["activities", "subjectReasons", "dropoutReasons"].map((f) => dist(f, a.distributions[f])).join("")}</div><p class="section-note">En las preguntas con varias opciones, una persona puede elegir más de una. Los porcentajes no tienen que sumar 100 %.</p>`)}
+    <p class="report-footer">Las historias y circunstancias personales se consultan únicamente en la ficha individual. Una respuesta ausente conserva el estado «Sin datos».</p></div></article>`;
+  }
+  function studentReport(s, g) {
+    const m = s.metrics;
+    const coverage = `De las otras ${m.peers} personas de la clase, ${m.relationsCoverage} tienen una respuesta de relaciones al menos parcialmente interpretable.`;
+    return `<article class="report">${hero(name(s), `${className(g)} · ${g.rows.length} estudiantes`, "Ficha individual", surveyStatus(s))}<div class="report-body"><div class="reading"><span>${s.name ? `Código: ${E(s.id)}` : "Los códigos se muestran tal como figuran en el Excel."}</span><span class="coverage">${E(s.lastDate ? `Finalización: ${dateLabel(s.lastDate)}` : "Finalización sin registrar")}</span></div>
+    ${section("01", "Relaciones e integración", `<div class="metric-grid">${metric("Relaciones positivas recibidas observadas", m.friendsReceived, coverage)}${metric("Relaciones positivas declaradas", m.friendsDeclared, "Personas de su clase valoradas con Buena o Muy buena relación.")}${metric("Relaciones positivas recíprocas observadas", m.friendsMutual, m.mutualComplete ? "Elecciones positivas correspondidas." : "Vínculos observados; hay respuestas ausentes o parcialmente interpretables.")}${metric("Relaciones negativas recibidas observadas", m.rejectionsReceived, coverage)}${metric("Relaciones negativas declaradas", m.rejectionsDeclared, "Personas de su clase valoradas con Mala o Muy mala relación.")}${metric("Relaciones negativas recíprocas observadas", m.rejectionsMutual, m.mutualComplete ? "Elecciones negativas correspondidas." : "Vínculos observados; hay respuestas ausentes o parcialmente interpretables.")}</div><div class="metric-grid compact">${metric("Aciertos de predicciones positivas", m.friendCorrect, predictionDescription(m, "friend"))}${metric("Aciertos de predicciones negativas", m.rejectionCorrect, predictionDescription(m, "rejection"))}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
+    ${section("02", "Bienestar y red de apoyo", `<div class="response-grid">${["alone", "fun", "general"].map((f) => responseCard(f, s)).join("")}</div><div class="metric-grid compact">${metric("Nominaciones como persona popular", m.popularVotes, "Veces que otras personas de su clase la señalan como popular.")}${metric("Nominaciones como conexión entre grupos", m.connectorVotes, "Veces que otras personas de su clase la señalan como conectora.")}${metric("Nominaciones como referente de apoyo", m.helpVotes, "Veces que otras personas de su clase la señalan para pedir ayuda.")}${metric("Contactos previos identificados", s.contacts?.length ?? null, "Personas señaladas en la pregunta de conocidos, incluidas otras clases.")}${metric("Contactos fuera de la clase", s.outsideCount, "Selecciones de la pregunta de contactos en otros grupos.")}</div><div class="support-box"><h4>Personas a quienes acudir</h4><p>${E(contactNames(s.help))}</p></div><div class="response-grid">${responseCard("uce", s)}</div>`)}
+    ${section("03", "Adaptación académica", `<div class="response-grid">${["time", "workload", "difficulty", "dropout", "activities"].map((f) => responseCard(f, s)).join("")}</div><div class="response-details">${["subjects", "subjectReasons", "subjectOther", "dropoutReasons", "dropoutOther"].map((f) => responseCard(f, s)).join("")}</div>`, "lime")}
+    ${section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story${s.story === null ? " missing" : ""}">${E(s.story ?? "No hay un texto registrado para esta persona.")}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
     </div></article>`;
   }
-  function render(){if(!model)return;const g=group();if(!g){$('report').innerHTML=empty();return;}if(tab==='group')$('report').innerHTML=groupReport(g);else{const s=g.rows.find(x=>x.id===$('student').value);$('report').innerHTML=s?studentReport(s,g):'<section class="empty-state"><h2>No hay coincidencias.</h2><p>Prueba con otro nombre o código en esta clase.</p></section>';}}
-  window.addEventListener('pagehide',()=>{generation++;worker?.terminate();book=null;model=null;});
-  window.addEventListener('pageshow',e=>{if(e.persisted)reset();});
+  function render() {
+    if (!model) return;
+    const g = group();
+    if (!g) {
+      $("report").innerHTML = empty();
+      return;
+    }
+    if (tab === "group") {
+      $("report").innerHTML = groupReport(g);
+      $("view-announcement").textContent =
+        `Ficha de clase actualizada: ${g.rows.length} estudiantes.`;
+    } else {
+      const s = g.rows.find((x) => x.id === $("student").value);
+      $("report").innerHTML = s
+        ? studentReport(s, g)
+        : '<section class="empty-state"><h2>No hay coincidencias.</h2><p>Prueba con otro nombre o código en esta clase.</p></section>';
+      $("view-announcement").textContent = s
+        ? `Ficha individual actualizada. ${$("student").options.length} coincidencias. ${s.status === "Completado" ? "Encuesta completada" : s.status === "En curso" ? "Encuesta en curso" : "Encuesta sin iniciar"}.`
+        : "No hay estudiantes que coincidan con la búsqueda en esta clase.";
+    }
+  }
+  window.addEventListener("pagehide", reset);
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) reset();
+  });
 })();
