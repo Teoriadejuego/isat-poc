@@ -1,14 +1,14 @@
 @charset "UTF-8";
 :root {
-  --navy: #183e64;
-  --turquoise: #3490b0;
-  --lime: #b6bc00;
-  --ink: #183e64;
-  --muted: #526474;
-  --bg: #f1f4f7;
-  --line: #d8e3e9;
-  --blue-soft: #e4f1f6;
-  --lime-soft: #f4f5db;
+  --navy: #192a67;
+  --accent: #023e83;
+  --sky: #8cd1e7;
+  --ink: #243162;
+  --muted: #444444;
+  --bg: #f5f5f5;
+  --line: #dce3ef;
+  --blue-soft: #def7ff;
+  --neutral-soft: #edf1f7;
   font-family: Arial, Helvetica, sans-serif;
   color: var(--ink);
   background: var(--bg);
@@ -62,7 +62,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid var(--turquoise);
+  outline: 3px solid var(--accent);
   outline-offset: 4px;
 }
 [hidden] {
@@ -81,6 +81,7 @@ select:focus-visible {
 }
 .topbar {
   background: white;
+  border-top: 4px solid var(--navy);
   border-bottom: 1px solid var(--line);
 }
 .topbar-inner {
@@ -102,7 +103,7 @@ select:focus-visible {
   text-decoration: none;
 }
 .brand-mark {
-  color: var(--turquoise);
+  color: var(--accent);
   font-size: 30px;
 }
 .brand-caption {
@@ -128,7 +129,7 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--lime);
+  background: var(--sky);
 }
 .btn {
   display: inline-flex;
@@ -203,7 +204,7 @@ select:focus-visible {
   color: var(--navy);
   font-weight: 700;
   border-radius: 8px;
-  background: var(--lime-soft);
+  background: var(--neutral-soft);
   padding: 12px 10px;
 }
 .upload-controls {
@@ -227,7 +228,7 @@ select:focus-visible {
   cursor: pointer;
 }
 .file-button:focus-within {
-  outline: 3px solid var(--turquoise);
+  outline: 3px solid var(--accent);
   outline-offset: 4px;
 }
 .file-button input {
@@ -257,7 +258,7 @@ select:focus-visible {
   font-size: 12px;
   line-height: 1.5;
   margin-top: 10px;
-  color: #24738e;
+  color: var(--accent);
 }
 .status:empty,
 .error:empty {
@@ -310,7 +311,7 @@ select:focus-visible {
 }
 .tab[aria-selected="true"] {
   color: var(--ink);
-  border-bottom-color: var(--turquoise);
+  border-bottom-color: var(--accent);
 }
 .filters {
   display: flex;
@@ -343,7 +344,7 @@ select:focus-visible {
   border-radius: 50%;
   margin: 0 auto 19px;
   background: var(--blue-soft);
-  color: var(--turquoise);
+  color: var(--accent);
   font-size: 34px;
 }
 .empty-state h2 {
@@ -380,11 +381,11 @@ select:focus-visible {
   position: absolute;
   right: -185px;
   top: -150px;
-  border: 35px solid var(--turquoise);
+  border: 35px solid var(--sky);
   border-radius: 50%;
   box-shadow:
     0 0 0 21px var(--navy),
-    0 0 0 23px var(--lime);
+    0 0 0 23px var(--blue-soft);
   opacity: 0.6;
   pointer-events: none;
 }
@@ -429,12 +430,12 @@ select:focus-visible {
   margin-bottom: 19px;
   background: var(--blue-soft);
 }
-.panel-lime {
-  background: var(--lime-soft);
+.panel-neutral {
+  background: var(--neutral-soft);
 }
 .panel-story {
-  background: #eef6f7;
-  border-left: 4px solid var(--turquoise);
+  background: var(--neutral-soft);
+  border-left: 4px solid var(--accent);
 }
 .section-label {
   display: flex;
@@ -457,8 +458,8 @@ select:focus-visible {
   font-size: 18px;
   flex-shrink: 0;
 }
-.panel-lime .section-number {
-  background: var(--lime);
+.panel-neutral .section-number {
+  background: var(--sky);
 }
 .rate-grid {
   display: grid;
@@ -500,18 +501,18 @@ progress {
   border-radius: 5px;
   overflow: hidden;
   appearance: none;
-  background: #d8e3e9;
+  background: var(--line);
 }
 progress::-webkit-progress-bar {
-  background: #d8e3e9;
+  background: var(--line);
   border-radius: 5px;
 }
 progress::-webkit-progress-value {
-  background: var(--turquoise);
+  background: var(--accent);
   border-radius: 5px;
 }
 progress::-moz-progress-bar {
-  background: var(--turquoise);
+  background: var(--accent);
   border-radius: 5px;
 }
 .distribution-grid {
@@ -867,7 +868,7 @@ progress::-moz-progress-bar {
     transition: box-shadow 0.15s;
   }
   .btn:hover:not(:disabled) {
-    box-shadow: 0 3px 12px #183e6425;
+    box-shadow: 0 3px 12px #192a6725;
   }
   .report {
     animation: appear 0.2s ease;
@@ -900,12 +901,12 @@ progress::-moz-progress-bar {
   white-space: nowrap;
 }
 .survey-complete {
-  background: var(--lime-soft);
+  background: var(--neutral-soft);
   color: var(--navy);
-  border-color: var(--lime);
+  border-color: var(--sky);
 }
 .survey-progress {
-  background: #e4f1f6;
+  background: var(--blue-soft);
   color: var(--navy);
 }
 .survey-pending {
@@ -1022,27 +1023,27 @@ progress::-moz-progress-bar {
   line-height: 1.6;
   color: var(--navy);
   margin-top: 12px;
-  border-left: 3px solid var(--lime);
+  border-left: 3px solid var(--sky);
   padding-left: 12px;
 }
 .quality-notice:empty {
   display: none;
 }
 #report:focus-visible {
-  outline: 3px solid var(--turquoise);
+  outline: 3px solid var(--accent);
   outline-offset: 4px;
   border-radius: 15px;
 }
 progress::-webkit-progress-value {
-  background: #24738e;
+  background: var(--accent);
 }
 progress::-moz-progress-bar {
-  background: #24738e;
+  background: var(--accent);
 }
 .care-panel {
   background: #fff;
   border: 1px solid var(--line);
-  border-top: 4px solid var(--turquoise);
+  border-top: 4px solid var(--accent);
   border-radius: 12px;
   padding: 23px;
   margin-bottom: 27px;
@@ -1069,7 +1070,7 @@ progress::-moz-progress-bar {
   font-size: 13px;
   font-weight: 700;
   color: var(--navy);
-  background: var(--lime-soft);
+  background: var(--neutral-soft);
   border-radius: 20px;
   padding: 9px 13px;
 }
@@ -1080,6 +1081,13 @@ progress::-moz-progress-bar {
   color: var(--muted);
   margin-top: 14px;
 }
+.care-definition {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-top: 12px;
+  max-width: 760px;
+}
 .care-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1087,15 +1095,15 @@ progress::-moz-progress-bar {
   margin-top: 23px;
 }
 .care-stats > div {
-  background: var(--blue-soft);
+  background: var(--neutral-soft);
   border-radius: 10px;
   padding: 20px;
 }
 .care-stats > div:first-child {
-  background: var(--lime-soft);
+  background: var(--blue-soft);
 }
 .care-stats h4 {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.4;
 }
 .care-stats strong {
@@ -1106,7 +1114,7 @@ progress::-moz-progress-bar {
   margin-top: 16px;
 }
 .care-stats p {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 8px;
 }
@@ -1133,7 +1141,7 @@ progress::-moz-progress-bar {
   line-height: 1.45;
 }
 .care-matrix th {
-  background: #f5f8fa;
+  background: var(--neutral-soft);
   font-weight: 700;
 }
 .care-matrix tbody th {
@@ -1154,13 +1162,13 @@ progress::-moz-progress-bar {
   font-size: 11px;
 }
 .care-matrix .matrix-own {
-  background: var(--lime-soft);
-}
-.care-matrix .matrix-peer {
   background: var(--blue-soft);
 }
+.care-matrix .matrix-peer {
+  background: var(--neutral-soft);
+}
 .care-matrix .matrix-both {
-  background: #d8ebef;
+  background: var(--sky);
 }
 .care-matrix-note {
   font-size: 11px;
@@ -1175,7 +1183,7 @@ progress::-moz-progress-bar {
   padding: 18px 0 8px;
 }
 .care-details summary:focus-visible {
-  outline: 3px solid var(--turquoise);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 @media (max-width: 420px) {
@@ -1227,7 +1235,7 @@ progress::-moz-progress-bar {
   margin-top: 8px;
 }
 .care-reason {
-  background: var(--lime-soft);
+  background: var(--blue-soft);
   color: var(--navy);
   font-size: 11px;
   line-height: 1.4;
@@ -1235,7 +1243,7 @@ progress::-moz-progress-bar {
   border-radius: 6px;
 }
 .care-reason-peers {
-  background: var(--blue-soft);
+  background: var(--neutral-soft);
 }
 .care-link {
   display: inline-flex;
@@ -1273,11 +1281,36 @@ progress::-moz-progress-bar {
 }
 .student-care .response-grid {
   margin-top: 15px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.care-outgoing {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.care-outgoing summary {
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 12px 0;
+}
+.care-outgoing summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.care-outgoing p {
+  padding-top: 10px;
+  overflow-wrap: anywhere;
 }
 .student-care h4 {
   font-size: 14px;
 }
 @media (max-width: 420px) {
+  .student-care .response-grid {
+    grid-template-columns: 1fr;
+  }
   .care-panel {
     padding: 16px;
   }

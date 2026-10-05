@@ -170,7 +170,7 @@ test("enlace abre la ficha exacta, limpia búsqueda y permite volver a la misma 
   assert.equal(app.window.document.activeElement.id, "report");
   assert.match(
     app.window.document.querySelector(".student-care").textContent,
-    /2 personas señalan/,
+    /2 personas indican/,
   );
   assert.doesNotMatch(
     app.get("report").textContent,

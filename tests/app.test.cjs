@@ -127,7 +127,7 @@ test("ficha individual sin familia, historia al final y estado de encuesta desta
   app.change("class", '["1","ENF","B"]');
   assert.equal(
     app.window.document.querySelector(".survey-status").textContent,
-    "Encuesta sin iniciar",
+    "Sin inicio registrado",
   );
 });
 
@@ -141,8 +141,8 @@ test("grupo distingue tres sentidos de bienestar y muestra estados de participac
   assert.match(report, /Nunca o casi nunca/);
   assert.match(report, /Completadas/);
   assert.match(report, /En curso/);
-  assert.match(report, /Sin iniciar/);
-  assert.match(report, /Solicitudes y señales de ayuda/);
+  assert.match(report, /Sin inicio registrado/);
+  assert.match(report, /Peticiones y menciones de ayuda/);
   assert.doesNotMatch(report, /Identifican a quién acudir/);
 });
 

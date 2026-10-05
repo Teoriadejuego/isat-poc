@@ -10,19 +10,19 @@
     <meta name="referrer" content="no-referrer" />
     <meta
       name="description"
-      content="ISAT: solicitudes de ayuda, señalamientos y fichas de cuidado del estudiante por clase."
+      content="ISAT: peticiones propias, menciones de ayuda y fichas por clase y estudiante."
     />
     <meta property="og:title" content="ISAT · Cuidado del estudiante" />
     <meta
       property="og:description"
-      content="Consulta las peticiones de ayuda y los casos de cada clase a partir de tu Excel."
+      content="Consulta las peticiones y menciones de ayuda de cada clase a partir de tu Excel."
     />
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.3.0" />
-    <script src="src/core.js?v=0.3.0" defer></script>
-    <script src="src/app.js?v=0.3.0" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.3.1" />
+    <script src="src/core.js?v=0.3.1" defer></script>
+    <script src="src/app.js?v=0.3.1" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -36,7 +36,7 @@
         </div>
         <div class="top-actions">
           <span class="pill"
-            ><span class="dot"></span>Consulta en tu navegador</span
+            ><span class="dot"></span>Procesamiento en tu navegador</span
           ><button id="clear" class="btn secondary" type="button" hidden>
             Cerrar consulta
           </button>
@@ -46,19 +46,22 @@
     <main id="main" class="main">
       <div class="workspace-title">
         <span class="eyebrow">ESPACIO DE CONSULTA</span>
-        <h1>Identifica las solicitudes de ayuda de cada clase.</h1>
+        <h1>Consulta las peticiones y menciones de ayuda.</h1>
         <p>
-          Carga el cuestionario ISAT para consultar las peticiones propias, los
-          señalamientos de otras personas y las fichas individuales.
+          Selecciona el Excel del cuestionario ISAT. Consulta las peticiones
+          propias y las respuestas en las que otras personas indican que un
+          estudiante necesita ayuda, clase a clase.
         </p>
       </div>
       <section class="upload-area" aria-labelledby="upload-title">
         <div class="upload-title">
           <div>
-            <h2 id="upload-title">El Excel de tu consulta</h2>
-            <p>Selecciona el archivo del cuestionario ISAT.</p>
+            <h2 id="upload-title">Cuestionario ISAT</h2>
+            <p>
+              Selecciona el Excel y revisa la hoja que contiene las respuestas.
+            </p>
           </div>
-          <span class="upload-badge" aria-hidden="true">XLSX</span>
+          <span class="upload-badge" aria-hidden="true">EXCEL</span>
         </div>
         <div class="upload-controls">
           <label class="file-button" for="file"
@@ -70,14 +73,17 @@
           ><span id="filename" class="filename"
             >Ningún archivo seleccionado</span
           ><label id="sheet-field" class="field" hidden
-            >Hoja<select id="sheet" aria-label="Hoja del Excel"></select></label
+            >Hoja con respuestas<select
+              id="sheet"
+              aria-label="Hoja con respuestas del Excel"
+            ></select></label
           ><button id="open" class="btn" type="button" disabled>
             Abrir fichas <span aria-hidden="true">→</span>
           </button>
         </div>
         <p class="upload-note">
-          El archivo se procesa en este navegador. Se admiten .xlsx y .xls de
-          hasta 20 MB.
+          El Excel se procesa en este navegador y no se envía al servidor. El
+          archivo original no se modifica. Formatos .xlsx y .xls, hasta 20 MB.
         </p>
         <p id="status" class="status" aria-live="polite" aria-atomic="true"></p>
         <p id="error" class="error" role="alert" aria-atomic="true"></p>
@@ -134,16 +140,16 @@
       >
         <section class="empty-state">
           <span class="empty-icon" aria-hidden="true">↗</span>
-          <h2>Empieza con tu Excel.</h2>
+          <h2>Las fichas aparecerán aquí.</h2>
           <p>
-            Después podrás elegir una clase y consultar su ficha o acercarte a
-            la experiencia de cada estudiante.
+            Selecciona el cuestionario y pulsa «Abrir fichas». Después podrás
+            elegir una clase o consultar la ficha de cada estudiante.
           </p>
         </section>
       </div>
       <footer class="bottom">
-        <span>ISAT · Integración y adaptación</span
-        ><span>Las respuestas se interpretan con contexto profesional.</span>
+        <span>ISAT · Cuidado del estudiante</span
+        ><span>Respuestas para orientar el acompañamiento.</span>
       </footer>
     </main>
     <noscript

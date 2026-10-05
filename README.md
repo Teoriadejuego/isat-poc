@@ -9,11 +9,11 @@ Visualizador ISAT centrado en las solicitudes de ayuda y los señalamientos para
 1. Selecciona un archivo `.xlsx` o `.xls` de hasta 20 MB.
 2. Elige la hoja `Users` del cuestionario y pulsa **Abrir fichas**.
 3. Elige **Ficha de clase** o **Ficha individual**. Selecciona la clase/titulación y, en la ficha individual, busca por nombre o código.
-4. Consulta el estado destacado de la encuesta: completada, en curso o sin iniciar.
+4. Consulta el estado destacado de la encuesta: completada, en curso o sin inicio registrado.
    En **Solicitudes y señales de ayuda** verás los casos de la clase para la Unidad de Cuidado del Estudiante. **Ver ficha** abre la ficha individual; **Volver a la ficha de clase** regresa al mismo grupo.
 5. **Cancelar lectura**, **Cancelar preparación**, **Retirar archivo** o **Cerrar consulta** interrumpen el proceso correspondiente y retiran los datos de la aplicación. Sustituir el Excel también invalida la consulta anterior.
 
-Los nombres se leen del propio Excel, cuando existen. Los códigos se conservan como texto y permiten distinguir nombres iguales. La historia aparece al final de la ficha individual. Las preguntas de contexto familiar no se muestran.
+Los nombres se leen del propio Excel, cuando existen. Los códigos se conservan como texto y permiten distinguir nombres iguales. La historia aparece al final de la ficha individual. Las preguntas de contexto familiar no se muestran. En pantalla, «menciones de ayuda» designa las respuestas en las que otras personas indican que un estudiante necesita ayuda; no designa personas a quienes acudir.
 
 ## Lectura del cuestionario
 
@@ -32,7 +32,7 @@ Los registros con códigos de usuario se muestran con esos códigos. Si existe u
 - **Adaptación académica:** organización del tiempo, actividades, carga de trabajo, dificultades, asignaturas y motivos, pensamientos de abandono y motivos. Las categorías desconocidas permanecen visibles, pero se excluyen de las tasas que requieren categorías reconocibles. Cada opción de una multiselección se cuenta una vez por persona; sus porcentajes pueden sumar más de 100 %.
 - **Historia:** circunstancia se muestra al final de la ficha individual, como texto, conservando los saltos de línea. Si personal contiene una respuesta real se incorpora también. Los eventos que solo contienen una marca de tiempo no se presentan como respuestas.
 
-La marca end determina «Completada»; start sin end determina «En curso». Sin ambas marcas se muestra «Sin iniciar». La finalización no garantiza que cada pregunta tenga respuesta. Cada tasa informa su denominador de respuestas interpretables; la densidad negativa utiliza las elecciones posibles de quienes tienen una lista de relaciones completamente interpretable.
+La marca end determina «Completada»; start sin end determina «En curso». Sin ambas marcas la interfaz muestra «Sin inicio registrado»: no se afirma que nadie haya contestado, ya que puede haber respuestas sin estas marcas. La finalización tampoco garantiza que cada pregunta tenga respuesta. Cada tasa informa su denominador de respuestas interpretables; la densidad negativa utiliza las elecciones posibles de quienes tienen una lista de relaciones completamente interpretable.
 
 Las normalizaciones de etiquetas, duplicados y referencias se realizan en memoria. El Excel original no se modifica. Se informa de las incidencias sin sustituirlas silenciosamente por cero.
 
@@ -47,6 +47,12 @@ El artefacto publicado se construye con una lista explícita de nueve recursos y
 El código del visualizador puede ser público; el Excel de trabajo y sus historias no se incluyen en el repositorio ni en la publicación. Esta arquitectura conserva los datos de consulta en memoria durante el uso; no equivale a borrar el archivo original ni garantiza eliminación forense de toda memoria del dispositivo.
 
 Los enlaces internos a fichas no incluyen nombres ni códigos en la dirección web. El listado y sus filtros se retiran al cerrar la consulta o sustituir el archivo.
+
+## Diseño y textos
+
+La versión 0.3.1 adapta los colores observados en [la web de la Universidad Loyola](https://www.uloyola.es/) el 5 de octubre de 2026: `#192A67`, `#8CD1E7`, `#023E83`, `#243162` y `#DEF7FF`. Los fondos secundarios y bordes incluyen tonos derivados. No se incorporan logotipos, fotografías, fuentes remotas ni código de esa web.
+
+Tres revisores automáticos con roles de redacción, comunicación educativa y marketing propusieron mejoras que se contrastaron con los requisitos antes de aplicarlas. La interfaz habla de fichas y menciones de ayuda, muestra las bases de los recuentos y conserva la matriz antes del listado. Las menciones que emite cada estudiante están en un desplegable dentro de su bloque de ayuda, separado de sus contactos. Los prompts y los resultados figuran en `REVISION_PROMPTS.md` y `REVISION_RESULTADOS.md`.
 
 ## Desarrollo local
 

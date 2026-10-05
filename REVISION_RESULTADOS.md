@@ -1,5 +1,15 @@
 # Revisión de ISAT
 
+## Actualización 0.3.1: paleta y comunicación
+
+Se observaron los estilos aplicados en https://www.uloyola.es/ el 5 de octubre de 2026. Se trasladaron a ISAT el azul marino `#192A67`, el azul claro `#8CD1E7`, el azul de enlaces `#023E83`, el texto azul `#243162` y el fondo `#DEF7FF`, con tonos secundarios derivados. Cabeceras, controles, fichas, barras, matriz y favicon utilizan la paleta local. Los colores de las celdas se acompañan de etiquetas explícitas.
+
+Tres revisores automáticos adoptaron roles de copy, educación y comunicación de producto. Se aplicaron sus propuestas de aclarar las menciones, sustituir «casos» por «fichas», mostrar bases de respuestas y mejorar instrucciones, errores y estado vacío. «Sin inicio registrado» describe la falta de marcas del cuestionario sin negar que pueda haber respuestas. Las personas que cada estudiante considera que necesitan ayuda están en su bloque de ayuda, no bajo «red de apoyo».
+
+Dos revisores propusieron colocar el listado antes de la matriz. Esa propuesta se descartó porque el usuario pidió los recuentos y, debajo, la matriz. Tampoco se añadieron una web comercial, promesas de seguridad absoluta ni respaldo institucional. Los indicadores, las categorías y el umbral confirmado conservan sus cálculos.
+
+Verificación de 0.3.1: 47 pruebas automáticas superadas y artefacto limitado a nueve recursos, sin Excel ni datos de consulta. En navegador se revisaron la matriz a 320 y 1280 píxeles, la ficha individual, el retorno a la clase y el cierre que retira fichas y filtros. No se observaron desbordamientos ni errores de consola. Los pares principales de texto y fondo, junto con las barras y el foco, alcanzaron relaciones de contraste entre 7,33 y 13,39; esta comprobación no sustituye una auditoría integral de accesibilidad.
+
 **Actualización 0.3.0:** el significado de UCE y ayuda ha sido confirmado posteriormente. UCE es una petición propia de ayuda y ayuda contiene señalamientos de personas que necesitan ayuda. Esta definición sustituye la interpretación anterior como «a quién acudir» y la duda sobre UCE recogidas en el informe histórico siguiente. El foco de las fichas pasa a los recuentos, la matriz de petición propia por señalamientos y la lista de casos con enlaces a fichas. La suite completa suma 47 pruebas superadas.
 
 Se contrastó el listado con un recuento independiente del cuestionario en local. Se comprobó que cada persona aparece una sola vez, que las selecciones repetidas no alcanzan artificialmente el umbral y que las respuestas ausentes quedan fuera de la matriz. En navegador se verificó el enlace a la ficha exacta y el regreso a la clase. La matriz, las tarjetas y los enlaces se revisaron a 320 y 1280 píxeles, sin desbordamiento de contenido ni errores de consola. El artefacto de publicación sigue limitado a nueve recursos de la aplicación, sin archivos de consulta.
