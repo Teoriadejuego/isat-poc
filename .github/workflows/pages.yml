@@ -3,6 +3,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      runner:
+        description: Entorno de ejecución para publicar
+        type: choice
+        default: ubuntu-latest
+        options:
+          - ubuntu-latest
+          - macos-15
 permissions:
   contents: read
 concurrency:
@@ -10,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 10
     permissions:
       contents: read
@@ -34,7 +42,7 @@ jobs:
           path: public
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 10
     permissions:
       pages: write

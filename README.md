@@ -68,4 +68,6 @@ pnpm start
 
 Dirección local: `http://127.0.0.1:8892/`. Para servir la aplicación no hacen falta las dependencias de pruebas; `node tools/serve.mjs` es suficiente con Node.js instalado. GitHub Pages publica mediante `.github/workflows/pages.yml`, después de las pruebas y la verificación del artefacto.
 
+Si GitHub no consigue asignar un servidor de ejecución, **Actions → Publicar ISAT → Run workflow** permite seleccionar `macos-15` como alternativa a `ubuntu-latest`. Ambos recorridos ejecutan las pruebas y verifican los mismos nueve recursos antes del despliegue.
+
 jsdom se utiliza únicamente en las pruebas. SheetJS 0.20.3 se distribuye localmente con su licencia en `vendor/LICENSE-SheetJS.txt`. Los prompts y el cierre de revisión figuran en `REVISION_PROMPTS.md` y `REVISION_RESULTADOS.md`.
