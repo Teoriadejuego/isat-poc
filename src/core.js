@@ -54,6 +54,13 @@
     ["siempre", 4],
   ]);
   const frequency = (v) => frequencies.get(norm(v)) ?? null;
+  const storyAnswer = (value) => {
+    if (value === null) return null;
+    let letters = 0;
+    for (const character of value)
+      if (/\p{L}/u.test(character) && ++letters >= 4) return value;
+    return null;
+  };
   const categories = Object.freeze({
     time: ["Muy bien", "Bien", "Regular", "Mal", "Muy mal"],
     workload: ["Muy baja", "Baja", "Adecuada", "Alta", "Muy alta"],
@@ -230,7 +237,7 @@
               ? "En curso"
               : "Sin iniciar",
         responses: {},
-        story: val(r, "story"),
+        story: storyAnswer(val(r, "story")),
         raw: {},
         quality: {},
       };
@@ -248,7 +255,7 @@
           if (label) s.responses[field] = label;
           else warnings.academic++;
         }
-      const personal = val(r, "personal");
+      const personal = storyAnswer(val(r, "personal"));
       if (personal && personal !== s.story)
         s.story = [s.story, personal].filter(Boolean).join("\n\n");
       const route = norm(val(r, "route")),

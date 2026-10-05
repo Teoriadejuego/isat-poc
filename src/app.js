@@ -163,7 +163,7 @@
     try {
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
-      const parser = new Worker("src/parser-worker.js?v=0.4.0");
+      const parser = new Worker("src/parser-worker.js?v=0.4.1");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -569,7 +569,7 @@
         : care.requested
           ? "Sí"
           : "No";
-    return `<div class="student-care"><div class="care-heading"><h4>Peticiones y menciones de ayuda</h4>${careReasons({ requested: care.requested === true, peerReports: care.peerReports })}</div><div class="response-grid"><div class="response-card"><h4>Petición propia de ayuda</h4><p class="response-value">${requested}</p></div><div class="response-card"><h4>Personas que indican que necesita ayuda</h4><p class="response-value">${num(care.peerReports)}</p><p class="small-note">Basado en las respuestas de ${care.peerCoverage} personas distintas de todo el Excel, excluyendo a quien corresponde esta ficha.</p></div></div><details class="care-outgoing"><summary>Personas que este estudiante considera que necesitan ayuda</summary><p>${E(contactNames(s.help))}</p></details></div>`;
+    return `<div class="student-care"><div class="care-heading"><h4>Peticiones y menciones de ayuda</h4>${careReasons({ requested: care.requested === true, peerReports: care.peerReports })}</div><div class="response-grid"><div class="response-card"><h4>Petición propia de ayuda</h4><p class="response-value">${requested}</p></div><div class="response-card"><h4>Personas que indican que necesita ayuda</h4><p class="response-value">${num(care.peerReports)}</p><p class="small-note">Basado en las respuestas de ${care.peerCoverage} personas distintas de todo el Excel, excluyendo a quien corresponde esta ficha. Se muestra únicamente el número de personas, sin identificar a quienes lo han indicado.</p></div></div></div>`;
   }
   function dist(field, d) {
     return `<div class="distribution"><h4>${E(C.FIELDS[field])}</h4><p class="coverage">${d.denominator} ${d.denominator === 1 ? "respuesta registrada" : "respuestas registradas"}</p>${d.items.length ? d.items.map((x) => `<div class="distribution-row"><div><span>${E(x.label)}</span><strong>${x.count} <small>· ${pct(x.percent)}</small></strong></div>${progress(x.count, d.denominator, x.label)}</div>`).join("") : '<p class="missing">Sin datos</p>'}</div>`;
@@ -581,25 +581,64 @@
     const value = s.responses[field];
     return `<div class="response-card"><h4>${E(C.FIELDS[field])}</h4><p class="response-value${value === null ? " missing" : ""}">${E(value ?? "Sin datos")}</p></div>`;
   }
-  function contactNames(list) {
-    if (list === null) return "Sin selección registrada";
-    if (!list.length) return "No ha indicado a ninguna persona";
-    return list
-      .map((x) => {
-        const s = model.students.find((t) => t.id === x.id);
-        return name(s) + (x.sameClass ? "" : " · otra clase");
-      })
-      .join(" · ");
-  }
-  function predictionDescription(m, kind) {
-    const emitted = m[kind + "Predictions"],
-      evaluable = m[kind + "Evaluable"];
+  function predictionMetric(s, kind) {
+    const m = s.metrics,
+      emitted = m[kind + "Predictions"],
+      evaluable = m[kind + "Evaluable"],
+      label = kind === "friend" ? "positivas" : "negativas",
+      title = `Aciertos de predicciones ${label}`;
     if (emitted === null)
-      return "No hay predicciones interpretables disponibles.";
-    if (emitted === 0) return "No se han señalado predicciones de este tipo.";
+      return metric(
+        title,
+        null,
+        "No hay una respuesta de predicciones interpretable.",
+      );
+    if (emitted === 0) {
+      if (!s.quality.predictions.complete)
+        return metric(
+          title,
+          null,
+          `No se reconocen predicciones ${label} sobre su clase en la respuesta parcial. No equivale a no haberlas emitido.`,
+        );
+      return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong class="metric-state">No procede</strong></div><p>No ha emitido predicciones ${label} sobre su clase; no hay aciertos que evaluar.</p></div>`;
+    }
+    const scope = s.quality.predictions.complete
+      ? "emitidas"
+      : "interpretables";
     if (!evaluable)
-      return `Las ${num(emitted)} predicciones emitidas todavía no pueden verificarse.`;
-    return `${num(evaluable)} predicciones verificables de ${num(emitted)} emitidas.`;
+      return metric(
+        title,
+        null,
+        `${num(emitted)} predicciones ${scope}; ninguna puede comprobarse con las respuestas de relaciones disponibles.`,
+      );
+    const pending = emitted - evaluable;
+    const description = `${num(emitted)} predicciones ${scope}. ${pending ? `${num(pending)} ${pending === 1 ? "no puede comprobarse" : "no pueden comprobarse"} por falta de respuestas de relaciones interpretables.` : "Todas pueden comprobarse con las respuestas de relaciones disponibles."}`;
+    return metric(
+      title,
+      m[kind + "Correct"],
+      description,
+      `de ${num(evaluable)} verificables`,
+    );
+  }
+  function relationshipNote(s) {
+    if (s.relations === null)
+      return `<p class="relationship-note">No hay una respuesta propia de relaciones interpretable. «Sin datos» no significa que no tenga amistades: pueden observarse las valoraciones recibidas y comprobarse sus predicciones con las respuestas de otras personas.</p>`;
+    if (!s.quality.relations.complete)
+      return `<p class="relationship-note">Su respuesta de relaciones es parcialmente interpretable. Los recuentos declarados y recíprocos solo incluyen vínculos reconocidos; puede haber otros.</p>`;
+    return "";
+  }
+  function declaredDescription(s, positive) {
+    if (s.relations === null)
+      return "No hay una respuesta propia de relaciones interpretable; no se puede conocer este recuento.";
+    const labels = positive ? "Buena o Muy buena" : "Mala o Muy mala";
+    return `Personas de su clase valoradas con ${labels} relación.${s.quality.relations.complete ? "" : " Recuento mínimo de los vínculos reconocidos en su respuesta parcial."}`;
+  }
+  function reciprocalDescription(s, positive) {
+    if (s.relations === null)
+      return "Sin una respuesta propia de relaciones, no se puede comprobar la reciprocidad.";
+    return s.metrics.mutualComplete
+      ? `Elecciones ${positive ? "positivas" : "negativas"} correspondidas.`
+      : "Solo cuenta vínculos confirmados con las respuestas disponibles; puede haber otros.";
   }
   const listColumns = [
     { key: "student", label: "Estudiante", value: (s) => name(s) },
@@ -918,10 +957,10 @@
     const m = s.metrics;
     const coverage = `De las otras ${m.peers} personas de la clase, ${m.relationsCoverage} tienen una respuesta de relaciones al menos parcialmente interpretable.`;
     return `<article class="report">${hero(name(s), `${className(g)} · ${g.rows.length} estudiantes`, "Ficha individual", surveyStatus(s))}<div class="report-body"><button class="back-to-class" type="button" data-return-class>← Volver a ${returnView === "list" ? "la lista de estudiantes" : "la ficha de clase"}</button>${studentCare(s)}<div class="reading"><span>${s.name ? `Código: ${E(s.id)}` : "Los códigos se muestran tal como figuran en el Excel."}</span><span class="coverage">${E(s.lastDate ? `Finalización: ${dateLabel(s.lastDate)}` : "Finalización sin registrar")}</span></div>
-    ${section("01", "Relaciones e integración", `<div class="metric-grid">${metric("Relaciones positivas recibidas observadas", m.friendsReceived, coverage)}${metric("Relaciones positivas declaradas", m.friendsDeclared, "Personas de su clase valoradas con Buena o Muy buena relación.")}${metric("Relaciones positivas recíprocas observadas", m.friendsMutual, m.mutualComplete ? "Elecciones positivas correspondidas." : "Vínculos observados; hay respuestas ausentes o parcialmente interpretables.")}${metric("Relaciones negativas recibidas observadas", m.rejectionsReceived, coverage)}${metric("Relaciones negativas declaradas", m.rejectionsDeclared, "Personas de su clase valoradas con Mala o Muy mala relación.")}${metric("Relaciones negativas recíprocas observadas", m.rejectionsMutual, m.mutualComplete ? "Elecciones negativas correspondidas." : "Vínculos observados; hay respuestas ausentes o parcialmente interpretables.")}</div><div class="metric-grid compact">${metric("Aciertos de predicciones positivas", m.friendCorrect, predictionDescription(m, "friend"))}${metric("Aciertos de predicciones negativas", m.rejectionCorrect, predictionDescription(m, "rejection"))}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
+    ${section("01", "Relaciones e integración", `${relationshipNote(s)}<div class="metric-grid">${metric("Relaciones positivas recibidas observadas", m.friendsReceived, coverage)}${metric("Relaciones positivas declaradas", m.friendsDeclared, declaredDescription(s, true))}${metric("Relaciones positivas recíprocas observadas", m.friendsMutual, reciprocalDescription(s, true))}${metric("Relaciones negativas recibidas observadas", m.rejectionsReceived, coverage)}${metric("Relaciones negativas declaradas", m.rejectionsDeclared, declaredDescription(s, false))}${metric("Relaciones negativas recíprocas observadas", m.rejectionsMutual, reciprocalDescription(s, false))}</div><p class="prediction-intro">Las predicciones expresan cómo cree que otras personas valoran su relación con este estudiante. Los aciertos se comprueban con las respuestas de esas personas, no con las relaciones que declara este estudiante.</p><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
     ${section("02", "Bienestar y contactos", `<div class="response-grid">${["alone", "fun", "general"].map((f) => responseCard(f, s)).join("")}</div><div class="metric-grid compact">${metric("Nominaciones como persona popular", m.popularVotes, "Veces que otras personas de su clase la señalan como popular.")}${metric("Nominaciones como conexión entre grupos", m.connectorVotes, "Veces que otras personas de su clase la señalan como conectora.")}${metric("Contactos previos identificados", s.contacts?.length ?? null, "Personas señaladas en la pregunta de conocidos, incluidas otras clases.")}${metric("Contactos fuera de la clase", s.outsideCount, "Selecciones de la pregunta de contactos en otros grupos.")}</div>`)}
     ${section("03", "Adaptación académica", `<div class="response-grid">${["time", "workload", "difficulty", "dropout", "activities"].map((f) => responseCard(f, s)).join("")}</div><div class="response-details">${["subjects", "subjectReasons", "subjectOther", "dropoutReasons", "dropoutOther"].map((f) => responseCard(f, s)).join("")}</div>`, "neutral")}
-    ${sheetFeedback("student", g, s)}${section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story${s.story === null ? " missing" : ""}">${E(s.story ?? "No hay un texto registrado para esta persona.")}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
+    ${sheetFeedback("student", g, s)}${s.story === null ? "" : section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story">${E(s.story)}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
     </div></article>`;
   }
   function render() {

@@ -591,6 +591,27 @@ progress::-moz-progress-bar {
   color: var(--muted);
   line-height: 1.5;
 }
+.metric-line .metric-state {
+  font:
+    700 20px/1.4 Arial,
+    Helvetica,
+    sans-serif;
+}
+.relationship-note,
+.prediction-intro {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.relationship-note {
+  background: var(--sky);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.prediction-intro {
+  margin-top: 20px;
+}
 .response-card {
   background: #ffffffc9;
   border-radius: 9px;
@@ -1285,27 +1306,6 @@ progress::-moz-progress-bar {
 .student-care .response-grid {
   margin-top: 15px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.care-outgoing {
-  border-top: 1px solid var(--line);
-  margin-top: 16px;
-  padding-top: 12px;
-  font-size: 12px;
-  line-height: 1.6;
-}
-.care-outgoing summary {
-  cursor: pointer;
-  font-weight: 700;
-  min-height: 44px;
-  padding: 12px 0;
-}
-.care-outgoing summary:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
-}
-.care-outgoing p {
-  padding-top: 10px;
-  overflow-wrap: anywhere;
 }
 .consultation-heading {
   margin: 0 0 26px;

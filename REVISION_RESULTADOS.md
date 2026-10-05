@@ -1,5 +1,15 @@
 # Revisión de ISAT
 
+## Actualización 0.4.1: interpretación de relaciones, ayuda e historias
+
+Se comprobó en local el caso comunicado: falta la respuesta propia a las preguntas de relaciones, pero hay ocho predicciones positivas, cinco verificables y tres aciertos. No había una selección de recorrido errónea. Los aciertos se verifican con las respuestas de otras personas y no requieren que exista la respuesta propia de relaciones. Se conservan esos cálculos y la ficha explica que «Sin datos» no significa cero amistades. Presenta **3 de 5 verificables**, las ocho predicciones emitidas y las tres sin comprobar. También distingue una respuesta parcial y un recuento mínimo observado. Sin predicciones de ese tipo en una respuesta interpretable, se muestra «No procede».
+
+La ficha individual de ayuda muestra petición propia y número de personas distintas que indican necesidad de ayuda. Se elimina el desplegable con las personas que ese estudiante había señalado y no se muestran las identidades de quienes emiten menciones. El listado de estudiantes que cumplen los criterios en la ficha de clase conserva sus enlaces.
+
+«Su historia» solo aparece si circunstancia o personal contienen una respuesta con al menos cuatro letras Unicode. Cada respuesta se filtra por separado, sin sumar «No» y «Sí»; espacios, números y signos no cuentan. Se conservan el texto literal y los saltos de línea de las respuestas admitidas, con escape al mostrarlas. No aparece una tarjeta vacía cuando falta texto.
+
+Verificación: **62 pruebas automáticas superadas**. Las siete nuevas regresiones comprueban el caso 3/5/8 con respuesta propia ausente, cero explícito, predicciones no verificables, respuestas parciales, recuentos de ayuda sin identidades y el límite de tres/cuatro letras. En navegador se utilizó un Excel sintético, excluido del repositorio, que reproduce 6 relaciones recibidas entre 37 respuestas de otras 94 personas. Se comprobaron las fichas en escritorio y a 320 píxeles, sin desbordamientos en las tarjetas ni en la página. Al cambiar de estudiante, la historia larga aparece y la respuesta «No» oculta todo el apartado. Los Excel de trabajo se consultaron solo en local y no forman parte de la publicación.
+
 ## Actualización 0.4.0: carga, grupos, listas e individuales
 
 La carga de Excel y hoja está separada de la consulta. El recorrido ofrece ficha de grupo, lista de estudiantes y ficha individual. Volver a los datos conserva la consulta si no se sustituye el archivo o la hoja. La lista muestra toda la clase, prioriza petición propia o dos o más menciones, permite buscar/filtrar/ordenar y presenta páginas de 50 filas. Las ausencias quedan al final en ambos sentidos. Las tres respuestas de bienestar se mantienen separadas, sin importar una escala de felicidad de PBIS. La lista aclara que las menciones recibidas proceden de personas distintas de todo el Excel.
