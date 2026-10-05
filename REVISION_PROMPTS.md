@@ -10,7 +10,7 @@ Comprueba cabeceras, rutas Par/Impar, marcas de tiempo, códigos como texto y al
 
 ## 02. Medidas y denominadores
 
-Revisa relaciones recibidas, declaradas y recíprocas, predicciones, apoyo y adaptación académica. Distingue una respuesta ausente de cero, limita cada medida a su población y usa denominadores verificables. No inventes puntuaciones globales ni interpretaciones de UCE.
+Revisa relaciones recibidas, declaradas y recíprocas, predicciones, peticiones de ayuda y adaptación académica. Distingue una respuesta ausente de cero, limita cada medida a su población y usa denominadores verificables. No inventes puntuaciones globales ni significados que no estén confirmados por quien define el cuestionario.
 
 ## 03. Privacidad y seguridad
 
@@ -52,3 +52,9 @@ Contrasta el producto y el README con los requisitos del usuario. Revisa separac
 4. Ejecutar su prueba de regresión y las comprobaciones afectadas.
 5. Registrar el resultado y continuar con el siguiente problema.
 6. Revisar escritorio y móvil, comprobar el Excel original en local y publicar solo el código.
+
+## Mejora 11. Casos para la Unidad de Cuidado del Estudiante
+
+Con el significado confirmado por quien define el cuestionario, interpreta uce = Sí como petición propia y ayuda como señalamientos de personas que necesitan ayuda. Muestra al principio de la ficha de clase los casos que cumplen petición propia o al menos dos personas distintas, sin duplicar quienes cumplen ambos criterios. Cuenta cada remitente una vez por destinatario, resuelve alias y excluye autonominaciones. Considera todos los señalamientos del Excel y muestra el caso en la clase de quien los recibe. Conserva las ausencias y no limites el criterio a encuestas finalizadas. Añade enlaces internos a la ficha individual y un retorno a la misma clase. Comprueba umbral 1/2, superposición, códigos duplicados en listas, otras clases, ausencia de preguntas, teclado, nombres iguales, escape de textos, sustitución y cierre. No añadas nombres o códigos a URLs, almacenamiento o transmisiones.
+
+Prioriza los recuentos y añade debajo una matriz de petición propia Sí/No por 0–1 o 2 o más señalamientos. Identifica las cuatro combinaciones y cuántas personas quedan fuera por falta de datos, sin tratar las ausencias como No. Mantén el listado de fichas debajo de la matriz. Las relaciones, el bienestar y la adaptación académica pasan a ser información complementaria.

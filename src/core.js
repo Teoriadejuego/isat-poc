@@ -72,7 +72,7 @@
     alone: "Soledad en la última semana",
     fun: "Disfrute con sus amistades",
     general: "Cómo le ha ido en la universidad",
-    uce: "UCE",
+    uce: "Solicita ayuda a la Unidad de Cuidado del Estudiante",
     time: "Organización del tiempo",
     activities: "Actividades universitarias",
     workload: "Carga de trabajo",
@@ -376,7 +376,6 @@
           : emptyValue(s.raw.others)
             ? 0
             : split(s.raw.others).length;
-      s.hasSupport = s.help === null ? null : s.help.length > 0;
       s.friends =
         s.relations === null
           ? null
@@ -385,6 +384,29 @@
         s.relations === null
           ? null
           : s.relations.filter((x) => x.rating < 0 && x.sameClass);
+    }
+    // Count different people across the whole workbook, including other classes.
+    // The nominations parser already deduplicates aliases and excludes self-reports.
+    const careReporters = new Map();
+    const peerRespondents = students.filter((s) => s.help !== null).length;
+    for (const source of students) {
+      for (const target of source.help || []) {
+        if (!careReporters.has(target.id))
+          careReporters.set(target.id, new Set());
+        careReporters.get(target.id).add(source.id);
+      }
+    }
+    for (const s of students) {
+      const own = yesNo(s.responses.uce);
+      const peerCoverage = peerRespondents - (s.help !== null ? 1 : 0);
+      s.care = {
+        requested: own === null ? null : own === "Sí",
+        peerReports: peerCoverage ? careReporters.get(s.id)?.size || 0 : null,
+        peerCoverage,
+        peerRespondents,
+        selfQuestionPresent: cols.uce >= 0,
+        peerQuestionPresent: cols.help >= 0,
+      };
     }
     const grouped = new Map();
     for (const s of students) {
@@ -407,14 +429,12 @@
         const incomingPositive = new Map(),
           incomingNegative = new Map(),
           popular = new Map(),
-          connector = new Map(),
-          help = new Map();
+          connector = new Map();
         const increment = (map, id) => map.set(id, (map.get(id) || 0) + 1);
         const available = {
             relations: 0,
             popularChoice: 0,
             connectorChoice: 0,
-            help: 0,
           },
           allComplete = rows.every((s) => s.quality.relations.complete);
         for (const source of rows) {
@@ -429,7 +449,6 @@
           for (const [field, map] of [
             ["popularChoice", popular],
             ["connectorChoice", connector],
-            ["help", help],
           ])
             for (const target of source[field] || [])
               if (target.sameClass) increment(map, target.id);
@@ -460,7 +479,6 @@
             connectorVotes: coverage("connectorChoice")
               ? connector.get(s.id) || 0
               : null,
-            helpVotes: coverage("help") ? help.get(s.id) || 0 : null,
           };
           for (const [kind, rate] of [
             ["friend", 1],
@@ -502,6 +520,68 @@
           a.group.localeCompare(b.group, "es"),
       );
     return { students, groups, warnings };
+  }
+  function careSummary(rows) {
+    const cases = rows
+      .filter((s) => s.care?.requested === true || s.care?.peerReports >= 2)
+      .map((s) => ({
+        id: s.id,
+        requested: s.care.requested === true,
+        peerReports: s.care.peerReports,
+      }));
+    const selfAnswered = rows.filter(
+      (s) => s.care?.requested !== null && s.care?.requested !== undefined,
+    ).length;
+    const peerAnswered = rows.filter(
+      (s) => s.care?.peerReports !== null && s.care?.peerReports !== undefined,
+    ).length;
+    const matrix = {
+      ownOnly: 0,
+      both: 0,
+      peerOnly: 0,
+      neither: 0,
+      known: 0,
+      missing: 0,
+    };
+    for (const s of rows) {
+      const care = s.care;
+      if (
+        care?.requested === null ||
+        care?.requested === undefined ||
+        care?.peerReports === null ||
+        care?.peerReports === undefined
+      ) {
+        matrix.missing++;
+        continue;
+      }
+      matrix.known++;
+      const peerSignal = care.peerReports >= 2;
+      const cell = care.requested
+        ? peerSignal
+          ? "both"
+          : "ownOnly"
+        : peerSignal
+          ? "peerOnly"
+          : "neither";
+      matrix[cell]++;
+    }
+    return {
+      cases,
+      matrix,
+      selfRequests: selfAnswered
+        ? rows.filter((s) => s.care.requested === true).length
+        : null,
+      selfAnswered,
+      peerCases: peerAnswered
+        ? rows.filter((s) => s.care?.peerReports >= 2).length
+        : null,
+      peerAny: peerAnswered
+        ? rows.filter((s) => s.care?.peerReports >= 1).length
+        : null,
+      peerRespondents: rows[0]?.care?.peerRespondents || 0,
+      selfQuestionPresent: !!rows[0]?.care?.selfQuestionPresent,
+      peerQuestionPresent: !!rows[0]?.care?.peerQuestionPresent,
+    };
   }
   function summary(rows) {
     const n = rows.length;
@@ -552,6 +632,7 @@
       : null;
     return {
       n,
+      care: careSummary(rows),
       completed: rows.filter((s) => s.status === "Completado").length,
       started: rows.filter((s) => s.status === "En curso").length,
       notStarted: rows.filter((s) => s.status === "Sin iniciar").length,
@@ -576,12 +657,6 @@
         (s) => recognized("dropout", s.responses.dropout),
         (v) => v !== "No",
       ),
-      support: rate(
-        (s) => s.hasSupport,
-        (v) => v === true,
-      ),
-      supportReached: rows.filter((s) => s.helpReached).length,
-      supportMissing: rows.filter((s) => s.help === null).length,
       time: rate(
         (s) => recognized("time", s.responses.time),
         (v) => ["Mal", "Muy mal"].includes(v),
@@ -624,6 +699,7 @@
   return Object.freeze({
     parseTable,
     summary,
+    careSummary,
     answer,
     text,
     norm,

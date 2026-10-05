@@ -142,7 +142,7 @@ test("grupo distingue tres sentidos de bienestar y muestra estados de participac
   assert.match(report, /Completadas/);
   assert.match(report, /En curso/);
   assert.match(report, /Sin iniciar/);
-  assert.match(report, /Selecciones de apoyo registradas/);
+  assert.match(report, /Solicitudes y señales de ayuda/);
   assert.doesNotMatch(report, /Identifican a quién acudir/);
 });
 

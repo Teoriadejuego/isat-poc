@@ -1,21 +1,27 @@
-# Cierre de revisión de ISAT 0.2.0
+# Revisión de ISAT
+
+**Actualización 0.3.0:** el significado de UCE y ayuda ha sido confirmado posteriormente. UCE es una petición propia de ayuda y ayuda contiene señalamientos de personas que necesitan ayuda. Esta definición sustituye la interpretación anterior como «a quién acudir» y la duda sobre UCE recogidas en el informe histórico siguiente. El foco de las fichas pasa a los recuentos, la matriz de petición propia por señalamientos y la lista de casos con enlaces a fichas. La suite completa suma 47 pruebas superadas.
+
+Se contrastó el listado con un recuento independiente del cuestionario en local. Se comprobó que cada persona aparece una sola vez, que las selecciones repetidas no alcanzan artificialmente el umbral y que las respuestas ausentes quedan fuera de la matriz. En navegador se verificó el enlace a la ficha exacta y el regreso a la clase. La matriz, las tarjetas y los enlaces se revisaron a 320 y 1280 píxeles, sin desbordamiento de contenido ni errores de consola. El artefacto de publicación sigue limitado a nueve recursos de la aplicación, sin archivos de consulta.
+
+## Informe histórico: versión 0.2.0
 
 Diez agentes revisaron la aplicación desde ámbitos distintos. La implementación se depuró de forma secuencial, reproduciendo los defectos con pruebas sintéticas. Los prompts están en `REVISION_PROMPTS.md`.
 
 ## Revisiones y correcciones
 
-| Revisión | Resultado aplicado |
-| --- | --- |
-| 01. Lectura | Cabeceras identificables, rutas Par/Impar coherentes, exclusión de alias contradictorios y conservación de evidencia cuando solo hay una autonominación. |
-| 02. Medidas | Ausencia separada de cero, selección de apoyo separada de acceso a la pregunta, predicciones verificables, categorías válidas y multiselecciones sin duplicados. |
-| 03. Privacidad | Al cerrar se retiran también los nombres de filtros ocultos, búsqueda, hoja y fichas. Se cancelan lecturas y se ignoran respuestas antiguas. El agente confirmó el cierre de sus hallazgos. |
-| 04. Textos | Español inclusivo, denominadores explícitos, fechas legibles, estados sin ambigüedad y explicación del sentido de los ítems de bienestar. |
-| 05. Accesibilidad | Regiones de estado presentes, anuncios de búsqueda y actualización, pestañas por teclado, foco al abrir/cerrar y contraste de barras mejorado. |
-| 06. Diseño | Tarjetas adaptables, ajuste de estados en móvil, texto largo sin desbordamiento y contexto familiar retirado. |
-| 07. Regresiones | Pruebas del ciclo completo de consulta, sustitución, cancelación antes y durante la preparación, escape de historias y navegación por teclado. |
-| 08. Rendimiento | Lectura y preparación íntegramente en Worker; índices Map y resúmenes por clase. El agente confirmó cancelación, timeout y aislamiento de resultados antiguos. |
-| 09. Publicación | Dependencias de pruebas fijadas, instalación en CI y construcción con inventario explícito de nueve recursos públicos. |
-| 10. Requisitos | README actualizado, separación respecto a PBIS, sin llaves, ejemplos, correo ni servicios externos. |
+| Revisión          | Resultado aplicado                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 01. Lectura       | Cabeceras identificables, rutas Par/Impar coherentes, exclusión de alias contradictorios y conservación de evidencia cuando solo hay una autonominación.                                    |
+| 02. Medidas       | Ausencia separada de cero, selección de apoyo separada de acceso a la pregunta, predicciones verificables, categorías válidas y multiselecciones sin duplicados.                            |
+| 03. Privacidad    | Al cerrar se retiran también los nombres de filtros ocultos, búsqueda, hoja y fichas. Se cancelan lecturas y se ignoran respuestas antiguas. El agente confirmó el cierre de sus hallazgos. |
+| 04. Textos        | Español inclusivo, denominadores explícitos, fechas legibles, estados sin ambigüedad y explicación del sentido de los ítems de bienestar.                                                   |
+| 05. Accesibilidad | Regiones de estado presentes, anuncios de búsqueda y actualización, pestañas por teclado, foco al abrir/cerrar y contraste de barras mejorado.                                              |
+| 06. Diseño        | Tarjetas adaptables, ajuste de estados en móvil, texto largo sin desbordamiento y contexto familiar retirado.                                                                               |
+| 07. Regresiones   | Pruebas del ciclo completo de consulta, sustitución, cancelación antes y durante la preparación, escape de historias y navegación por teclado.                                              |
+| 08. Rendimiento   | Lectura y preparación íntegramente en Worker; índices Map y resúmenes por clase. El agente confirmó cancelación, timeout y aislamiento de resultados antiguos.                              |
+| 09. Publicación   | Dependencias de pruebas fijadas, instalación en CI y construcción con inventario explícito de nueve recursos públicos.                                                                      |
+| 10. Requisitos    | README actualizado, separación respecto a PBIS, sin llaves, ejemplos, correo ni servicios externos.                                                                                         |
 
 ## Cambios solicitados durante la revisión
 

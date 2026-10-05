@@ -1,6 +1,6 @@
 {
   "name": "isat-visualizador",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Visualizador ISAT con carga local de Excel, fichas de clase y de estudiante.",
   "scripts": {

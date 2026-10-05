@@ -104,13 +104,14 @@ test("Par/Impar, numeric aliases, reciprocal observed ties and incoming predicti
   assert.equal(m.students[1].status, "En curso");
   assert.equal(m.students[2].status, "Sin iniciar");
 });
-test("support selections, explicit nobody and unvisited unknown", () => {
+test("señalar a otra persona no equivale a pedir ayuda para sí", () => {
   const m = C.parseTable(fixture());
-  assert.equal(m.students[0].hasSupport, true);
-  assert.equal(m.students[1].hasSupport, false);
-  assert.equal(m.students[2].hasSupport, null);
+  assert.equal(m.students[0].care.requested, null);
+  assert.equal(m.students[1].care.peerReports, 1);
+  assert.equal(m.students[2].help, null);
   const s = C.summary(m.groups.find((g) => g.course === "PSI").rows);
-  assert.deepEqual(s.support, { count: 1, denominator: 2, percent: 50 });
+  assert.equal(s.care.cases.length, 0);
+  assert.equal(s.care.selfRequests, null);
 });
 test("missing relationships never become zero incoming nominations or false prediction errors", () => {
   const t = fixture();

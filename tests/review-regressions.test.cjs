@@ -21,11 +21,11 @@ test("carga de trabajo Muy baja es una respuesta válida de la escala", () => {
   assert.equal(m.warnings.academic, 0);
 });
 
-test("visitar apoyo no equivale a contestar; sin selección permanece ausente", () => {
+test("visitar la pregunta de ayuda no equivale a contestarla", () => {
   const m = make([{ ...base("A"), eayuda: log(""), start: log("") }]);
-  assert.equal(m.students[0].hasSupport, null);
+  assert.equal(m.students[0].care.requested, null);
   assert.equal(m.students[0].help, null);
-  assert.equal(C.summary(m.students).support.denominator, 0);
+  assert.equal(C.summary(m.students).care.peerRespondents, 0);
 });
 test("bienestar respeta sentidos opuestos sin generar una escala global", () => {
   const m = make([
