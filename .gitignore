@@ -1,0 +1,19 @@
+# Los datos del cuestionario nunca forman parte de la web pública.
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.pbis
+*.jsonl
+*.rds
+*.zip
+*.log
+*.inspect.ndjson
+node_modules/
+.qa/
+.env
+.env.*
+private/
+outputs/
+.DS_Store
+Thumbs.db
