@@ -68,6 +68,7 @@ test("sin respuestas para verificar se conserva Sin datos y no se inventan error
   ]);
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
   assert.equal(positive.querySelector("strong").textContent, "Sin datos");
+  assert.match(positive.textContent, /1 predicción emitida/);
   assert.match(positive.textContent, /ninguna puede comprobarse/);
   assert.equal(positive.querySelector(".metric-line span"), null);
 });

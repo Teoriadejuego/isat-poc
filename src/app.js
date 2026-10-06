@@ -210,7 +210,7 @@
     try {
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
-      const parser = new Worker("src/parser-worker.js?v=0.5.0");
+      const parser = new Worker("src/parser-worker.js?v=0.5.1");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -651,21 +651,26 @@
       return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong class="metric-state">No procede</strong></div><p>No ha emitido predicciones ${label} sobre su clase; no hay aciertos que evaluar.</p></div>`;
     }
     const scope = s.quality.predictions.complete
-      ? "emitidas"
-      : "interpretables";
+      ? emitted === 1
+        ? "emitida"
+        : "emitidas"
+      : emitted === 1
+        ? "interpretable"
+        : "interpretables";
+    const predictionCount = `${num(emitted)} ${emitted === 1 ? "predicción" : "predicciones"} ${scope}`;
     if (!evaluable)
       return metric(
         title,
         null,
-        `${num(emitted)} predicciones ${scope}; ninguna puede comprobarse con las respuestas de relaciones disponibles.`,
+        `${predictionCount}; ninguna puede comprobarse con las respuestas de relaciones disponibles.`,
       );
     const pending = emitted - evaluable;
-    const description = `${num(emitted)} predicciones ${scope}. ${pending ? `${num(pending)} ${pending === 1 ? "no puede comprobarse" : "no pueden comprobarse"} por falta de respuestas de relaciones interpretables.` : "Todas pueden comprobarse con las respuestas de relaciones disponibles."}`;
+    const description = `${predictionCount}. ${pending ? `${num(pending)} ${pending === 1 ? "no puede comprobarse" : "no pueden comprobarse"} por falta de respuestas de relaciones interpretables.` : `${emitted === 1 ? "Puede comprobarse" : "Todas pueden comprobarse"} con las respuestas de relaciones disponibles.`}`;
     return metric(
       title,
       m[kind + "Correct"],
       description,
-      `de ${num(evaluable)} verificables`,
+      `de ${num(evaluable)} ${evaluable === 1 ? "verificable" : "verificables"}`,
     );
   }
   function relationshipNote(s) {

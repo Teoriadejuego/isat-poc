@@ -1,5 +1,13 @@
 # Revisión de ISAT
 
+## Actualización 0.5.1: comprobación con el Excel de trabajo
+
+Se comprobó íntegramente el cuestionario autorizado en local, sin modificarlo, publicarlo ni copiar sus filas a las pruebas. El contraste independiente recorrió todas las clases y estudiantes: petición propia, personas distintas que indican necesidad de ayuda, matriz, relaciones declaradas y recibidas, reciprocidad, predicciones emitidas/verificables/correctas, denominadores de bienestar, estados de la encuesta y texto de historias. Se verificaron todas las fichas de grupo, todas las filas accesibles mediante paginación y todas las fichas individuales. El cierre retira los datos de los controles y de la ficha.
+
+Los recuentos y la interpretación de ausencias coincidieron con la fuente. Se corrigió la concordancia de singular y plural al mostrar una sola predicción y una sola predicción verificable, sin cambiar los cálculos. Los datos y la herramienta privada de contraste quedan excluidos del repositorio y del artefacto público.
+
+Verificación: 72 pruebas automáticas superadas y nueve recursos públicos verificados. En el navegador se comprobaron las ocho clases, la paginación 50/15 de la clase de 65 estudiantes, casos con petición propia ausente y menciones suficientes, predicciones sin respuesta propia y una historia larga al final. A 320 píxeles no se observaron desbordamientos de la página, la matriz, las tarjetas de ayuda ni la historia. El archivo original mantiene el mismo contenido tras la revisión.
+
 ## Actualización 0.5.0: mejoras de PBIS adaptadas a ISAT
 
 Se verificó mediante la referencia remota de main que la última versión pública de PBIS corresponde a **acb5a7a9c3bf4ea0ca7f0f10895d8a94c2fbf889**. Se revisaron su código, guía, lista de clase y recorrido individual. La copia de PBIS tenía cambios locales previos en site-src/index.html y tools/build.mjs; no se modificaron. La lista ordenable, reacciones, confianza y opiniones ya estaban incorporadas en ISAT.
