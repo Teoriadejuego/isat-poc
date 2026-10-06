@@ -1187,6 +1187,45 @@ progress::-moz-progress-bar {
   margin-top: 7px;
   font-size: 11px;
 }
+.matrix-count {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  padding: 8px 4px;
+}
+.matrix-count:hover {
+  background: #ffffff80;
+}
+.care-matrix td .matrix-action {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+.care-matrix-hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 12px;
+}
+.care-matrix .text-button {
+  text-align: left;
+  min-height: 44px;
+  margin-top: 8px;
+}
+.response-options {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.response-options li + li {
+  margin-top: 8px;
+}
 .care-matrix .matrix-own {
   background: var(--blue-soft);
 }

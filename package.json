@@ -1,6 +1,6 @@
 {
   "name": "isat-visualizador",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "description": "Visualizador ISAT con carga separada de Excel, grupos, listas e informes individuales.",
   "scripts": {

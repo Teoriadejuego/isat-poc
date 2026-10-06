@@ -208,6 +208,7 @@
         conflicts: 0,
         routes: 0,
         academic: 0,
+        responses: 0,
       };
     const val = (r, k) => (cols[k] < 0 ? null : answer(r[cols[k]]));
     table.slice(1).forEach((r, i) => {
@@ -248,6 +249,24 @@
           : value;
         if (field === "dropout" && value !== null)
           s.responses[field] = value.replace(/^S\uFFFD(?=,|\s|$)/, "Sí");
+        if (
+          ["uce", "difficulty"].includes(field) &&
+          value !== null &&
+          yesNo(value) === null
+        )
+          warnings.responses++;
+        if (["alone", "fun", "general"].includes(field) && value !== null) {
+          const level = frequency(value);
+          if (level === null) warnings.responses++;
+          else
+            s.responses[field] = [
+              "Nunca",
+              "Casi nunca",
+              "Algunas veces",
+              "Casi siempre",
+              "Siempre",
+            ][level];
+        }
       }
       for (const field of Object.keys(categories))
         if (s.responses[field] !== null) {
@@ -528,6 +547,21 @@
       );
     return { students, groups, warnings };
   }
+  function careCategory(care) {
+    if (
+      typeof care?.requested !== "boolean" ||
+      !Number.isInteger(care.peerReports) ||
+      care.peerReports < 0
+    )
+      return "missing";
+    return care.requested
+      ? care.peerReports >= 2
+        ? "both"
+        : "ownOnly"
+      : care.peerReports >= 2
+        ? "peerOnly"
+        : "neither";
+  }
   function careSummary(rows) {
     const cases = rows
       .filter((s) => s.care?.requested === true || s.care?.peerReports >= 2)
@@ -551,25 +585,12 @@
       missing: 0,
     };
     for (const s of rows) {
-      const care = s.care;
-      if (
-        care?.requested === null ||
-        care?.requested === undefined ||
-        care?.peerReports === null ||
-        care?.peerReports === undefined
-      ) {
+      const cell = careCategory(s.care);
+      if (cell === "missing") {
         matrix.missing++;
         continue;
       }
       matrix.known++;
-      const peerSignal = care.peerReports >= 2;
-      const cell = care.requested
-        ? peerSignal
-          ? "both"
-          : "ownOnly"
-        : peerSignal
-          ? "peerOnly"
-          : "neither";
       matrix[cell]++;
     }
     return {
@@ -707,6 +728,7 @@
     parseTable,
     summary,
     careSummary,
+    careCategory,
     answer,
     text,
     norm,

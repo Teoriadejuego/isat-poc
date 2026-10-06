@@ -1,5 +1,15 @@
 # Revisión de ISAT
 
+## Actualización 0.6.0: consulta, revisión y recuperación
+
+Se reprodujo una pérdida de valoraciones al volver a la pantalla de datos y pulsar de nuevo «Abrir fichas» sin cambiar el archivo. Ahora ese botón se presenta como «Volver a las fichas» y regresa a la misma consulta, conservando vista, clase, filtro, búsqueda, orden, página y revisión, sin ejecutar otra preparación.
+
+La matriz permite abrir las listas de sus cuatro combinaciones y consultar los casos con datos de ayuda incompletos. Las celdas sin casos no aparentan enlaces disponibles. El criterio y los recuentos conservan su significado; las ausencias nunca entran como «No». El retorno de una ficha individual mantiene el filtro de origen. Las opiniones pendientes se conservan por vista y estudiante durante la consulta, se identifican como borradores y solo entran en el resumen al guardarlas. El cierre, sustitución y caducidad retiran también esos borradores.
+
+Las opciones múltiples de actividades y motivos se presentan como listas legibles, normalizadas y escapadas. Las frecuencias válidas se muestran con etiquetas uniformes. Las respuestas de bienestar, petición propia o dificultades no reconocidas permanecen visibles, se excluyen de los cálculos que requieren categorías válidas y se incluyen en el aviso de incidencias. Los errores de archivos dañados se explican en español. La lectura inicial, antes de crear el Worker, también tiene límite de tiempo y descarta los bytes que lleguen después.
+
+Verificación: 81 pruebas automáticas superadas, incluidas nueve nuevas comprobaciones del retorno sin pérdida, filtros de matriz, ausencias, borradores separados, sustitución, categorías desconocidas, lectura tardía y recuperación tras archivo dañado. Se volvió a contrastar íntegramente el cuestionario autorizado en local: todas las clases, todas las filas de listas y todas las fichas individuales, con cálculos independientes y original intacto. En navegador se comprobaron los recorridos con datos sintéticos, confianza y reacciones, retorno desde datos, borradores, filtros de ausencias y cierre de ayuda con Escape. A 320 píxeles no se observaron desbordamientos de la página, matriz, ayuda ni opiniones; la tabla amplia se desplaza dentro de su región. El artefacto sigue limitado a nueve recursos, sin cuestionarios ni datos de trabajo.
+
 ## Actualización 0.5.1: comprobación con el Excel de trabajo
 
 Se comprobó íntegramente el cuestionario autorizado en local, sin modificarlo, publicarlo ni copiar sus filas a las pruebas. El contraste independiente recorrió todas las clases y estudiantes: petición propia, personas distintas que indican necesidad de ayuda, matriz, relaciones declaradas y recibidas, reciprocidad, predicciones emitidas/verificables/correctas, denominadores de bienestar, estados de la encuesta y texto de historias. Se verificaron todas las fichas de grupo, todas las filas accesibles mediante paginación y todas las fichas individuales. El cierre retira los datos de los controles y de la ficha.

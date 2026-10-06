@@ -41,6 +41,25 @@ function worker() {
   };
   return { send, messages };
 }
+test("un Excel dañado muestra una explicación legible y permite seleccionar otro archivo", () => {
+  const w = worker();
+  const invalid = w.send({
+    type: "read",
+    requestId: 1,
+    bytes: new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x01]).buffer,
+  });
+  assert.equal(invalid.type, "error");
+  assert.match(invalid.error, /Excel válido, sin contraseña/);
+  assert.equal(
+    w.send({ type: "read", requestId: 2, bytes: bytes({ Users: fixture() }) })
+      .type,
+    "loaded",
+  );
+  assert.equal(
+    w.send({ type: "parse", requestId: 3, sheet: "Users" }).type,
+    "parsed",
+  );
+});
 test("lector real devuelve solo hojas; prepara modelo y resúmenes sin devolver filas crudas", () => {
   const w = worker(),
     loaded = w.send({

@@ -1,18 +1,25 @@
 "use strict";
-importScripts("../vendor/xlsx.full.min.js", "core.js?v=0.5.1");
+importScripts("../vendor/xlsx.full.min.js", "core.js?v=0.6.0");
 let sheets = null;
 self.onmessage = function (event) {
   const { type, requestId } = event.data;
   try {
     if (type === "read") {
       sheets = null;
-      const book = XLSX.read(event.data.bytes, {
-        type: "array",
-        cellFormula: false,
-        cellHTML: false,
-        cellDates: false,
-        sheetRows: 10002,
-      });
+      let book;
+      try {
+        book = XLSX.read(event.data.bytes, {
+          type: "array",
+          cellFormula: false,
+          cellHTML: false,
+          cellDates: false,
+          sheetRows: 10002,
+        });
+      } catch {
+        throw Error(
+          "No se pudo leer este archivo. Comprueba que sea un Excel válido, sin contraseña, y vuelve a seleccionarlo.",
+        );
+      }
       if (book.SheetNames.length > 20)
         throw Error("El libro supera el límite de 20 hojas.");
       let cells = 0,
