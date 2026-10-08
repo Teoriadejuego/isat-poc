@@ -1,5 +1,15 @@
 # Prompts de revisión de ISAT
 
+## Revisión de entrega · 0.9.0
+
+**Redacción y diseño:** reduce explicaciones repetidas sin eliminar denominadores, estados ausentes, criterios de ayuda ni la nota final de participación. Mantén códigos, lenguaje inclusivo y una guía breve con detalles a demanda.
+
+**Contraste con PBIS:** inspecciona las funciones disponibles y adapta solo las compatibles con el cuestionario ISAT. Prioriza un resumen de grupo con detalle desplegable; no añadas escalas, diagnósticos, nombres ni datos que no procedan del Excel.
+
+**Recorrido de revisión:** conecta grupo, lista filtrada y ficha individual. Permite avanzar y retroceder respetando búsqueda, orden, página y borradores. Conserva los límites de la selección y retira el estado al sustituir el archivo.
+
+**Entrega:** contrasta los dos cuestionarios facilitados sin publicarlos, ejecuta las pruebas y revisa escritorio y móvil. Documenta uso y alcance como prototipo funcional, y verifica el artefacto público antes del despliegue.
+
 ## Actualización 0.8.1: nota al final
 
 Mueve la nota de participación y resultados provisionales al final de cada ficha de grupo, lista e individual, después de todos sus contenidos y controles. Conserva una sola nota por vista y mantenla fuera de los indicadores desplegables. No cambies su texto, los porcentajes ni los cálculos.

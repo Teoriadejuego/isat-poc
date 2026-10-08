@@ -1,5 +1,16 @@
 # Revisión de ISAT
 
+## Entrega del prototipo 0.9.0 · 8 de octubre de 2026
+
+- Verificación final: **100 pruebas automáticas superadas** y artefacto de once recursos públicos verificado, sin datos de consulta.
+- Revisión de los textos de grupo, lista, estudiante y guía: se retiran explicaciones duplicadas y se mantienen los denominadores, la distinción entre ausencias y ceros y la nota de participación al final.
+- Se contrasta la copia local de PBIS y se adapta su presentación de resumen con ampliación de detalles. En ISAT, ayuda y bienestar permanecen visibles; relaciones, distribuciones y adaptación académica se despliegan. El estado se recuerda por grupo y se retira al sustituir el archivo.
+- «Revisar estas fichas» abre la lista de petición propia o al menos dos menciones. «Anterior» y «Siguiente» recorren la selección filtrada en su orden, incluso al cambiar de página; los borradores y el regreso a la lista se conservan.
+- Guía integrada de tres pasos con aclaraciones desplegables y manejo de foco/Escape. No se han añadido preguntas, escalas, datos, cuentas ni servicios externos.
+- Contraste privado de los dos libros facilitados: 315 registros en 8 clases y 1.232 en 22. Se comprobaron todas las fichas de grupo e individuales, los registros de las listas, recuentos de ayuda, matriz, relaciones, predicciones e historias. Los originales permanecen idénticos. Ningún Excel ni captura de la consulta forma parte de la publicación.
+- Navegador local: carga real del Excel, recorrido por los casos, retorno a lista y guía. Vista móvil de 320 px sin desbordamiento de página en grupo e individual. La tabla conserva su desplazamiento horizontal propio.
+- README actualizado con un recorrido de presentación al cliente y el alcance de la entrega. Se entrega como prototipo funcional para evaluación, no como un sistema de seguimiento de intervenciones.
+
 ## Actualización 0.8.1: nota al final
 
 La nota de participación se sitúa como último elemento de cada ficha de grupo, lista y ficha individual, después de las opiniones y, cuando existe, de la historia. Permanece visible fuera de los indicadores desplegables. Su texto y los cálculos se conservan. La comprobación de participación verifica ahora también su posición final en las tres vistas.

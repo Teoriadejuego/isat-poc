@@ -143,7 +143,7 @@ test("guía accesible abre y cierra por Escape sin retirar datos y devuelve foco
   assert.equal(doc(app).activeElement.id, "help-close");
   assert.match(
     app.get("help-dialog").textContent,
-    /al menos dos personas\s+distintas/,
+    /al menos dos\s+personas\s+distintas/,
   );
   app
     .get("help-dialog")

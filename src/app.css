@@ -1920,6 +1920,36 @@ dialog::backdrop {
   letter-spacing: 0;
   margin-bottom: 12px;
 }
+.help-reading > summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 0;
+}
+.student-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.student-navigation > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.student-navigation span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.student-navigation .back-to-class {
+  margin: 0;
+}
+.care-details {
+  margin-top: 20px;
+}
 .help-reading p {
   font-size: 13px;
   margin-top: 10px;

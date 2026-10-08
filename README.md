@@ -4,6 +4,24 @@ Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda pa
 
 **Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
 
+## Entrega del prototipo · 0.9.0
+
+ISAT permite a la Unidad de Cuidado del Estudiante consultar las peticiones propias y las menciones de ayuda, contrastarlas con el contexto de la clase y abrir las fichas individuales. Esta entrega es un **prototipo funcional para evaluación**, con los indicadores del cuestionario ISAT T1.
+
+**Recorrido recomendado para la presentación:**
+
+1. Abre la web, selecciona tu Excel y la hoja **Users**.
+2. Elige una clase. Revisa los dos recuentos de ayuda y su matriz; no sumes las fuentes, porque pueden coincidir.
+3. Pulsa **Revisar estas fichas**. La lista muestra únicamente petición propia o menciones de dos o más personas.
+4. Abre un código y avanza con **Anterior / Siguiente**, manteniendo el filtro y el orden. Vuelve a la lista para comparar o valorar datos.
+5. Amplía **Ver más indicadores** cuando necesites contexto. Consulta **Mi revisión** antes de cerrar.
+
+La guía integrada se organiza en tres pasos y aclaraciones desplegables. La ficha de grupo mantiene ayuda y bienestar a primera vista, con las distribuciones y los indicadores complementarios al ampliar. Este enfoque se ha adaptado de la ficha resumida de la versión local de PBIS; se conservan los significados y cálculos propios de ISAT.
+
+**Alcance de la entrega:** web sin instalación, carga de un Excel, códigos del archivo, tres niveles de consulta, red de relaciones, historias y revisión durante la sesión. No incluye cuentas, seguimiento de intervenciones, guardado permanente ni envío de opiniones. «Revisar» registra una valoración de los datos; no acredita que se haya atendido a un estudiante. La información apoya el criterio profesional y no determina diagnósticos ni decisiones automáticas.
+
+**Para compartir:** envía el enlace del visualizador; entrega el cuestionario por el canal acordado con el cliente. Los Excel de trabajo no forman parte del código ni de la web publicada. La revisión temporal debe consultarse antes de cerrar; no se recupera después.
+
 ## Uso
 
 1. Selecciona un archivo `.xlsx` o `.xls` de hasta 20 MB.
@@ -16,7 +34,7 @@ Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda pa
 6. Pulsa un dato para marcar **OK**, **Revisar** o **Me sorprende**. Repetir la misma reacción la retira; también puedes usar **Quitar valoración**. Valora tu confianza con el pequeño deslizador de −5 a +5: «Sin valorar» sigue siendo distinto de 0. El botón **0** marca una confianza neutra y **×** retira la valoración. El código abre la ficha individual y el retorno conserva el filtro, la búsqueda, el orden y la página de la lista.
 7. Las fichas y la lista permiten guardar una valoración de utilidad de 1 a 5 y un comentario opcional. Estas opiniones y las marcas permanecen en memoria durante la consulta; no alteran el Excel ni se envían.
 8. **Cancelar lectura**, **Cancelar preparación**, **Retirar archivo** o **Cerrar consulta** interrumpen el proceso y retiran los datos de la aplicación. Al cerrar una consulta con valoraciones aparece un resumen con código aleatorio de sesión, códigos de grupo G001, G002… y los códigos de estudiante del Excel, sin adjuntar nombres ni respuestas. No hay una cuenta que identificar. El comentario se muestra tal como se ha escrito; se pide no incluir nombres. **Cerrar resumen** retira también ese contenido. Sustituir el archivo o la hoja inicia una nueva consulta y descarta las valoraciones anteriores. Salir de la página retira los datos sin generar un resumen.
-9. **Mi revisión** en la cabecera permite consultar las valoraciones desde cualquier vista o desde **Datos cargados**, conservando la consulta. **Ayuda** explica el recorrido, los criterios de consulta y los estados sin datos, y puede cerrarse con Escape.
+9. **Mi revisión** en la cabecera permite consultar las valoraciones desde cualquier vista o desde **Datos cargados**, conservando la consulta. **Guía de uso** explica el recorrido y ofrece aclaraciones desplegables; puede cerrarse con Escape.
 10. Tras **15 minutos sin actividad**, se retiran los datos, las valoraciones y cualquier resumen abierto. En el último minuto aparece **Continuar consulta**, que renueva el plazo. También se comprueba la caducidad al volver a una pestaña oculta; una interacción posterior al límite no restaura la consulta. Se debe cargar el archivo de nuevo. El Excel original permanece en su ubicación.
 
 Volver a **Datos cargados** y pulsar **Volver a las fichas** conserva la selección, vista, filtros y revisión sin preparar de nuevo el mismo Excel. Cambiar de archivo o de hoja inicia una nueva consulta. Los borradores de opiniones se conservan por vista y estudiante en memoria durante la consulta, con el aviso **Cambios pendientes**; solo se incorporan al resumen al pulsar **Guardar valoración**. Cerrar, caducar o sustituir la consulta también retira los borradores.

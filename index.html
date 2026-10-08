@@ -20,11 +20,11 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.8.1" />
+    <link rel="stylesheet" href="src/app.css?v=0.9.0" />
     <script src="src/core.js?v=0.8.0" defer></script>
     <link rel="stylesheet" href="src/ego-network.css?v=0.7.0" />
     <script src="src/ego-network.js?v=0.7.0" defer></script>
-    <script src="src/app.js?v=0.8.1" defer></script>
+    <script src="src/app.js?v=0.9.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -45,7 +45,7 @@
             type="button"
             aria-haspopup="dialog"
           >
-            Ayuda</button
+            Guía de uso</button
           ><button
             id="review-open"
             class="btn secondary"
@@ -258,68 +258,78 @@
       <div class="summary-heading">
         <h2 id="help-title">Cómo consultar ISAT</h2>
         <button id="help-close" class="btn secondary" type="button">
-          Cerrar ayuda
+          Cerrar guía
         </button>
       </div>
       <ol class="help-steps">
         <li>
-          <strong>Abre tus datos.</strong> Selecciona el Excel del cuestionario,
-          elige la hoja Users y pulsa «Abrir fichas». El archivo se procesa en
-          este navegador.
+          <strong>Carga el Excel.</strong> Elige la hoja Users y pulsa «Abrir
+          fichas». El archivo se lee en tu navegador.
         </li>
         <li>
-          <strong>Empieza por el grupo.</strong> Los recuentos y la matriz
-          cruzan la petición propia con las menciones de otras personas. El
-          listado reúne petición propia o menciones de al menos dos personas
-          distintas. Pulsa una celda de la matriz para abrir la lista
-          correspondiente; también puedes consultar los datos de ayuda
-          incompletos.
+          <strong>Empieza por el grupo.</strong> Consulta las peticiones de
+          ayuda. «Revisar estas fichas» abre los casos; cada celda de la matriz
+          abre su lista.
         </li>
         <li>
-          <strong>Revisa la lista.</strong> Busca por código, filtra y ordena
-          los encabezados. Pulsa un dato para marcar OK, Revisar o Me sorprende;
-          repetir la misma opción retira la marca. La confianza va de −5 a +5 y
-          «Sin valorar» es distinto de 0.
-        </li>
-        <li>
-          <strong>Profundiza en cada estudiante.</strong> Su ficha muestra
-          primero la ayuda, el bienestar y las relaciones. «Ver más indicadores»
-          abre los detalles. La historia aparece al final si la respuesta tiene
-          al menos cuatro letras.
+          <strong>Abre cada ficha.</strong> Pulsa un código en la lista y avanza
+          con «Anterior» y «Siguiente». «Ver más indicadores» amplía la
+          información.
         </li>
       </ol>
-      <div class="help-reading">
-        <h3>Cómo leer los resultados</h3>
+      <details class="help-reading">
+        <summary>Cómo se cuentan las peticiones de ayuda</summary>
         <p>
-          Cada vista muestra el porcentaje de encuestas completadas de la clase.
-          Los indicadores usan las respuestas disponibles de cada pregunta,
-          incluidas las de encuestas en curso. «Pendiente» indica que falta una
-          respuesta necesaria; no equivale a cero ni a «No». Las predicciones se
-          comprueban con las respuestas de otras personas; pueden verificarse
-          aunque falte la respuesta propia de relaciones. En ayuda solo se
-          muestra el número de personas que emiten menciones.
+          Se incluyen quienes piden ayuda o reciben menciones de al menos dos
+          personas distintas. Una persona puede cumplir ambos criterios: los
+          totales no se suman.
         </p>
         <p>
-          La información orienta el acompañamiento. No establece diagnósticos ni
+          Las menciones abarcan todo el Excel, incluidas otras clases. Se
+          muestra su número, nunca quién las emitió. La matriz requiere
+          respuesta propia Sí/No y un recuento disponible.
+        </p>
+      </details>
+      <details class="help-reading">
+        <summary>Cómo interpretar los indicadores</summary>
+        <p>
+          «Pendiente» no equivale a cero ni a «No». Cada porcentaje muestra su
+          base de cálculo. La participación de la clase figura al final de cada
+          vista.
+        </p>
+        <p>
+          Más soledad es menos favorable; más disfrute y una mejor experiencia
+          universitaria son más favorables. Son tres respuestas independientes.
+        </p>
+        <p>
+          Los recuentos de relaciones se refieren a la clase; la red incluye
+          otras clases. Las predicciones se verifican con las respuestas de
+          otras personas, aunque falte la respuesta propia.
+        </p>
+        <p>
+          La información orienta el acompañamiento; no establece diagnósticos ni
           decisiones automáticas.
         </p>
-      </div>
-      <div class="help-reading">
-        <h3>Tu revisión y el cierre</h3>
+      </details>
+      <details class="help-reading">
+        <summary>Valorar datos y cerrar la consulta</summary>
         <p>
-          «Mi revisión» reúne tus marcas, confianza y opiniones usando códigos.
-          Permanecen durante esta consulta y no se envían. «Cerrar consulta»
-          retira el archivo y las fichas; si has valorado, permite consultar un
-          resumen hasta que lo cierres. Los comentarios pendientes se conservan
-          al cambiar de vista, pero debes pulsar «Guardar valoración» para
-          incluirlos en el resumen.
+          Pulsa un dato para marcar OK, Revisar o Me sorprende. Repetir la
+          opción retira la marca. La confianza va de −5 a +5; «Sin valorar» es
+          distinto de 0.
         </p>
         <p>
-          Tras 15 minutos sin actividad se retiran también las valoraciones y
-          cualquier resumen abierto. Aparece un aviso durante el último minuto.
-          El Excel original permanece en su ubicación.
+          «Mi revisión» reúne las marcas y opiniones guardadas. Los borradores
+          se conservan al cambiar de ficha; pulsa «Guardar valoración» para
+          incluirlos.
         </p>
-      </div>
+        <p>
+          Nada se envía. «Cerrar consulta» retira los datos y permite leer el
+          resumen de revisión antes de cerrarlo. Cambiar de archivo, salir de la
+          página o pasar 15 minutos sin actividad retira también la revisión. El
+          Excel original no se modifica.
+        </p>
+      </details>
     </dialog>
     <noscript
       ><p>
