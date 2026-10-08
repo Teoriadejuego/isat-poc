@@ -28,6 +28,10 @@ test("una única nota por vista con porcentaje de finalización por clase, sin c
     app.get("tab-" + tab).click();
     const notes = app.get("report").querySelectorAll(".participation-note");
     assert.equal(notes.length, 1);
+    assert.equal(
+      app.get("report").querySelector("article.report").lastElementChild,
+      notes[0],
+    );
     assert.match(
       notes[0].textContent,
       /33,3 % de la clase \(1 de 3 estudiantes\)/,

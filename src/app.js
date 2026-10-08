@@ -1282,8 +1282,8 @@
         : "No hay estudiantes que coincidan con la búsqueda en esta clase.";
     }
     $("report")
-      .querySelector(".report-hero")
-      ?.insertAdjacentHTML("afterend", participationNote(g));
+      .querySelector("article.report")
+      ?.insertAdjacentHTML("beforeend", participationNote(g));
   }
   window.addEventListener("pagehide", reset);
   window.addEventListener("pageshow", (e) => {

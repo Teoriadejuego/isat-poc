@@ -1,5 +1,9 @@
 # Revisión de ISAT
 
+## Actualización 0.8.1: nota al final
+
+La nota de participación se sitúa como último elemento de cada ficha de grupo, lista y ficha individual, después de las opiniones y, cuando existe, de la historia. Permanece visible fuera de los indicadores desplegables. Su texto y los cálculos se conservan. La comprobación de participación verifica ahora también su posición final en las tres vistas.
+
 ## Actualización 0.8.0: resultados provisionales y participación
 
 Cada ficha y lista incluye una sola nota con las encuestas completadas de la clase, su porcentaje y su base de cálculo. El porcentaje procede de la finalización registrada, independientemente de las respuestas existentes en cada pregunta. La nota explica que se utilizan respuestas disponibles, incluidas encuestas en curso, y que los resultados pueden cambiar al completar o corregir y volver a cargar el Excel.

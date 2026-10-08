@@ -445,7 +445,7 @@ select:focus-visible {
   border-radius: 8px;
   background: white;
   padding: 12px 15px;
-  margin: 18px clamp(16px, 3vw, 28px) 0;
+  margin: 0 clamp(16px, 3vw, 28px) 20px;
   font-size: 12px;
   line-height: 1.6;
   overflow-wrap: anywhere;
