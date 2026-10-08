@@ -1,5 +1,15 @@
 # Revisión de ISAT
 
+## Actualización 0.7.0: red individual y marcado de ayuda
+
+Se incorporan los cambios aprobados de la copia local. Las fichas y listas utilizan los códigos del archivo. La red individual incluye valoraciones entre estudiantes de cualquier clase presente en el Excel y permite abrir sus fichas, actualizando estudio y clase cuando corresponde. Cada flecha conserva dirección, categoría e intensidad; las valoraciones en ambos sentidos tienen trayectos separados. El dibujo aparece al final de «Ver más indicadores», sin selectores de relaciones o dirección ni tabla de detalle. Conserva la leyenda y la ampliación. Un borde discontinuo identifica otra clase; el texto distingue el alcance de archivo de la red del alcance por clase de los indicadores existentes.
+
+La cabecera, el borde y el bloque de ayuda de la ficha individual se destacan en rojo si la petición propia es «Sí» o hay más de dos menciones de personas distintas (tres en adelante). El listado mantiene su criterio de petición propia o dos o más menciones. Se comprobaron los límites de dos y tres menciones, petición propia, navegación sin marcado residual y separación de las fichas de grupo. El núcleo de cálculo permanece intacto.
+
+Verificación: **89 pruebas automáticas superadas**. Las comprobaciones antiguas que esperaban nombres se actualizaron para verificar los códigos, manteniendo búsqueda, navegación y conservación de la revisión. La red se contrastó íntegramente en privado con las respuestas originales de los dos Excel aportados: dirección, valoración, intensidad y vínculos entre clases. Los originales no se modificaron. En el navegador local se verificaron la apertura del gráfico dentro de los indicadores, la ausencia de filtros y tabla, la ficha roja con una petición real y la retirada del color al cambiar de estudiante. No se registraron errores de consola ni desbordamiento de la página.
+
+El artefacto público se limita a once recursos de aplicación. Los dos nuevos recursos son el JavaScript y el CSS de la red. Los Excel, las selecciones privadas de comprobación y las capturas quedan fuera del repositorio y del despliegue.
+
 ## Actualización 0.6.0: consulta, revisión y recuperación
 
 Se reprodujo una pérdida de valoraciones al volver a la pantalla de datos y pulsar de nuevo «Abrir fichas» sin cambiar el archivo. Ahora ese botón se presenta como «Volver a las fichas» y regresa a la misma consulta, conservando vista, clase, filtro, búsqueda, orden, página y revisión, sin ejecutar otra preparación.

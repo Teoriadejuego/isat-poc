@@ -99,7 +99,7 @@ test("lista completa prioriza ayuda sin excluir encuestas incompletas y filtra p
   );
   changeElement(app, app.get("list-scope"), "care");
   assert.deepEqual(ids(app), ["S01", "S03"]);
-  app.get("search").value = "bea";
+  app.get("search").value = "S03";
   app.get("search").dispatchEvent(new app.window.Event("input"));
   assert.deepEqual(ids(app), ["S03"]);
 });
@@ -133,13 +133,14 @@ test("orden numérico en ambos sentidos, ausencias siempre al final y tres ítem
   assert.doesNotMatch(app.get("report").textContent, /Felicidad|Índice global/);
 });
 
-test("homónimos se distinguen por código; ficha y retorno conservan búsqueda y filtro", async (t) => {
+test("se muestran códigos y ficha y retorno conservan búsqueda y filtro", async (t) => {
   const app = createApp(t);
   await app.load(listFixture());
   app.get("tab-list").click();
-  app.get("search").value = "alex";
+  app.get("search").value = "S0";
   app.get("search").dispatchEvent(new app.window.Event("input"));
-  assert.equal(ids(app).length, 2);
+  assert.equal(ids(app).length, 4);
+  assert.doesNotMatch(app.get("report").textContent, /Álex Prueba|Bea Prueba/);
   doc(app).querySelector('[data-care-student="S02"]').click();
   assert.equal(app.get("student").value, "S02");
   assert.match(
@@ -152,8 +153,8 @@ test("homónimos se distinguen por código; ficha y retorno conservan búsqueda 
   );
   doc(app).querySelector("[data-return-class]").click();
   assert.equal(app.get("tab-list").getAttribute("aria-selected"), "true");
-  assert.equal(app.get("search").value, "alex");
-  assert.equal(ids(app).length, 2);
+  assert.equal(app.get("search").value, "S0");
+  assert.equal(ids(app).length, 4);
   assert.equal(app.window.location.hash, "");
 });
 
@@ -220,7 +221,8 @@ test("otra consulta y navegación de historial no recuperan valoraciones ni cuad
     /Me sorprende/,
   );
   cell(app, "S01", "requested").click();
-  assert.match(app.get("cell-review-context").textContent, /Álex/);
+  assert.match(app.get("cell-review-context").textContent, /S01/);
+  assert.doesNotMatch(app.get("cell-review-context").textContent, /Álex/);
   app.window.dispatchEvent(
     new app.window.PageTransitionEvent("pagehide", { persisted: true }),
   );

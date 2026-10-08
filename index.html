@@ -20,9 +20,11 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.6.0" />
+    <link rel="stylesheet" href="src/app.css?v=0.7.0" />
     <script src="src/core.js?v=0.6.0" defer></script>
-    <script src="src/app.js?v=0.6.0" defer></script>
+    <link rel="stylesheet" href="src/ego-network.css?v=0.7.0" />
+    <script src="src/ego-network.js?v=0.7.0" defer></script>
+    <script src="src/app.js?v=0.7.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -177,7 +179,7 @@
             >Buscar estudiante<input
               id="search"
               type="search"
-              placeholder="Nombre o código"
+              placeholder="Código de estudiante"
               autocomplete="off" /></label
           ><label id="student-field" class="field" hidden
             >Estudiante<select id="student"></select
@@ -274,10 +276,10 @@
           incompletos.
         </li>
         <li>
-          <strong>Revisa la lista.</strong> Busca por nombre o código, filtra y
-          ordena los encabezados. Pulsa un dato para marcar OK, Revisar o Me
-          sorprende; repetir la misma opción retira la marca. La confianza va de
-          −5 a +5 y «Sin valorar» es distinto de 0.
+          <strong>Revisa la lista.</strong> Busca por código, filtra y ordena
+          los encabezados. Pulsa un dato para marcar OK, Revisar o Me sorprende;
+          repetir la misma opción retira la marca. La confianza va de −5 a +5 y
+          «Sin valorar» es distinto de 0.
         </li>
         <li>
           <strong>Profundiza en cada estudiante.</strong> Su ficha muestra

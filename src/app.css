@@ -408,6 +408,29 @@ select:focus-visible {
   font-size: 13px;
   color: var(--blue-soft);
 }
+.report-care {
+  border-color: #d6828c;
+  box-shadow: 0 0 0 2px #f5ccd2;
+}
+.report-care .report-hero {
+  background: #982c3d;
+}
+.report-care .report-hero:after {
+  border-color: #f6adb6;
+  box-shadow:
+    0 0 0 21px #982c3d,
+    0 0 0 23px #ffe1e5;
+}
+.report-care .report-hero p {
+  color: #ffe7eb;
+}
+.report-care .report-body {
+  background: #fffafb;
+}
+.report-care .student-care {
+  background: #fff0f2;
+  border-left: 4px solid #b83348;
+}
 .hero-type {
   font-family: Georgia, serif;
   font-size: 21px;

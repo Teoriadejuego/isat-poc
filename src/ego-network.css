@@ -1,0 +1,228 @@
+.ego-network {
+  margin: 26px 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+}
+.ego-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+.ego-heading h3 {
+  font-size: 30px;
+  margin-top: 8px;
+}
+.ego-intro,
+.ego-coverage,
+.ego-missing-note,
+.ego-empty {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.ego-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  padding: 18px 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ego-legend span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.ego-legend i {
+  display: block;
+  width: 30px;
+  border-top: 2px solid var(--accent);
+  position: relative;
+}
+.ego-legend i::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -5px;
+  border-left: 7px solid var(--accent);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+.ego-legend .ego-legend-strong {
+  border-top-width: 5px;
+}
+.ego-legend .ego-legend-strong::after {
+  top: -7px;
+}
+.ego-legend .ego-legend-negative {
+  border-top-color: #ba3543;
+}
+.ego-legend .ego-legend-negative::after {
+  border-left-color: #ba3543;
+}
+.ego-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.ego-zoom > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ego-zoom button {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-weight: 700;
+}
+.ego-zoom output {
+  min-width: 65px;
+  text-align: center;
+  font-size: 11px;
+}
+.ego-result {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 12px 0;
+}
+.ego-stage {
+  overflow: auto;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: radial-gradient(
+    ellipse at center,
+    #def7ff 0%,
+    #f8fcff 50%,
+    #fff 100%
+  );
+}
+.ego-stage:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.ego-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.ego-stage.is-zoomed .ego-svg {
+  width: auto;
+  max-width: none;
+  min-width: 100%;
+}
+.ego-stage.is-zoomed {
+  max-height: 650px;
+}
+.ego-positive {
+  stroke: var(--accent);
+}
+.ego-negative {
+  stroke: #ba3543;
+}
+.ego-positive-fill {
+  fill: var(--accent);
+}
+.ego-negative-fill {
+  fill: #ba3543;
+}
+.ego-edge {
+  stroke-linecap: round;
+}
+.ego-peripheral-node {
+  fill: #fff;
+  stroke: #b8c9dd;
+  stroke-width: 1.5;
+}
+.ego-other-class {
+  stroke-dasharray: 6 4;
+  stroke: var(--accent);
+}
+.ego-svg a:hover .ego-peripheral-node {
+  fill: #def7ff;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.ego-svg a:focus-visible .ego-peripheral-node {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.ego-central-node {
+  fill: var(--navy);
+  stroke: #8cd1e7;
+  stroke-width: 4;
+}
+.ego-node-name {
+  fill: var(--ink);
+  font:
+    700 16px Arial,
+    Helvetica,
+    sans-serif;
+}
+.ego-central-name {
+  fill: #fff;
+  font-size: 18px;
+}
+.ego-node-code {
+  fill: #52647b;
+  font:
+    12px Arial,
+    Helvetica,
+    sans-serif;
+}
+.ego-central-node ~ .ego-node-code {
+  fill: #c9eafb;
+}
+.ego-central-caption {
+  fill: #c9eafb;
+  font:
+    700 9px Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: 1.5px;
+}
+.ego-coverage {
+  color: var(--muted);
+  margin-top: 15px;
+}
+.ego-missing-note {
+  padding: 12px 14px;
+  background: var(--neutral-soft);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.ego-empty {
+  padding: 12px 0;
+}
+@media (max-width: 720px) {
+  .ego-network {
+    padding: 16px;
+  }
+  .ego-heading h3 {
+    font-size: 26px;
+  }
+  .ego-legend {
+    gap: 14px;
+    font-size: 11px;
+  }
+  .ego-stage.is-zoomed {
+    max-height: 480px;
+  }
+}

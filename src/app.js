@@ -1,6 +1,7 @@
 (function () {
   "use strict";
   const C = window.IsatCore,
+    N = window.IsatEgoNetwork,
     E = C.escape,
     $ = (id) => document.getElementById(id);
   let book = null,
@@ -61,7 +62,7 @@
     /^\d{4}-\d{2}-\d{2}$/.test(value)
       ? value.slice(8, 10) + "/" + value.slice(5, 7) + "/" + value.slice(0, 4)
       : value;
-  const name = (s) => s.name || s.id;
+  const name = (s) => s.id;
   const studentsLabel = (count) =>
     `${num(count)} ${count === 1 ? "estudiante" : "estudiantes"}`;
   const className = (g) => g.course + (g.group === "." ? "" : " · " + g.group);
@@ -454,7 +455,7 @@
       name(a).localeCompare(name(b), "es", { numeric: true }),
     );
     $("student").innerHTML = options(
-      sorted.map((s) => [s.id, s.name ? `${s.name} · ${s.id}` : s.id]),
+      sorted.map((s) => [s.id, s.id]),
       rows.some((s) => s.id === old) ? old : sorted[0]?.id,
     );
   }
@@ -493,7 +494,40 @@
     $("report").focus({ preventScroll: true });
     $("report").scrollIntoView?.({ block: "start" });
   }
+  function openNetworkStudent(id) {
+    const s = model?.students.find((student) => student.id === id);
+    const targetGroup = s && model.groups.find((g) => g.rows.includes(s));
+    if (!targetGroup) return;
+    if (targetGroup.key === group()?.key) {
+      openCareStudent(id);
+      return;
+    }
+    returnView = "group";
+    $("study").value = targetGroup.study;
+    studentQuery = "";
+    listState.query = "";
+    listState.page = 0;
+    tab = "student";
+    setTab();
+    updateClasses();
+    $("class").value = targetGroup.key;
+    updateStudents();
+    $("student").value = s.id;
+    render();
+    focusReport();
+  }
   $("report").addEventListener("click", (event) => {
+    const zoomButton = event.target.closest("button[data-ego-zoom]");
+    if (zoomButton) {
+      N.zoom(zoomButton.closest(".ego-network"), zoomButton.dataset.egoZoom);
+      return;
+    }
+    const networkLink = event.target.closest("a[data-network-student]");
+    if (networkLink) {
+      event.preventDefault();
+      openNetworkStudent(networkLink.dataset.networkStudent);
+      return;
+    }
     const studentLink = event.target.closest("a[data-care-student]");
     if (studentLink) {
       event.preventDefault();
@@ -660,7 +694,7 @@
         ? `<details class="care-details" open><summary>${cases.length === 1 ? "Consultar la ficha individual" : `Consultar las ${cases.length} fichas individuales`}</summary><ul class="care-list">${cases
             .map((item) => {
               const s = students.get(item.id);
-              return `<li><div class="care-person"><strong>${E(name(s))}</strong>${s.name ? `<span class="care-code">Código: ${E(s.id)}</span>` : ""}<div class="care-reasons">${careReasons(item)}</div></div><a class="care-link" href="#report" data-care-student="${E(s.id)}" aria-label="${E(`Ver ficha individual de ${name(s)}${s.name ? `, código ${s.id}` : ""}`)}">Ver ficha individual <span aria-hidden="true">→</span></a></li>`;
+              return `<li><div class="care-person"><strong>${E(name(s))}</strong><div class="care-reasons">${careReasons(item)}</div></div><a class="care-link" href="#report" data-care-student="${E(s.id)}" aria-label="${E(`Ver ficha individual del código ${s.id}`)}">Ver ficha individual <span aria-hidden="true">→</span></a></li>`;
             })
             .join("")}</ul></details>`
         : `<p class="care-empty">${unavailable}</p>`
@@ -865,7 +899,7 @@
   }
   function listCell(s, col) {
     if (col.key === "student")
-      return `<a class="student-list-link" href="#report" data-care-student="${E(s.id)}">${E(name(s))}</a>${s.name ? `<span class="care-code">Código: ${E(s.id)}</span>` : ""}${needsConsultation(s) ? '<span class="list-priority">Petición propia o ≥2 menciones</span>' : ""}`;
+      return `<a class="student-list-link" href="#report" data-care-student="${E(s.id)}">${E(name(s))}</a>${needsConsultation(s) ? '<span class="list-priority">Petición propia o ≥2 menciones</span>' : ""}`;
     if (col.key === "confidence") {
       const current = review.confidence.get(s.id);
       return `<select class="confidence-select" data-confidence="${E(s.id)}" aria-label="${E(`Tu confianza en los datos de ${name(s)}, código ${s.id}`)}"><option value=""${current === undefined ? " selected" : ""}>Sin valorar</option>${Array.from(
@@ -898,7 +932,7 @@
     listState.page = Math.max(0, Math.min(listState.page, pages - 1));
     const start = listState.page * PAGE_SIZE;
     const columns = listColumns.filter((col) => !col.extra || listState.extra);
-    return `<article class="report list-report">${hero(className(g), `${g.rows.length} estudiantes · ${g.summary.care.cases.length} cumplen los criterios de consulta`, "Lista de estudiantes")}<div class="report-body"><p class="list-intro">Consulta la clase completa o filtra por petición propia de ayuda y menciones de dos o más personas. Pulsa un nombre o código para abrir su ficha. Las menciones cuentan personas distintas de todo el Excel, incluidas otras clases.</p><div class="list-tools"><label class="field">Mostrar<select id="list-scope" aria-label="Mostrar">${options(
+    return `<article class="report list-report">${hero(className(g), `${g.rows.length} estudiantes · ${g.summary.care.cases.length} cumplen los criterios de consulta`, "Lista de estudiantes")}<div class="report-body"><p class="list-intro">Consulta la clase completa o filtra por petición propia de ayuda y menciones de dos o más personas. Pulsa un código para abrir la ficha individual. Las menciones cuentan personas distintas de todo el Excel, incluidas otras clases.</p><div class="list-tools"><label class="field">Mostrar<select id="list-scope" aria-label="Mostrar">${options(
       listScopes,
       listState.scope,
     )}</select></label><label class="column-toggle"><input id="list-extra" type="checkbox"${listState.extra ? " checked" : ""}>Bienestar y relaciones</label><button class="btn secondary" type="button" data-prioritize>Priorizar ayuda</button></div><p class="list-hint">Los encabezados ordenan en ambos sentidos; «Sin datos» queda al final. Pulsa un dato para marcar OK, Revisar o Me sorprende.</p>${listState.extra ? '<p class="direction-note">Soledad, disfrute y experiencia universitaria se muestran por separado. Más soledad es menos favorable; más disfrute y una mejor experiencia son más favorables. Los recuentos de relaciones recibidas reflejan las respuestas disponibles.</p>' : ""}<div class="student-table-wrap" role="region" aria-label="Lista de estudiantes: tabla desplazable horizontalmente" tabindex="0"><table class="student-table"><caption>${rows.length} de ${g.rows.length} estudiantes${listState.sort === "care" ? " · Peticiones y menciones de ayuda primero" : ""}</caption><thead><tr>${columns.map((col) => `<th scope="col" aria-sort="${listState.sort === col.key ? (listState.direction > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-sort="${col.key}">${E(col.label)}<span aria-hidden="true">${listState.sort === col.key ? (listState.direction > 0 ? " ↑" : " ↓") : " ↕"}</span></button></th>`).join("")}</tr></thead><tbody>${
@@ -1188,12 +1222,14 @@
   );
   function studentReport(s, g) {
     const m = s.metrics;
+    const highlighted = s.care.requested === true || s.care.peerReports > 2;
     const coverage = `De las otras ${m.peers} personas de la clase, ${m.relationsCoverage} tienen una respuesta de relaciones al menos parcialmente interpretable.`;
-    return `<article class="report">${hero(name(s), `${className(g)} · ${studentsLabel(g.rows.length)}`, "Ficha individual", surveyStatus(s))}<div class="report-body"><button class="back-to-class" type="button" data-return-class>← Volver a ${returnView === "list" ? "la lista de estudiantes" : "la ficha de clase"}</button>${studentCare(s)}<div class="reading"><span>${s.name ? `Código: ${E(s.id)}` : "Los códigos se muestran tal como figuran en el Excel."}</span><span class="coverage">${E(s.lastDate ? `Finalización: ${dateLabel(s.lastDate)}` : "Finalización sin registrar")}</span></div>
-    ${studentOverview(s)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, predicciones, contactos y adaptación académica</span></summary>
+    return `<article class="report${highlighted ? " report-care" : ""}">${hero(name(s), `${className(g)} · ${studentsLabel(g.rows.length)}`, "Ficha individual", surveyStatus(s))}<div class="report-body"><button class="back-to-class" type="button" data-return-class>← Volver a ${returnView === "list" ? "la lista de estudiantes" : "la ficha de clase"}</button>${studentCare(s)}<div class="reading"><span>Los códigos se muestran tal como figuran en el Excel.</span><span class="coverage">${E(s.lastDate ? `Finalización: ${dateLabel(s.lastDate)}` : "Finalización sin registrar")}</span></div>
+    ${studentOverview(s)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, predicciones, contactos, adaptación académica y red de relaciones</span></summary>
     ${section("01", "Relaciones e integración", `${relationshipNote(s)}<div class="metric-grid">${metric("Relaciones positivas recibidas observadas", m.friendsReceived, coverage)}${metric("Relaciones positivas declaradas", m.friendsDeclared, declaredDescription(s, true))}${metric("Relaciones positivas recíprocas observadas", m.friendsMutual, reciprocalDescription(s, true))}${metric("Relaciones negativas recibidas observadas", m.rejectionsReceived, coverage)}${metric("Relaciones negativas declaradas", m.rejectionsDeclared, declaredDescription(s, false))}${metric("Relaciones negativas recíprocas observadas", m.rejectionsMutual, reciprocalDescription(s, false))}</div><p class="prediction-intro">Las predicciones expresan cómo cree que otras personas valoran su relación con este estudiante. Los aciertos se comprueban con las respuestas de esas personas, no con las relaciones que declara este estudiante.</p><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div><p class="section-note">Las relaciones dentro de la clase se cuentan por separado de las referencias a otras clases. Los recuentos recibidos reflejan las respuestas disponibles.</p>`)}
     ${section("02", "Contactos y papel en el grupo", `<div class="metric-grid">${metric("Nominaciones como persona popular", m.popularVotes, "Veces que otras personas de su clase la señalan como popular.")}${metric("Nominaciones como conexión entre grupos", m.connectorVotes, "Veces que otras personas de su clase la señalan como conectora.")}${metric("Contactos previos identificados", s.contacts?.length ?? null, "Personas señaladas en la pregunta de conocidos, incluidas otras clases.")}${metric("Contactos fuera de la clase", s.outsideCount, "Selecciones de la pregunta de contactos en otros grupos.")}</div>`)}
     ${section("03", "Adaptación académica", `<div class="response-grid">${["time", "workload", "difficulty", "dropout", "activities"].map((f) => responseCard(f, s)).join("")}</div><div class="response-details">${["subjects", "subjectReasons", "subjectOther", "dropoutReasons", "dropoutOther"].map((f) => responseCard(f, s)).join("")}</div>`, "neutral")}
+    ${N.view(s, model.students)}
     </details><p class="individual-reading-note">La ficha orienta el acompañamiento con contexto profesional. No establece diagnósticos ni decisiones automáticas.</p>${sheetFeedback("student", g, s)}${s.story === null ? "" : section("04", "Su historia", `<p class="story-intro">Circunstancias personales compartidas en el cuestionario.</p><div class="story">${E(s.story)}</div><p class="section-note">El texto se muestra tal como se guardó en el Excel.</p>`, "story")}
     </div></article>`;
   }
@@ -1217,7 +1253,7 @@
       const s = g.rows.find((x) => x.id === $("student").value);
       $("report").innerHTML = s
         ? studentReport(s, g)
-        : '<section class="empty-state"><h2>No hay coincidencias.</h2><p>Prueba con otro nombre o código en esta clase.</p></section>';
+        : '<section class="empty-state"><h2>No hay coincidencias.</h2><p>Busca otro código en esta clase.</p></section>';
       $("view-announcement").textContent = s
         ? `Ficha individual actualizada. ${$("student").options.length} coincidencias. ${s.status === "Completado" ? "Encuesta completada" : s.status === "En curso" ? "Encuesta en curso" : "Sin inicio registrado"}.`
         : "No hay estudiantes que coincidan con la búsqueda en esta clase.";

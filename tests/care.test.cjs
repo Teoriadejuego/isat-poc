@@ -165,7 +165,7 @@ test("enlace abre la ficha exacta, limpia búsqueda y permite volver a la misma 
   assert.equal(app.get("search").value, "");
   assert.equal(
     app.window.document.querySelector(".report-hero h2").textContent,
-    "Persona Dos",
+    "PEER",
   );
   assert.equal(app.window.document.activeElement.id, "report");
   assert.match(

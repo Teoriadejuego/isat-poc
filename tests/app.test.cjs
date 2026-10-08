@@ -28,9 +28,10 @@ test("cierre elimina fichas, etiquetas personales, filtros y archivo de consulta
   await app.load(fixture());
   app.get("tab-student").click();
   app.change("class", '["1","PSI","A"]');
-  app.get("search").value = "Persona";
+  app.get("search").value = "S01";
   app.get("search").dispatchEvent(new app.window.Event("input"));
-  assert.match(app.get("student").textContent, /Persona Prueba/);
+  assert.match(app.get("student").textContent, /S01/);
+  assert.doesNotMatch(app.get("student").textContent, /Persona Prueba/);
   app.get("clear").click();
   assert.equal(app.get("consultation").hidden, true);
   for (const id of ["student", "class", "study", "sheet"])

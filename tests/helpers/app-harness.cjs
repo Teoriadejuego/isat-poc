@@ -59,7 +59,7 @@ function createApp(t, options = {}) {
     }
   }
   window.Worker = TestWorker;
-  for (const file of ["src/core.js", "src/app.js"])
+  for (const file of ["src/core.js", "src/ego-network.js", "src/app.js"])
     window.eval(fs.readFileSync(path.join(root, file), "utf8"));
   const get = (id) => window.document.getElementById(id);
   async function selectFile(

@@ -24,10 +24,13 @@ test("data remains in memory, stories are escaped and view clears on file change
   assert.match(js, /function removeModel/);
   assert.match(js, /worker\?\.terminate/);
 });
-test("el artefacto real contiene solo los nueve recursos públicos y rechaza extras", async (t) => {
+test("el artefacto contiene solo los once recursos públicos, incluida la red, y rechaza extras", async (t) => {
   const { buildSite, verifySite, publicFiles } =
     await import("../tools/build-site.mjs");
   const qa = path.join(root, ".qa");
+  assert.equal(publicFiles.length, 11);
+  assert.ok(publicFiles.includes("src/ego-network.js"));
+  assert.ok(publicFiles.includes("src/ego-network.css"));
   fs.mkdirSync(qa, { recursive: true });
   const directory = fs.mkdtempSync(path.join(qa, "staging-"));
   assert.deepEqual(

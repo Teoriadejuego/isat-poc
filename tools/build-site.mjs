@@ -9,6 +9,8 @@ export const publicFiles = Object.freeze([
   "src/app.css",
   "src/app.js",
   "src/core.js",
+  "src/ego-network.js",
+  "src/ego-network.css",
   "src/icon.svg",
   "src/parser-worker.js",
   "vendor/LICENSE-SheetJS.txt",
