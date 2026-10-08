@@ -106,16 +106,17 @@ test("Par/Impar, numeric aliases, reciprocal observed ties and incoming predicti
 });
 test("señalar a otra persona no equivale a pedir ayuda para sí", () => {
   const m = C.parseTable(fixture());
-  assert.equal(m.students[0].care.requested, null);
+  assert.equal(m.students[0].care.requested, false);
   assert.equal(m.students[1].care.peerReports, 1);
   assert.equal(m.students[2].help, null);
   const s = C.summary(m.groups.find((g) => g.course === "PSI").rows);
   assert.equal(s.care.cases.length, 0);
-  assert.equal(s.care.selfRequests, null);
+  assert.equal(s.care.selfRequests, 0);
 });
 test("missing relationships never become zero incoming nominations or false prediction errors", () => {
   const t = fixture();
-  t[2][headers.indexOf("redes2")] = null;
+  for (const field of ["redes2", "alone", "dificultad", "abandono", "ayuda"])
+    t[2][headers.indexOf(field)] = null;
   const s = C.parseTable(t).students[0];
   assert.equal(s.metrics.friendsReceived, null);
   assert.equal(s.metrics.friendEvaluable, 0);

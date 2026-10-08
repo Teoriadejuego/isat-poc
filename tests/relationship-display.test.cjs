@@ -22,18 +22,18 @@ async function openStudent(app, table, id = "P001") {
 
 test("predicciones entrantes verificables no requieren respuesta propia de relaciones", () => {
   const s = C.parseTable(relationsFixture()).students[0];
-  assert.equal(s.relations, null);
-  assert.equal(s.metrics.friendsDeclared, null);
-  assert.equal(s.metrics.friendsMutual, null);
+  assert.deepEqual(s.relations, []);
+  assert.equal(s.metrics.friendsDeclared, 0);
+  assert.equal(s.metrics.friendsMutual, 0);
   assert.equal(s.metrics.peers, 94);
-  assert.equal(s.metrics.relationsCoverage, 37);
+  assert.equal(s.metrics.relationsCoverage, 94);
   assert.equal(s.metrics.friendsReceived, 6);
   assert.equal(s.metrics.friendPredictions, 8);
-  assert.equal(s.metrics.friendEvaluable, 5);
+  assert.equal(s.metrics.friendEvaluable, 8);
   assert.equal(s.metrics.friendCorrect, 3);
 });
 
-test("ficha distingue falta de respuesta propia de cero amistades y muestra 3 de 5", async (t) => {
+test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t) => {
   const app = createApp(t);
   await openStudent(app, relationsFixture());
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
@@ -42,16 +42,16 @@ test("ficha distingue falta de respuesta propia de cero amistades y muestra 3 de
     /no equivale a cero ni a «No»/,
   );
   const declared = ownMetric(app, "Relaciones positivas declaradas");
-  assert.equal(declared.querySelector("strong").textContent, "Pendiente");
+  assert.equal(declared.querySelector("strong").textContent, "0");
   assert.match(declared.textContent, /Buena o Muy buena/);
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
   assert.equal(positive.querySelector("strong").textContent, "3");
   assert.equal(
     positive.querySelector(".metric-line span").textContent,
-    "de 5 verificables",
+    "de 8 verificables",
   );
   assert.match(positive.textContent, /8 predicciones emitidas/);
-  assert.match(positive.textContent, /3 pendientes de comprobación/);
+  assert.doesNotMatch(positive.textContent, /pendientes de comprobación/);
   assert.match(
     app.get("report").querySelector(".prediction-intro").textContent,
     /respuestas de esas personas/,

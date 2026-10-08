@@ -1,5 +1,13 @@
 # Revisión de ISAT
 
+## Actualización 0.9.1 · 9 de octubre de 2026
+
+Se interpreta la selección vacía con respuesta posterior como ninguna persona señalada y, en UCE, como No. El orden del recorrido es explícito e independiente del orden de columnas; no se utiliza una visita ni la finalización aislada como respuesta posterior. Las inferencias se identifican en el modelo. No se convierten errores de lectura ni columnas ausentes en ceros.
+
+La matriz incorpora los casos con petición propia pendiente, sin mezclarlos con No, y permite abrir sus listas. Los totales superiores de petición propia y menciones se reconcilian con las celdas. Se retira el recuento secundario de al menos una mención.
+
+105 pruebas automáticas superadas. Contraste de ambos Excel privados: mismos recuentos de menciones recibidas, nuevas selecciones vacías válidas, totales de matriz coherentes y originales sin modificar. Las pruebas de predicciones se actualizan: una selección vacía confirmada permite contrastar la predicción; una ausencia sin avance posterior sigue sin ser verificable.
+
 ## Entrega del prototipo 0.9.0 · 8 de octubre de 2026
 
 - Verificación final: **100 pruebas automáticas superadas** y artefacto de once recursos públicos verificado, sin datos de consulta.

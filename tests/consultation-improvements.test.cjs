@@ -20,7 +20,7 @@ function matrixFixture() {
       { id: "B", own: "Sí", help: "C" },
       { id: "C", own: "No", help: "B" },
       { id: "D", own: "No", help: "E" },
-      { id: "E", own: null, help: "Nadie" },
+      { id: "E", own: null, help: null },
       { id: "F", own: "No", help: "Nadie" },
     ].map((s) =>
       row({
@@ -29,7 +29,7 @@ function matrixFixture() {
         Grupo: "A",
         dia: log("Par"),
         uce: s.own === null ? null : log(s.own),
-        ayuda: log(s.help),
+        ayuda: s.help === null ? null : log(s.help),
         redes1: log("Nadie"),
       }),
     ),

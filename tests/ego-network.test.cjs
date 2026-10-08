@@ -85,7 +85,7 @@ test("los filtros afectan solo al dibujo y no cambian el estudiante ni los recue
   assert.equal(N.build(s, students).edges.length, 15);
   assert.equal(s.metrics.friendsDeclared, 3);
 });
-test("una respuesta propia ausente conserva las flechas recibidas y no inventa salientes", () => {
+test("una selección vacía tras avanzar conserva las flechas recibidas sin inventar salientes", () => {
   const table = egoFixture();
   table[1][headers.indexOf("redes1")] = null;
   const m = C.parseTable(table),
@@ -93,7 +93,8 @@ test("una respuesta propia ausente conserva las flechas recibidas y no inventa s
   const n = N.build(s, m.students);
   assert.equal(n.outgoing, 0);
   assert.equal(n.incoming, 9);
-  assert.match(N.body(s, m.students), /no significa que no tenga amistades/);
+  assert.deepEqual(s.relations, []);
+  assert.equal(s.quality.relations.inferredEmpty, true);
   assert.match(
     N.body(
       m.students.find((s) => s.id === "R013"),

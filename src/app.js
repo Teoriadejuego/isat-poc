@@ -31,6 +31,8 @@
     ["peerOnly", "Sin petición propia y ≥2 menciones"],
     ["neither", "Sin petición propia y 0–1 menciones"],
     ["missing", "Datos de ayuda incompletos"],
+    ["pendingLow", "Sin respuesta propia y 0–1 menciones"],
+    ["pendingHigh", "Sin respuesta propia y ≥2 menciones"],
   ];
   function newListState() {
     return {
@@ -237,7 +239,7 @@
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
       readingFile = false;
-      const parser = new Worker("src/parser-worker.js?v=0.8.0");
+      const parser = new Worker("src/parser-worker.js?v=0.9.1");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -772,7 +774,7 @@
         : !care.selfAnswered && !care.peerRespondents
           ? "No hay respuestas interpretables para consultar estos criterios."
           : "Con las respuestas disponibles, ningún estudiante reúne los criterios del listado.";
-    return `<section class="care-panel" aria-labelledby="care-title"><div class="care-heading"><div><span class="eyebrow">UNIDAD DE CUIDADO DEL ESTUDIANTE</span><h3 id="care-title">Peticiones y menciones de ayuda</h3></div><span class="care-total">${cases.length} ${cases.length === 1 ? "ficha para consultar" : "fichas para consultar"}</span></div><div class="care-stats"><div><h4>Han pedido ayuda</h4><strong>${num(care.selfRequests)}</strong><p>${care.selfRequests === null ? "No hay respuestas «Sí» o «No» registradas para esta pregunta." : `De ${studentsLabel(care.selfAnswered)} con respuesta «Sí» o «No».`}</p></div><div><h4>Con menciones de dos o más personas</h4><strong>${num(care.peerCases)}</strong><p>${care.peerCases === null ? "No hay respuestas interpretables para contar las menciones de ayuda." : `Estudiantes con al menos una mención registrada: ${num(care.peerAny)}.`}</p></div></div>${careMatrix(care.matrix)}<p class="care-intro">Petición propia o menciones de al menos dos personas. Cada estudiante se cuenta una sola vez.</p><button class="btn" type="button" data-care-scope="care">Revisar estas fichas (${cases.length}) →</button>${
+    return `<section class="care-panel" aria-labelledby="care-title"><div class="care-heading"><div><span class="eyebrow">UNIDAD DE CUIDADO DEL ESTUDIANTE</span><h3 id="care-title">Peticiones y menciones de ayuda</h3></div><span class="care-total">${cases.length} ${cases.length === 1 ? "ficha para consultar" : "fichas para consultar"}</span></div><div class="care-stats"><div><h4>Han pedido ayuda</h4><strong>${num(care.selfRequests)}</strong><p>${care.selfRequests === null ? "No hay respuestas «Sí» o «No» registradas para esta pregunta." : `De ${studentsLabel(care.selfAnswered)} con respuesta «Sí» o «No».`}</p></div><div><h4>Con menciones de dos o más personas</h4><strong>${num(care.peerCases)}</strong><p>${care.peerCases === null ? "No hay respuestas interpretables para contar las menciones de ayuda." : `De ${studentsLabel(g.rows.length)} de la clase.`}</p></div></div>${careMatrix(care.matrix)}<p class="care-intro">Petición propia o menciones de al menos dos personas. Cada estudiante se cuenta una sola vez.</p><button class="btn" type="button" data-care-scope="care">Revisar estas fichas (${cases.length}) →</button>${
       cases.length
         ? `<details class="care-details"><summary>${cases.length === 1 ? "Consultar la ficha individual" : `Consultar las ${cases.length} fichas individuales`}</summary><ul class="care-list">${cases
             .map((item) => {
@@ -781,17 +783,18 @@
             })
             .join("")}</ul></details>`
         : `<p class="care-empty">${unavailable}</p>`
-    }<button class="btn secondary" type="button" data-open-list>Ver lista de la clase →</button><p class="care-coverage">Menciones de ${care.peerRespondents} personas con respuesta interpretable en todo el Excel, incluidas otras clases.</p></section>`;
+    }<button class="btn secondary" type="button" data-open-list>Ver lista de la clase →</button><p class="care-coverage">Base del recuento: ${care.peerRespondents} respuestas interpretables en todo el Excel, incluidas otras clases.</p></section>`;
   }
   function careMatrix(matrix) {
     const value = (scope, label) => {
       const count = matrix[scope];
-      const content = `<strong>${matrix.known ? count : "Pendiente"}</strong><span>${label}</span>`;
-      return matrix.known && count > 0
+      const available = matrix.known || matrix.pendingLow || matrix.pendingHigh;
+      const content = `<strong>${available ? count : "Pendiente"}</strong><span>${label}</span>`;
+      return available && count > 0
         ? `<button type="button" class="matrix-count" data-care-scope="${scope}" aria-label="${E(`${label}: ${count} ${count === 1 ? "estudiante" : "estudiantes"}. Ver lista.`)}">${content}<span class="matrix-action" aria-hidden="true">Ver estudiantes →</span></button>`
         : content;
     };
-    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr></tbody></table><p class="care-matrix-note">${matrix.known} estudiantes con ambos datos disponibles; ${matrix.missing} fuera de la matriz por falta de datos.</p>${matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Consultar datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
+    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr>${matrix.pendingLow + matrix.pendingHigh ? `<tr class="matrix-pending"><th scope="row">Sin respuesta propia</th><td>${value("pendingLow", "0–1 menciones")}</td><td>${value("pendingHigh", "2 o más menciones")}</td></tr>` : ""}</tbody></table><p class="care-matrix-note">${matrix.known} con respuesta propia Sí/No; ${matrix.pendingLow + matrix.pendingHigh} sin respuesta propia.${matrix.missing > matrix.pendingLow + matrix.pendingHigh ? ` ${matrix.missing - matrix.pendingLow - matrix.pendingHigh} fuera de la matriz por falta de recuento de menciones.` : ""}</p>${matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Consultar datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
   }
   function studentCare(s) {
     const care = s.care;
@@ -934,7 +937,13 @@
         (listState.scope === "all" ||
           (listState.scope === "care"
             ? needsConsultation(s)
-            : C.careCategory(s.care) === listState.scope)),
+            : ["pendingLow", "pendingHigh"].includes(listState.scope)
+              ? s.care.requested === null &&
+                Number.isInteger(s.care.peerReports) &&
+                (listState.scope === "pendingHigh"
+                  ? s.care.peerReports >= 2
+                  : s.care.peerReports < 2)
+              : C.careCategory(s.care) === listState.scope)),
     );
     const col = listColumns.find((c) => c.key === listState.sort);
     const compareNames = (a, b) =>

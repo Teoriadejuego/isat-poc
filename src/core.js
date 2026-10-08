@@ -291,6 +291,58 @@
                 ? 2
                 : null;
       if (branch === null && branch1 && branch2) warnings.routes++;
+      // Questionnaire order, not spreadsheet column order. The two routes
+      // reverse relations/predictions; event markers are not answers.
+      const path = [
+        ...(branch === 1 ? ["r1", "p1"] : branch === 2 ? ["p2", "r2"] : []),
+        "popular",
+        "central",
+        "known",
+        "others",
+        "alone",
+        "fun",
+        "general",
+        "uce",
+        "help",
+        "story",
+        "personal",
+        "siblings",
+        "brothers",
+        "sisters",
+        "position",
+        "time",
+        "activities",
+        "workload",
+        "difficulty",
+        "subjects",
+        "subjectReasons",
+        "subjectOther",
+        "dropout",
+        "dropoutReasons",
+        "dropoutOther",
+      ];
+      const passedEmpty = (field) =>
+        cols[field] >= 0 &&
+        val(r, field) === null &&
+        path.indexOf(field) >= 0 &&
+        path
+          .slice(path.indexOf(field) + 1)
+          .some((next) => val(r, next) !== null);
+      if (passedEmpty("uce")) {
+        s.responses.uce = "No";
+        s.quality.uce = { inferredNo: true };
+      }
+      s.emptySelections = [];
+      for (const [field, source] of [
+        ["relations", branch === 1 ? "r1" : branch === 2 ? "r2" : null],
+        ["predictions", branch === 1 ? "p1" : branch === 2 ? "p2" : null],
+        ["popular", "popular"],
+        ["connector", "central"],
+        ["contacts", "known"],
+        ["outside", "others"],
+        ["help", "help"],
+      ])
+        if (source && passedEmpty(source)) s.emptySelections.push(field);
       s.raw.relations =
         branch === null ? null : val(r, branch === 1 ? "r1" : "r2");
       s.raw.predictions =
@@ -326,7 +378,14 @@
     function nominations(value, owner, ratings = false, field) {
       const quality = { complete: value !== null, rejected: 0 };
       owner.quality[field] = quality;
-      if (value === null) return null;
+      if (value === null) {
+        if (owner.emptySelections.includes(field)) {
+          quality.complete = true;
+          quality.inferredEmpty = true;
+          return [];
+        }
+        return null;
+      }
       if (emptyValue(value)) return [];
       const result = new Map(),
         conflicts = new Set();
@@ -395,10 +454,12 @@
       s.connectorChoice = nominations(s.raw.central, s, false, "connector");
       s.contacts = nominations(s.raw.known, s, false, "contacts");
       s.help = nominations(s.raw.help, s, false, "help");
-      // Reaching the question is not evidence of a submitted empty answer.
+      // A later answer confirms an empty selection; a visit marker alone does not.
       s.outsideCount =
         s.raw.others === null
-          ? null
+          ? s.emptySelections.includes("outside")
+            ? 0
+            : null
           : emptyValue(s.raw.others)
             ? 0
             : split(s.raw.others).length;
@@ -583,11 +644,17 @@
       neither: 0,
       known: 0,
       missing: 0,
+      pendingLow: 0,
+      pendingHigh: 0,
     };
     for (const s of rows) {
       const cell = careCategory(s.care);
       if (cell === "missing") {
         matrix.missing++;
+        if (Number.isInteger(s.care?.peerReports)) {
+          if (s.care.peerReports >= 2) matrix.pendingHigh++;
+          else matrix.pendingLow++;
+        }
         continue;
       }
       matrix.known++;

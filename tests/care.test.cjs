@@ -29,6 +29,7 @@ function careFixture() {
     row({ ...base("SINGLE"), Nombre: "Persona Cuatro", uce: log("No") }),
     row({
       ...base("R1"),
+      uce: log("Respuesta sin interpretar"),
       ayuda: log("PEER | 1002 | PEER | BOTH | SINGLE | R1 | desconocido"),
     }),
     row({ ...base("R2"), Curso: "ENF", Grupo: "B", ayuda: log("1002 | BOTH") }),
@@ -115,6 +116,8 @@ test("la matriz cruza Sí/No con el umbral de dos y no convierte ausencias en No
     neither: 2,
     known: 5,
     missing: 1,
+    pendingHigh: 1,
+    pendingLow: 0,
   });
   assert.equal(care.peerAny, 4);
   assert.equal(care.peerCases, 3);
@@ -138,14 +141,14 @@ test("recuentos y matriz son el primer bloque y diferencian las cuatro combinaci
     /Han pedido ayuda/,
   );
   const table = app.window.document.querySelector(".care-matrix table");
-  assert.equal(table.querySelectorAll("tbody td").length, 4);
+  assert.equal(table.querySelectorAll("tbody td").length, 6);
   assert.equal(table.querySelector(".matrix-both strong").textContent, "1");
   assert.equal(table.querySelector(".matrix-own strong").textContent, "1");
   assert.match(table.textContent, /0 o 1 persona/);
   assert.match(table.textContent, /2 o más personas/);
   assert.match(
     app.window.document.querySelector(".care-matrix-note").textContent,
-    /1 fuera de la matriz/,
+    /1 sin respuesta propia/,
   );
 });
 test("enlace abre la ficha exacta, limpia búsqueda y permite volver a la misma clase", async (t) => {

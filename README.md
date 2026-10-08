@@ -4,7 +4,11 @@ Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda pa
 
 **Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
 
-## Entrega del prototipo · 0.9.0
+## Entrega del prototipo · 0.9.1
+
+**Interpretación de preguntas vacías.** En las preguntas de seleccionar personas, un vacío se interpreta como ninguna selección cuando existe una respuesta posterior en el recorrido del cuestionario. En UCE, un vacío con respuesta posterior se interpreta como «No», según el criterio confirmado para este cuestionario. Se respeta el orden Par/Impar; el orden de las columnas del Excel no cambia el resultado. Una marca de visita o de finalización por sí sola no basta, y las columnas ausentes y las respuestas no interpretables permanecen pendientes. El modelo conserva la procedencia de estas interpretaciones y no modifica el archivo.
+
+La matriz incluye una fila **Sin respuesta propia** cuando hay estudiantes con menciones contabilizadas pero sin respuesta UCE interpretable. Así, el total de dos o más menciones puede comprobarse sumando las filas Sí, No y Sin respuesta propia. La fila pendiente no se mezcla con No y sus celdas abren la lista correspondiente.
 
 ISAT permite a la Unidad de Cuidado del Estudiante consultar las peticiones propias y las menciones de ayuda, contrastarlas con el contexto de la clase y abrir las fichas individuales. Esta entrega es un **prototipo funcional para evaluación**, con los indicadores del cuestionario ISAT T1.
 

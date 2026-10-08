@@ -1,5 +1,9 @@
 # Prompts de revisión de ISAT
 
+## Actualización 0.9.1: vacíos tras avanzar y matriz completa
+
+Aplica la regla confirmada por el usuario: una pregunta de seleccionar personas vacía, con una respuesta posterior en el recorrido correspondiente, significa ninguna selección. En UCE significa No bajo la misma condición. Conserva pendiente cuando no hay respuesta posterior, la columna no existe o el contenido no se interpreta. Respeta el orden Par/Impar y no uses el orden de columnas ni meras marcas de visita como prueba. Conserva procedencia interna. Añade la fila Sin respuesta propia a la matriz y sus filtros para que el total de menciones pueda comprobarse sin descartar casos pendientes. Retira el dato secundario de una sola mención del resumen. Verifica errores, columnas reordenadas, recorridos, denominadores, predicciones y enlaces.
+
 ## Revisión de entrega · 0.9.0
 
 **Redacción y diseño:** reduce explicaciones repetidas sin eliminar denominadores, estados ausentes, criterios de ayuda ni la nota final de participación. Mantén códigos, lenguaje inclusivo y una guía breve con detalles a demanda.
