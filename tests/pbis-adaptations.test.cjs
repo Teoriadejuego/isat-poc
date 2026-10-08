@@ -70,8 +70,11 @@ test("resumen conserva ausencias y explicaciones añadidas de relaciones y predi
   app.get("tab-student").click();
   app.change("student", "P001");
   const overview = doc(app).querySelector(".student-overview");
-  assert.match(overview.textContent, /Positivas declaradasSin datos/);
-  assert.match(overview.textContent, /no significa que no tenga amistades/);
+  assert.match(overview.textContent, /Positivas declaradasPendiente/);
+  assert.match(
+    doc(app).querySelector(".participation-note").textContent,
+    /no equivale a cero/,
+  );
   const details = doc(app).querySelector(".expanded-indicators");
   details.open = true;
   details.dispatchEvent(new app.window.Event("toggle"));

@@ -1,5 +1,13 @@
 # Revisión de ISAT
 
+## Actualización 0.8.0: resultados provisionales y participación
+
+Cada ficha y lista incluye una sola nota con las encuestas completadas de la clase, su porcentaje y su base de cálculo. El porcentaje procede de la finalización registrada, independientemente de las respuestas existentes en cada pregunta. La nota explica que se utilizan respuestas disponibles, incluidas encuestas en curso, y que los resultados pueden cambiar al completar o corregir y volver a cargar el Excel.
+
+Los recuentos reconocidos de relaciones, reciprocidad y aciertos siguen visibles aunque falten otras respuestas. Se retiran los párrafos repetidos de ausencia y el aviso específico de relaciones. Los valores que necesitan una respuesta ausente se presentan como «Pendiente» en todas las vistas; el modelo conserva null, las ausencias siguen al final de las listas y no entran como cero ni «No» en la matriz de ayuda. La densidad negativa observada incorpora ahora las valoraciones negativas reconocidas de listas parcialmente interpretables. Su denominador son las elecciones posibles de quienes tienen una lista al menos parcialmente interpretable; es un mínimo observado dentro de esa base, no una estimación de las respuestas que faltan.
+
+Verificación: **96 pruebas automáticas superadas**. Las nuevas pruebas contrastan una nota por vista, porcentajes 0/33,3/100, cambio de clase, retirada al cerrar, aciertos y reciprocidad confirmados con respuestas parciales, finalización al 100 % con preguntas ausentes y el nuevo denominador de densidad. Con el cuestionario aportado se comprobó en local la clase de 48 estudiantes: 36 con finalización registrada (75 %), un caso con valoraciones recibidas y sin respuesta propia, y la ausencia de los avisos repetidos. A 320 píxeles no desbordan la nota ni la página. Sin errores de consola. Los datos originales permanecen intactos y fuera de la publicación.
+
 ## Actualización 0.7.1: lista más compacta
 
 Se retira «Petición propia o ≥2 menciones» de las filas de estudiantes y se cambia la etiqueta del filtro a «Peticiones y menciones de ayuda». El criterio, los recuentos y la prioridad de consulta se conservan.

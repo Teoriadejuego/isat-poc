@@ -95,7 +95,7 @@ test("lista completa prioriza ayuda sin excluir encuestas incompletas y filtra p
   assert.equal(cell(app, "S03", "peer").querySelector("span").textContent, "2");
   assert.equal(
     cell(app, "S04", "requested").querySelector("span").textContent,
-    "Sin datos",
+    "Pendiente",
   );
   changeElement(app, app.get("list-scope"), "care");
   assert.deepEqual(ids(app), ["S01", "S03"]);

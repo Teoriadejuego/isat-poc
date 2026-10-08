@@ -1,5 +1,9 @@
 # Prompts de revisión de ISAT
 
+## Actualización 0.8.0: resultados con las respuestas disponibles
+
+Muestra los datos que pueden calcularse con el Excel actual, incluidas las respuestas reconocidas de encuestas en curso o parcialmente interpretables. Añade una sola nota de participación por vista de grupo, lista e individual: porcentaje con finalización registrada en la clase, numerador y denominador, y posibilidad de cambios al completar o corregir y volver a cargar el archivo. Distingue finalización de disponibilidad por pregunta. Retira las explicaciones repetidas de ausencia bajo cada indicador de relaciones. Si falta una respuesta necesaria, muestra «Pendiente» y conserva el valor ausente en el modelo, sin imputar cero, «No» ni fallos de predicción. Incorpora las nominaciones negativas reconocidas de respuestas parciales a la densidad observada, explicando su base y carácter mínimo. Mantén aciertos comprobados, denominadores, reciprocidad confirmada, ayuda, filtros y revisión. Verifica 0 %, porcentajes decimales y 100 %, cambios de clase y vista, ausencia propia con nominaciones recibidas, respuestas parciales y cierre. Contrasta el archivo aportado en navegador sin publicarlo.
+
 ## Actualización 0.7.1: lista más compacta
 
 Retira la etiqueta repetida «Petición propia o ≥2 menciones» de las filas y usa «Peticiones y menciones de ayuda» en el filtro, conservando el criterio y la ordenación. Sustituye el selector de confianza por un pequeño deslizador de −5 a +5. Distingue una valoración neutra de una no realizada, permite marcar cero y quitar la valoración, y actualiza el número durante el arrastre sin reconstruir el control. Conserva la revisión al cambiar de vista y retírala al sustituir o cerrar la consulta. Comprueba extremos, cero, ausencias, ordenación, foco, teclado y visualización.

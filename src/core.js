@@ -651,9 +651,7 @@
       );
       return { denominator: valid.length, items };
     };
-    const relationRows = rows.filter(
-        (s) => s.relations !== null && s.quality.relations.complete,
-      ),
+    const relationRows = rows.filter((s) => s.relations !== null),
       peerSlots = relationRows.length * (n - 1);
     const rejectionCount = relationRows.length
       ? relationRows.reduce((sum, s) => sum + s.rejections.length, 0)

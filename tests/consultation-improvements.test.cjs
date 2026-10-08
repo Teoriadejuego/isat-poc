@@ -102,7 +102,7 @@ test("celdas sin datos o con cero no ofrecen enlaces que aparenten casos", async
   assert.equal(doc(app).querySelectorAll(".care-matrix td button").length, 0);
   assert.match(
     doc(app).querySelector(".care-matrix table").textContent,
-    /Sin datos/,
+    /Pendiente/,
   );
   doc(app).querySelector('[data-care-scope="missing"]').click();
   assert.deepEqual(ids(app), ["A"]);

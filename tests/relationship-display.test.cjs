@@ -36,13 +36,14 @@ test("predicciones entrantes verificables no requieren respuesta propia de relac
 test("ficha distingue falta de respuesta propia de cero amistades y muestra 3 de 5", async (t) => {
   const app = createApp(t);
   await openStudent(app, relationsFixture());
+  assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.match(
-    app.get("report").querySelector(".relationship-note").textContent,
-    /«Sin datos» no significa que no tenga amistades/,
+    app.get("report").querySelector(".participation-note").textContent,
+    /no equivale a cero ni a «No»/,
   );
   const declared = ownMetric(app, "Relaciones positivas declaradas");
-  assert.equal(declared.querySelector("strong").textContent, "Sin datos");
-  assert.match(declared.textContent, /No hay una respuesta propia/);
+  assert.equal(declared.querySelector("strong").textContent, "Pendiente");
+  assert.match(declared.textContent, /Buena o Muy buena/);
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
   assert.equal(positive.querySelector("strong").textContent, "3");
   assert.equal(
@@ -50,7 +51,7 @@ test("ficha distingue falta de respuesta propia de cero amistades y muestra 3 de
     "de 5 verificables",
   );
   assert.match(positive.textContent, /8 predicciones emitidas/);
-  assert.match(positive.textContent, /3 no pueden comprobarse/);
+  assert.match(positive.textContent, /3 pendientes de comprobación/);
   assert.match(
     app.get("report").querySelector(".prediction-intro").textContent,
     /respuestas de esas personas/,
@@ -59,7 +60,7 @@ test("ficha distingue falta de respuesta propia de cero amistades y muestra 3 de
   assert.equal(negative.querySelector("strong").textContent, "No procede");
 });
 
-test("sin respuestas para verificar se conserva Sin datos y no se inventan errores", async (t) => {
+test("sin respuestas para verificar se conserva Pendiente y no se inventan errores", async (t) => {
   const app = createApp(t);
   await openStudent(app, [
     headers,
@@ -67,9 +68,9 @@ test("sin respuestas para verificar se conserva Sin datos y no se inventan error
     row(base("P002")),
   ]);
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
-  assert.equal(positive.querySelector("strong").textContent, "Sin datos");
+  assert.equal(positive.querySelector("strong").textContent, "Pendiente");
   assert.match(positive.textContent, /1 predicción emitida/);
-  assert.match(positive.textContent, /ninguna puede comprobarse/);
+  assert.match(positive.textContent, /0 verificables/);
   assert.equal(positive.querySelector(".metric-line span"), null);
 });
 
@@ -96,18 +97,16 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
     "No procede",
   );
   app.change("student", "P002");
-  assert.match(
-    app.get("report").querySelector(".relationship-note").textContent,
-    /parcialmente interpretable/,
-  );
-  assert.match(
-    ownMetric(app, "Relaciones positivas declaradas").textContent,
-    /Recuento mínimo/,
+  assert.equal(app.get("report").querySelector(".relationship-note"), null);
+  assert.equal(
+    ownMetric(app, "Relaciones positivas declaradas").querySelector("strong")
+      .textContent,
+    "0",
   );
   assert.equal(
     ownMetric(app, "Aciertos de predicciones positivas").querySelector("strong")
       .textContent,
-    "Sin datos",
+    "Pendiente",
   );
 });
 

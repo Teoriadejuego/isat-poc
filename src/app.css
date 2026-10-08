@@ -439,6 +439,24 @@ select:focus-visible {
 .report-body {
   padding: 25px 28px 20px;
 }
+.participation-note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: white;
+  padding: 12px 15px;
+  margin: 18px clamp(16px, 3vw, 28px) 0;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.participation-note strong {
+  color: var(--navy);
+}
+.participation-note p {
+  margin-top: 4px;
+  color: var(--muted);
+}
 .reading {
   display: flex;
   justify-content: space-between;
@@ -622,17 +640,9 @@ progress::-moz-progress-bar {
     Helvetica,
     sans-serif;
 }
-.relationship-note,
 .prediction-intro {
   font-size: 12px;
   line-height: 1.6;
-}
-.relationship-note {
-  background: var(--sky);
-  border-left: 3px solid var(--accent);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
 }
 .prediction-intro {
   margin-top: 20px;
