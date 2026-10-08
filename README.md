@@ -4,7 +4,9 @@ Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda pa
 
 **Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
 
-## Entrega del prototipo · 0.9.1
+## Entrega del prototipo · 0.9.2
+
+**Predicciones:** se muestran los aciertos confirmados sobre las predicciones verificables. Si falta comprobar alguna, aparece un asterisco y su número pendiente. Sin ninguna verificable se muestra «0* de 0 verificables»: no significa que las predicciones hayan fallado. Una selección vacía confirmada muestra «No hizo predicciones». Cuando falta una respuesta propia interpretable, permanece «Pendiente». Las predicciones ya disponibles se evalúan aunque la encuesta siga en curso.
 
 **Interpretación de preguntas vacías.** En las preguntas de seleccionar personas, un vacío se interpreta como ninguna selección cuando existe una respuesta posterior en el recorrido del cuestionario. En UCE, un vacío con respuesta posterior se interpreta como «No», según el criterio confirmado para este cuestionario. Se respeta el orden Par/Impar; el orden de las columnas del Excel no cambia el resultado. Una marca de visita o de finalización por sí sola no basta, y las columnas ausentes y las respuestas no interpretables permanecen pendientes. El modelo conserva la procedencia de estas interpretaciones y no modifica el archivo.
 

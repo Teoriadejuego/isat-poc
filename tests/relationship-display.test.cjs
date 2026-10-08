@@ -57,10 +57,13 @@ test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t
     /respuestas de esas personas/,
   );
   const negative = ownMetric(app, "Aciertos de predicciones negativas");
-  assert.equal(negative.querySelector("strong").textContent, "No procede");
+  assert.equal(
+    negative.querySelector("strong").textContent,
+    "No hizo predicciones",
+  );
 });
 
-test("sin respuestas para verificar se conserva Pendiente y no se inventan errores", async (t) => {
+test("sin respuestas para verificar muestra cero aciertos confirmados y todas pendientes", async (t) => {
   const app = createApp(t);
   await openStudent(app, [
     headers,
@@ -68,10 +71,57 @@ test("sin respuestas para verificar se conserva Pendiente y no se inventan error
     row(base("P002")),
   ]);
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
-  assert.equal(positive.querySelector("strong").textContent, "Pendiente");
+  assert.equal(positive.querySelector("strong").textContent, "0*");
   assert.match(positive.textContent, /1 predicción emitida/);
   assert.match(positive.textContent, /0 verificables/);
-  assert.equal(positive.querySelector(".metric-line span"), null);
+  assert.equal(
+    positive.querySelector(".metric-line span").textContent,
+    "de 0 verificables",
+  );
+  assert.match(positive.textContent, /1 de sus predicciones está pendiente/);
+});
+
+test("aciertos parciales positivos y negativos usan solo respuestas verificables y muestran pendientes", async (t) => {
+  const app = createApp(t);
+  await openStudent(app, [
+    headers,
+    row({
+      ...base("P001"),
+      start: log(""),
+      beliefs1: log(
+        "P002 (Buena relación) | P003 (Buena relación) | P004 (Buena relación) | P005 (Mala relación) | P006 (Mala relación)",
+      ),
+    }),
+    row({ ...base("P002"), redes1: log("P001 (Buena relación)") }),
+    row({ ...base("P003"), redes1: log("P001 (Normal)") }),
+    row(base("P004")),
+    row({ ...base("P005"), redes1: log("P001 (Mala relación)") }),
+    row(base("P006")),
+  ]);
+  for (const [kind, checked] of [
+    ["positivas", 2],
+    ["negativas", 1],
+  ]) {
+    const card = ownMetric(app, `Aciertos de predicciones ${kind}`);
+    assert.equal(card.querySelector("strong").textContent, "1*");
+    assert.match(
+      card.querySelector(".metric-line span").textContent,
+      new RegExp(`de ${checked} verificable`),
+    );
+    const noteId = card
+      .querySelector("strong")
+      .getAttribute("aria-describedby");
+    assert.match(
+      app.get(noteId).textContent,
+      /1 de sus predicciones está pendiente/,
+    );
+  }
+  app.change("student", "P004");
+  assert.equal(
+    ownMetric(app, "Aciertos de predicciones positivas").querySelector("strong")
+      .textContent,
+    "Pendiente",
+  );
 });
 
 test("cero explícito y recuentos parciales de relaciones tienen mensajes distintos", async (t) => {
@@ -94,7 +144,7 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
   assert.equal(
     ownMetric(app, "Aciertos de predicciones positivas").querySelector("strong")
       .textContent,
-    "No procede",
+    "No hizo predicciones",
   );
   app.change("student", "P002");
   assert.equal(app.get("report").querySelector(".relationship-note"), null);

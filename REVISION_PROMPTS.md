@@ -1,5 +1,9 @@
 # Prompts de revisión de ISAT
 
+## Actualización 0.9.2: aciertos y comprobaciones pendientes
+
+Presenta los aciertos confirmados con las respuestas disponibles, incluso si todavía hay predicciones sin verificar. Añade asterisco y número pendiente; si ninguna es verificable, muestra cero aciertos confirmados sobre cero verificables, sin convertir los pendientes en errores. Sustituye No procede por No hizo predicciones para una selección vacía confirmada. Conserva Pendiente si falta la respuesta propia. Comprueba ambos signos, cero verificables, respuestas parciales y actualización al cambiar estudiante.
+
 ## Actualización 0.9.1: vacíos tras avanzar y matriz completa
 
 Aplica la regla confirmada por el usuario: una pregunta de seleccionar personas vacía, con una respuesta posterior en el recorrido correspondiente, significa ninguna selección. En UCE significa No bajo la misma condición. Conserva pendiente cuando no hay respuesta posterior, la columna no existe o el contenido no se interpreta. Respeta el orden Par/Impar y no uses el orden de columnas ni meras marcas de visita como prueba. Conserva procedencia interna. Añade la fila Sin respuesta propia a la matriz y sus filtros para que el total de menciones pueda comprobarse sin descartar casos pendientes. Retira el dato secundario de una sola mención del resumen. Verifica errores, columnas reordenadas, recorridos, denominadores, predicciones y enlaces.

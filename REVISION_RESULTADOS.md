@@ -1,5 +1,9 @@
 # Revisión de ISAT
 
+## Actualización 0.9.2 · 9 de octubre de 2026
+
+La ficha muestra los aciertos confirmados y su denominador verificable, con asterisco y número de comprobaciones pendientes. Cero verificables se presenta como 0* de 0, conservando el valor ausente original en el modelo y sin crear fallos. Las selecciones vacías confirmadas muestran No hizo predicciones; falta de respuesta permanece Pendiente. Se verifican predicciones positivas y negativas, datos de una encuesta en curso y cambio a otra ficha. **106 pruebas automáticas superadas**.
+
 ## Actualización 0.9.1 · 9 de octubre de 2026
 
 Se interpreta la selección vacía con respuesta posterior como ninguna persona señalada y, en UCE, como No. El orden del recorrido es explícito e independiente del orden de columnas; no se utiliza una visita ni la finalización aislada como respuesta posterior. Las inferencias se identifican en el modelo. No se convierten errores de lectura ni columnas ausentes en ceros.

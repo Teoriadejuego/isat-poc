@@ -839,16 +839,18 @@
       return metric(
         title,
         null,
-        "Aciertos confirmados con las valoraciones recibidas.",
+        s.status === "Completado"
+          ? "No hay predicciones interpretables."
+          : "Pregunta pendiente de respuesta.",
       );
     if (emitted === 0) {
       if (!s.quality.predictions.complete)
         return metric(
           title,
           null,
-          "Aciertos confirmados con las valoraciones recibidas.",
+          "No hay predicciones interpretables de este tipo.",
         );
-      return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong class="metric-state">No procede</strong></div><p>No ha emitido predicciones ${label} sobre su clase; no hay aciertos que evaluar.</p></div>`;
+      return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong class="metric-state">No hizo predicciones</strong></div></div>`;
     }
     const scope = s.quality.predictions.complete
       ? emitted === 1
@@ -858,14 +860,15 @@
         ? "interpretable"
         : "interpretables";
     const predictionCount = `${num(emitted)} ${emitted === 1 ? "predicción" : "predicciones"} ${scope}`;
-    if (!evaluable)
-      return metric(title, null, `${predictionCount} · 0 verificables.`);
     const pending = emitted - evaluable;
-    const description = `${predictionCount}${pending ? ` · ${num(pending)} ${pending === 1 ? "pendiente" : "pendientes"} de comprobación` : ""}.`;
+    if (pending) {
+      const noteId = `prediction-pending-${kind}`;
+      return `<div class="metric"><h4>${E(title)}</h4><div class="metric-line"><strong aria-describedby="${noteId}">${num(m[kind + "Correct"] ?? 0)}<sup aria-hidden="true">*</sup></strong><span>de ${num(evaluable)} ${evaluable === 1 ? "verificable" : "verificables"}</span></div><p>${E(predictionCount)}.</p><p id="${noteId}">* ${num(pending)} ${pending === 1 ? "de sus predicciones está pendiente" : "de sus predicciones están pendientes"} de comprobar con las respuestas de otras personas.</p></div>`;
+    }
     return metric(
       title,
       m[kind + "Correct"],
-      description,
+      `${predictionCount}.`,
       `de ${num(evaluable)} ${evaluable === 1 ? "verificable" : "verificables"}`,
     );
   }
