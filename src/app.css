@@ -1501,13 +1501,6 @@ progress::-moz-progress-bar {
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
 }
-.list-priority {
-  display: block;
-  font-size: 10px;
-  line-height: 1.4;
-  margin-top: 7px;
-  color: var(--navy);
-}
 .cell-value {
   min-height: 44px;
   width: 100%;
@@ -1540,15 +1533,49 @@ progress::-moz-progress-bar {
 .cell-reviewed {
   background: var(--neutral-soft);
 }
-.confidence-select {
-  min-height: 44px;
-  max-width: 120px;
-  padding: 8px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+.confidence-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 158px;
+}
+.confidence-slider {
+  width: 88px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.is-unrated .confidence-slider {
+  accent-color: var(--muted);
+}
+.confidence-value {
+  width: 34px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.is-unrated .confidence-value {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.confidence-action {
+  width: 24px;
+  height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 5px;
   color: var(--ink);
-  background: white;
-  font-size: 12px;
+  background: var(--neutral-soft);
+  font-size: 14px;
+}
+.confidence-action:hover {
+  background: var(--blue-soft);
 }
 .list-empty {
   padding: 24px !important;

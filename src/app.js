@@ -24,7 +24,7 @@
   const expandedStudents = new Set();
   const listScopes = [
     ["all", "Toda la clase"],
-    ["care", "Petición propia o ≥2 menciones"],
+    ["care", "Peticiones y menciones de ayuda"],
     ["ownOnly", "Petición propia y 0–1 menciones"],
     ["both", "Petición propia y ≥2 menciones"],
     ["peerOnly", "Sin petición propia y ≥2 menciones"],
@@ -569,6 +569,14 @@
       focusReport();
       return;
     }
+    const confidenceAction = event.target.closest(
+      "button[data-confidence-action]",
+    );
+    if (confidenceAction) {
+      const id = confidenceAction.dataset.confidenceAction;
+      saveConfidence(id, review.confidence.has(id) ? null : 0);
+      return;
+    }
     const matrixCell = event.target.closest("button[data-care-scope]");
     if (
       matrixCell &&
@@ -608,29 +616,59 @@
         listState.sort = "care";
       render();
       $("list-extra").focus();
-    } else if (event.target.matches("select[data-confidence]")) {
-      const id = event.target.dataset.confidence;
-      if (!group()?.rows.some((s) => s.id === id)) return;
-      const value = event.target.value;
-      if (value === "") review.confidence.delete(id);
-      else if (
-        /^-?\d$/.test(value) &&
-        Number(value) >= -5 &&
-        Number(value) <= 5
-      )
-        review.confidence.set(id, Number(value));
-      if (listState.sort === "confidence")
-        listState.page = Math.floor(
-          listRows(group()).findIndex((s) => s.id === id) / PAGE_SIZE,
-        );
-      render();
-      Array.from($("report").querySelectorAll("[data-confidence]"))
-        .find((el) => el.dataset.confidence === id)
-        ?.focus();
-      $("view-announcement").textContent =
-        "Confianza guardada durante esta consulta.";
+    } else if (event.target.matches('input[type="range"][data-confidence]')) {
+      saveConfidence(
+        event.target.dataset.confidence,
+        Number(event.target.value),
+      );
     }
   });
+  const confidenceLabel = (value) =>
+    value === undefined ? "Sin valorar" : `${value > 0 ? "+" : ""}${value}`;
+  function setConfidence(id, value) {
+    if (!group()?.rows.some((s) => s.id === id)) return false;
+    if (value === null) review.confidence.delete(id);
+    else if (Number.isInteger(value) && value >= -5 && value <= 5)
+      review.confidence.set(id, value);
+    else return false;
+    return true;
+  }
+  function saveConfidence(id, value) {
+    if (!setConfidence(id, value)) return;
+    if (listState.sort === "confidence")
+      listState.page = Math.floor(
+        listRows(group()).findIndex((s) => s.id === id) / PAGE_SIZE,
+      );
+    render();
+    Array.from($("report").querySelectorAll("[data-confidence]"))
+      .find((el) => el.dataset.confidence === id)
+      ?.focus();
+    $("view-announcement").textContent =
+      value === null
+        ? "Valoración de confianza retirada."
+        : "Confianza guardada durante esta consulta.";
+  }
+  function previewConfidence(input) {
+    const id = input.dataset.confidence;
+    const value = Number(input.value);
+    if (!setConfidence(id, value)) return;
+    const control = input.closest(".confidence-control");
+    control.classList.remove("is-unrated");
+    control.querySelector(".confidence-value").textContent =
+      confidenceLabel(value);
+    input.setAttribute("aria-valuetext", confidenceLabel(value));
+    const action = control.querySelector("[data-confidence-action]");
+    action.textContent = "×";
+    action.title = "Quitar valoración";
+    action.setAttribute(
+      "aria-label",
+      `Quitar valoración de confianza de ${id}`,
+    );
+    syncReviewButton();
+    const summaryButton = $("report").querySelector("[data-review-summary]");
+    summaryButton.disabled = !reviewCount();
+    summaryButton.textContent = `Mi revisión (${reviewCount()})`;
+  }
   function section(number, title, body, style = "blue") {
     return `<section class="section-panel panel-${style}"><div class="section-label"><span class="section-number">${number}</span><h3>${E(title)}</h3></div>${body}</section>`;
   }
@@ -899,18 +937,14 @@
   }
   function listCell(s, col) {
     if (col.key === "student")
-      return `<a class="student-list-link" href="#report" data-care-student="${E(s.id)}">${E(name(s))}</a>${needsConsultation(s) ? '<span class="list-priority">Petición propia o ≥2 menciones</span>' : ""}`;
+      return `<a class="student-list-link" href="#report" data-care-student="${E(s.id)}">${E(name(s))}</a>`;
     if (col.key === "confidence") {
       const current = review.confidence.get(s.id);
-      return `<select class="confidence-select" data-confidence="${E(s.id)}" aria-label="${E(`Tu confianza en los datos de ${name(s)}, código ${s.id}`)}"><option value=""${current === undefined ? " selected" : ""}>Sin valorar</option>${Array.from(
-        { length: 11 },
-        (_, i) => i - 5,
-      )
-        .map(
-          (v) =>
-            `<option value="${v}"${v === current ? " selected" : ""}>${v > 0 ? "+" : ""}${v}</option>`,
-        )
-        .join("")}</select>`;
+      const unrated = current === undefined;
+      const actionLabel = unrated
+        ? `Valorar como neutra (0) la confianza en los datos de ${s.id}`
+        : `Quitar valoración de confianza de ${s.id}`;
+      return `<div class="confidence-control${unrated ? " is-unrated" : ""}"><input class="confidence-slider" type="range" min="-5" max="5" step="1" value="${current ?? 0}" data-confidence="${E(s.id)}" aria-label="${E(`Tu confianza en los datos de ${s.id}`)}" aria-valuetext="${confidenceLabel(current)}"><span class="confidence-value">${confidenceLabel(current)}</span><button class="confidence-action" type="button" data-confidence-action="${E(s.id)}" aria-label="${E(actionLabel)}" title="${unrated ? "Marcar 0 (neutra)" : "Quitar valoración"}">${unrated ? "0" : "×"}</button></div>`;
     }
     const key = JSON.stringify([s.id, col.key]);
     const reaction = review.cells.get(key);
@@ -1075,6 +1109,10 @@
     if (note.textContent !== message) note.textContent = message;
   }
   $("report").addEventListener("input", (event) => {
+    if (event.target.matches('input[type="range"][data-confidence]')) {
+      previewConfidence(event.target);
+      return;
+    }
     const form = event.target.closest("form[data-sheet-feedback]");
     if (form) saveFeedbackDraft(form);
   });

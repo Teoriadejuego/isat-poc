@@ -1,5 +1,9 @@
 # Prompts de revisión de ISAT
 
+## Actualización 0.7.1: lista más compacta
+
+Retira la etiqueta repetida «Petición propia o ≥2 menciones» de las filas y usa «Peticiones y menciones de ayuda» en el filtro, conservando el criterio y la ordenación. Sustituye el selector de confianza por un pequeño deslizador de −5 a +5. Distingue una valoración neutra de una no realizada, permite marcar cero y quitar la valoración, y actualiza el número durante el arrastre sin reconstruir el control. Conserva la revisión al cambiar de vista y retírala al sustituir o cerrar la consulta. Comprueba extremos, cero, ausencias, ordenación, foco, teclado y visualización.
+
 ## Actualización 0.7.0 aprobada: red individual y marcado de ayuda
 
 **Implementación.** Incorporar la red de relaciones revisada en local al final de «Ver más indicadores», cerrado inicialmente. Mostrar códigos del Excel, sin nombres generados ni columnas nuevas. Leer las valoraciones registradas en `redes1` o `redes2` según la ruta y resolver los alias existentes. Incluir estudiantes de cualquier clase presente en el archivo. Las flechas salen de quien valora y llegan a la persona valorada; preservar signos e intensidades diferentes en ambos sentidos. Azul para Buena/Muy buena y rojo para Mala/Muy mala, con mayor grosor para «Muy». No utilizar predicciones o menciones de ayuda para construir esta red. Retirar filtros de signo y dirección y tabla de detalle; conservar leyenda, etiquetas, ampliación y navegación a la ficha de cada código. Distinguir otra clase con un borde discontinuo y explicar el alcance de archivo frente a indicadores por clase.

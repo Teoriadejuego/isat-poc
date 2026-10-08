@@ -179,6 +179,114 @@ test("reacciones editables y confianza neutra se mantienen al cambiar de vista y
   assert.doesNotMatch(cell(app, "S01", "requested").textContent, /Revisar/);
 });
 
+test("lista sin etiqueta repetida y deslizador que distingue sin valorar de cero", async (t) => {
+  const app = createApp(t);
+  await app.load(listFixture());
+  app.get("tab-list").click();
+  assert.doesNotMatch(
+    app.get("report").textContent,
+    /Petición propia o ≥2 menciones/,
+  );
+  assert.equal(doc(app).querySelector(".list-priority"), null);
+  const slider = doc(app).querySelector('[data-confidence="S01"]');
+  assert.equal(slider.type, "range");
+  assert.equal(slider.min, "-5");
+  assert.equal(slider.max, "5");
+  assert.equal(slider.step, "1");
+  assert.equal(slider.getAttribute("aria-valuetext"), "Sin valorar");
+  assert.equal(app.get("review-open").disabled, true);
+  doc(app).querySelector('[data-confidence-action="S01"]').click();
+  assert.equal(
+    doc(app)
+      .querySelector('[data-confidence="S01"]')
+      .getAttribute("aria-valuetext"),
+    "0",
+  );
+  assert.equal(app.get("review-open").textContent, "Mi revisión (1)");
+  app.get("review-open").click();
+  assert.match(app.get("review-content").textContent, /S010/);
+  app.get("summary-close").click();
+  doc(app).querySelector('[data-confidence-action="S01"]').click();
+  assert.equal(
+    doc(app)
+      .querySelector('[data-confidence="S01"]')
+      .getAttribute("aria-valuetext"),
+    "Sin valorar",
+  );
+  assert.equal(app.get("review-open").disabled, true);
+  changeElement(app, app.get("list-scope"), "care");
+  assert.deepEqual(ids(app), ["S01", "S03"]);
+});
+
+test("arrastrar actualiza confianza sin reconstruir el control y conserva el último valor", async (t) => {
+  const app = createApp(t);
+  await app.load(listFixture());
+  app.get("tab-list").click();
+  const slider = doc(app).querySelector('[data-confidence="S01"]');
+  for (const value of ["-5", "0", "5"]) {
+    slider.value = value;
+    slider.dispatchEvent(new app.window.Event("input", { bubbles: true }));
+    assert.equal(doc(app).querySelector('[data-confidence="S01"]'), slider);
+    assert.equal(
+      slider.getAttribute("aria-valuetext"),
+      value === "5" ? "+5" : value,
+    );
+    assert.equal(
+      slider.closest(".confidence-control").classList.contains("is-unrated"),
+      false,
+    );
+    assert.match(
+      doc(app)
+        .querySelector('[data-confidence-action="S01"]')
+        .getAttribute("aria-label"),
+      /Quitar/,
+    );
+    assert.equal(app.get("review-open").textContent, "Mi revisión (1)");
+  }
+  app.get("tab-group").click();
+  app.get("tab-list").click();
+  assert.equal(doc(app).querySelector('[data-confidence="S01"]').value, "5");
+  assert.equal(
+    doc(app)
+      .querySelector('[data-confidence="S01"]')
+      .getAttribute("aria-valuetext"),
+    "+5",
+  );
+  await app.load(listFixture());
+  app.get("tab-list").click();
+  assert.equal(
+    doc(app)
+      .querySelector('[data-confidence="S01"]')
+      .getAttribute("aria-valuetext"),
+    "Sin valorar",
+  );
+  assert.equal(app.get("review-open").disabled, true);
+});
+
+test("confianza ordena ambos extremos y cero, y al quitarla pasa a las ausencias", async (t) => {
+  const app = createApp(t);
+  await app.load(listFixture());
+  app.get("tab-list").click();
+  for (const [id, value] of [
+    ["S01", "-5"],
+    ["S02", "0"],
+    ["S03", "5"],
+  ])
+    changeElement(
+      app,
+      doc(app).querySelector(`[data-confidence="${id}"]`),
+      value,
+    );
+  sort(app, "confidence");
+  assert.deepEqual(ids(app), ["S01", "S02", "S03", "S04"]);
+  sort(app, "confidence");
+  assert.deepEqual(ids(app), ["S03", "S02", "S01", "S04"]);
+  doc(app).querySelector('[data-confidence-action="S03"]').click();
+  assert.deepEqual(ids(app), ["S02", "S01", "S03", "S04"]);
+  assert.equal(doc(app).activeElement.dataset.confidence, "S03");
+  assert.equal(app.get("review-open").textContent, "Mi revisión (2)");
+});
+
 test("cierre muestra revisión codificada, retira fichas y al cerrar el resumen no queda contenido", async (t) => {
   const app = createApp(t);
   await app.load(listFixture());

@@ -1,5 +1,13 @@
 # Revisión de ISAT
 
+## Actualización 0.7.1: lista más compacta
+
+Se retira «Petición propia o ≥2 menciones» de las filas de estudiantes y se cambia la etiqueta del filtro a «Peticiones y menciones de ayuda». El criterio, los recuentos y la prioridad de consulta se conservan.
+
+La confianza se valora con un pequeño deslizador de −5 a +5 y su número se actualiza durante el arrastre sin reconstruir el control. El estado inicial permanece «Sin valorar»: no se guarda un cero por defecto. El botón 0 permite marcar una confianza neutra y × permite retirarla. Se conservan la ordenación numérica, las ausencias al final, el foco y las valoraciones durante la consulta; sustituir o cerrar los datos las retira.
+
+Verificación: **92 pruebas automáticas superadas**. En navegador local se comprobó el cuestionario aportado, la ausencia de la etiqueta, los controles por teclado, la retirada y el cero explícito, y la conservación al cambiar de vista. A 320 píxeles la tabla se desplaza dentro de su región, los controles caben en las celdas y la página no desborda. Sin errores de consola. El artefacto público sigue limitado a once recursos, sin archivos de datos ni capturas.
+
 ## Actualización 0.7.0: red individual y marcado de ayuda
 
 Se incorporan los cambios aprobados de la copia local. Las fichas y listas utilizan los códigos del archivo. La red individual incluye valoraciones entre estudiantes de cualquier clase presente en el Excel y permite abrir sus fichas, actualizando estudio y clase cuando corresponde. Cada flecha conserva dirección, categoría e intensidad; las valoraciones en ambos sentidos tienen trayectos separados. El dibujo aparece al final de «Ver más indicadores», sin selectores de relaciones o dirección ni tabla de detalle. Conserva la leyenda y la ampliación. Un borde discontinuo identifica otra clase; el texto distingue el alcance de archivo de la red del alcance por clase de los indicadores existentes.
