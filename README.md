@@ -4,7 +4,14 @@ Visualizador ISAT centrado en las peticiones propias y las menciones de ayuda pa
 
 **Abrir ISAT:** https://teoriadejuego.github.io/isat-poc/
 
-## Entrega del prototipo · 0.9.2
+## Entrega del prototipo · 0.10.0
+
+La revisión de octubre adapta a ISAT las mejoras útiles de PBIS 0.10.6: consulta más compacta, explicaciones a demanda y comparación de relaciones con la media de la clase. Conserva todas las preguntas que ya mostraba el visualizador.
+
+- **Del dato a la ficha:** los indicadores de bienestar y adaptación académica abren la lista exacta de estudiantes que representan. La respuesta correspondiente se muestra en una columna y el filtro se conserva al recorrer sus fichas.
+- **Referencia de clase:** el resumen individual compara cuatro recuentos de relaciones con la media de los valores disponibles de su clase. Cada medida conserva su propia base; los pendientes no se convierten en ceros. El desplegable explica las bases y el alcance de la comparación.
+- **Lectura directa:** ayuda primero, bienestar y relaciones a continuación. Las diez preguntas académicas se organizan en organización y participación, dificultades y continuidad de los estudios. Se mantienen predicciones, contactos, red e historia.
+- **Explicaciones sin repetición:** denominadores y predicciones pendientes permanecen junto a sus cifras. La guía y los desplegables reúnen las definiciones; la nota de participación continúa al final de cada vista.
 
 **Predicciones:** se muestran los aciertos confirmados sobre las predicciones verificables. Si falta comprobar alguna, aparece un asterisco y su número pendiente. Sin ninguna verificable se muestra «0* de 0 verificables»: no significa que las predicciones hayan fallado. Una selección vacía confirmada muestra «No hizo predicciones». Cuando falta una respuesta propia interpretable, permanece «Pendiente». Las predicciones ya disponibles se evalúan aunque la encuesta siga en curso.
 
@@ -18,7 +25,7 @@ ISAT permite a la Unidad de Cuidado del Estudiante consultar las peticiones prop
 
 1. Abre la web, selecciona tu Excel y la hoja **Users**.
 2. Elige una clase. Revisa los dos recuentos de ayuda y su matriz; no sumes las fuentes, porque pueden coincidir.
-3. Pulsa **Revisar estas fichas**. La lista muestra únicamente petición propia o menciones de dos o más personas.
+3. Pulsa **Ver estudiantes** en el bloque de ayuda. La lista muestra únicamente petición propia o menciones de dos o más personas. Los indicadores de bienestar y adaptación académica también permiten abrir sus listas.
 4. Abre un código y avanza con **Anterior / Siguiente**, manteniendo el filtro y el orden. Vuelve a la lista para comparar o valorar datos.
 5. Amplía **Ver más indicadores** cuando necesites contexto. Consulta **Mi revisión** antes de cerrar.
 
@@ -32,7 +39,7 @@ La guía integrada se organiza en tres pasos y aclaraciones desplegables. La fic
 
 1. Selecciona un archivo `.xlsx` o `.xls` de hasta 20 MB.
 2. Elige la hoja `Users` del cuestionario y pulsa **Abrir fichas**.
-3. Al abrir las fichas se oculta la carga de datos. Elige **Ficha de grupo**, **Lista de estudiantes** o **Ficha individual** y selecciona la clase/titulación. **Datos cargados** vuelve al Excel; **Volver a la consulta** conserva la vista y las valoraciones si no cambias el archivo ni la hoja.
+3. Al abrir las fichas se oculta la carga de datos. Elige **Grupo**, **Lista** o **Estudiante** y selecciona la clase/titulación. **Datos cargados** vuelve al Excel; **Volver a la consulta** conserva la vista y las valoraciones si no cambias el archivo ni la hoja.
 4. Consulta el estado destacado de la encuesta: completada, en curso o sin inicio registrado.
    En **Peticiones y menciones de ayuda** verás los casos de la clase para la Unidad de Cuidado del Estudiante. **Ver ficha individual** abre la ficha individual; **Volver a la ficha de clase** regresa al mismo grupo. Las celdas de la matriz con estudiantes abren su lista filtrada; también puedes consultar quienes tienen datos de ayuda incompletos, sin tratarlos como respuestas «No».
    La ficha individual muestra primero petición propia, número de personas que indican necesidad de ayuda y un resumen de bienestar y relaciones. **Ver más indicadores** abre relaciones, predicciones, contactos y adaptación académica; la red de relaciones es su último bloque. La apertura se recuerda por estudiante durante la consulta. La historia queda fuera del desplegable, al final de la ficha. La cabecera, el borde y el bloque de ayuda se destacan en rojo cuando la petición propia es **Sí** o hay **más de dos menciones** (tres en adelante). Este marcado visual no cambia el criterio del listado de dos o más menciones ni constituye un diagnóstico.

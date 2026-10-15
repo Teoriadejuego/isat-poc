@@ -34,15 +34,15 @@ test("una única nota por vista con porcentaje de finalización por clase, sin c
     );
     assert.match(
       notes[0].textContent,
-      /33,3 % de la clase \(1 de 3 estudiantes\)/,
+      /Encuesta completada: 33,3 % · 1 de 3 estudiantes/,
     );
     assert.match(notes[0].textContent, /encuestas en curso/);
-    assert.match(notes[0].textContent, /pueden cambiar/);
+    assert.match(notes[0].textContent, /Pueden cambiar/);
   }
   app.change("class", '["1","Control","B"]');
   assert.match(
     app.get("report").querySelector(".participation-note").textContent,
-    /100 % de la clase \(1 de 1 estudiante\)/,
+    /Encuesta completada: 100 % · 1 de 1 estudiante/,
   );
   app.get("clear").click();
   assert.equal(app.get("report").querySelector(".participation-note"), null);
@@ -69,14 +69,14 @@ test("respuestas parciales y de encuestas en curso aportan vínculos, reciprocid
   await app.load(table);
   app.get("tab-student").click();
   for (const title of [
-    "Relaciones positivas declaradas",
-    "Relaciones positivas recíprocas observadas",
+    "Positivas declaradas",
+    "Positivas recíprocas",
     "Aciertos de predicciones positivas",
   ])
     assert.equal(metric(app, title).querySelector("strong").textContent, "1");
   assert.match(
     app.get("report").querySelector(".participation-note").textContent,
-    /0 % de la clase/,
+    /Encuesta completada: 0 % · 0 de 3 estudiantes/,
   );
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
 });
@@ -92,17 +92,15 @@ test("finalización al 100 % no convierte falta de respuestas en cero ni predicc
   app.get("tab-student").click();
   assert.match(
     app.get("report").querySelector(".participation-note").textContent,
-    /100 % de la clase/,
+    /Encuesta completada: 100 % · 2 de 2 estudiantes/,
   );
   assert.equal(
-    metric(app, "Relaciones positivas recibidas observadas").querySelector(
-      "strong",
-    ).textContent,
+    metric(app, "Positivas recibidas").querySelector("strong").textContent,
     "1",
   );
   for (const title of [
-    "Relaciones positivas declaradas",
-    "Relaciones positivas recíprocas observadas",
+    "Positivas declaradas",
+    "Positivas recíprocas",
     "Aciertos de predicciones positivas",
   ])
     assert.equal(

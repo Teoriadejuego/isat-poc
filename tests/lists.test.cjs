@@ -145,7 +145,7 @@ test("se muestran códigos y ficha y retorno conservan búsqueda y filtro", asyn
   assert.equal(app.get("student").value, "S02");
   assert.match(
     doc(app).querySelector(".student-care").textContent,
-    /Petición propia de ayudaNo/,
+    /Ha pedido ayudaNo/,
   );
   assert.match(
     doc(app).querySelector("[data-return-class]").textContent,

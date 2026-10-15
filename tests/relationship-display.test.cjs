@@ -38,12 +38,22 @@ test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t
   await openStudent(app, relationsFixture());
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.match(
-    app.get("report").querySelector(".participation-note").textContent,
+    app.get("help-dialog").textContent.replace(/\s+/g, " "),
     /no equivale a cero ni a «No»/,
   );
-  const declared = ownMetric(app, "Relaciones positivas declaradas");
+  const declared = ownMetric(app, "Positivas declaradas");
   assert.equal(declared.querySelector("strong").textContent, "0");
-  assert.match(declared.textContent, /Buena o Muy buena/);
+  const readingNote = declared
+    .closest(".section-panel")
+    .querySelector("details.reading-note");
+  assert.match(
+    readingNote.textContent,
+    /Positivas: Buena o Muy buena relación/,
+  );
+  assert.match(
+    readingNote.textContent,
+    /recíprocas: valoración en ambos sentidos/,
+  );
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
   assert.equal(positive.querySelector("strong").textContent, "3");
   assert.equal(
@@ -52,10 +62,7 @@ test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t
   );
   assert.match(positive.textContent, /8 predicciones emitidas/);
   assert.doesNotMatch(positive.textContent, /pendientes de comprobación/);
-  assert.match(
-    app.get("report").querySelector(".prediction-intro").textContent,
-    /respuestas de esas personas/,
-  );
+  assert.match(readingNote.textContent, /respuestas de esas personas/);
   const negative = ownMetric(app, "Aciertos de predicciones negativas");
   assert.equal(
     negative.querySelector("strong").textContent,
@@ -78,7 +85,7 @@ test("sin respuestas para verificar muestra cero aciertos confirmados y todas pe
     positive.querySelector(".metric-line span").textContent,
     "de 0 verificables",
   );
-  assert.match(positive.textContent, /1 de sus predicciones está pendiente/);
+  assert.match(positive.textContent, /1 predicción pendiente de comprobar/);
 });
 
 test("aciertos parciales positivos y negativos usan solo respuestas verificables y muestran pendientes", async (t) => {
@@ -113,7 +120,7 @@ test("aciertos parciales positivos y negativos usan solo respuestas verificables
       .getAttribute("aria-describedby");
     assert.match(
       app.get(noteId).textContent,
-      /1 de sus predicciones está pendiente/,
+      /1 predicción pendiente de comprobar/,
     );
   }
   app.change("student", "P004");
@@ -137,8 +144,7 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
   ]);
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.equal(
-    ownMetric(app, "Relaciones positivas declaradas").querySelector("strong")
-      .textContent,
+    ownMetric(app, "Positivas declaradas").querySelector("strong").textContent,
     "0",
   );
   assert.equal(
@@ -149,8 +155,7 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
   app.change("student", "P002");
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.equal(
-    ownMetric(app, "Relaciones positivas declaradas").querySelector("strong")
-      .textContent,
+    ownMetric(app, "Positivas declaradas").querySelector("strong").textContent,
     "0",
   );
   assert.equal(

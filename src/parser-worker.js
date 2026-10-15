@@ -1,5 +1,5 @@
 "use strict";
-importScripts("../vendor/xlsx.full.min.js", "core.js?v=0.9.1");
+importScripts("../vendor/xlsx.full.min.js", "core.js?v=0.10.0");
 let sheets = null;
 self.onmessage = function (event) {
   const { type, requestId } = event.data;

@@ -100,7 +100,7 @@ test("una selección vacía tras avanzar conserva las flechas recibidas sin inve
       m.students.find((s) => s.id === "R013"),
       m.students,
     ),
-    /No hay relaciones positivas o negativas registradas/,
+    /Sin valoraciones positivas o negativas registradas/,
   );
 });
 test("solo se muestran códigos, se escapan los textos y las redes grandes no solapan nodos", () => {

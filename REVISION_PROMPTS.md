@@ -1,5 +1,15 @@
 # Prompts de revisión de ISAT
 
+## Actualización 0.10.0: experiencia de consulta y contraste con PBIS
+
+**Producto y redacción:** audita PBIS y adapta únicamente las mejoras compatibles con ISAT. Conserva las preguntas del visualizador y el significado del cuestionario. Acorta títulos e instrucciones, concentra explicaciones en la guía y desplegables, y conserva los denominadores, las predicciones pendientes y una nota final de participación.
+
+**Navegación:** conecta cada indicador de bienestar y adaptación académica con su lista de estudiantes, compartiendo el mismo criterio que el cálculo agregado. Muestra la respuesta correspondiente y conserva selección, orden, navegación y revisión al abrir fichas y regresar.
+
+**Contexto individual:** compara los recuentos de relaciones del estudiante con la media de los valores disponibles de su propia clase, sin convertir ausencias en cero ni añadir escalas. Expón la base por medida. Organiza las diez preguntas académicas en tres bloques sin suprimir respuestas. Mantén ayuda, relaciones, predicciones, contactos, red e historia.
+
+**Verificación:** contrasta en privado las dos exportaciones del 15 de octubre, originales intactos. Comprueba las 30 clases y 1.547 fichas, los filtros, las medias, los datos pendientes y el cierre. Publica exclusivamente código y documentación, sin Excel, historias, códigos reales ni capturas de consulta.
+
 ## Actualización 0.9.2: aciertos y comprobaciones pendientes
 
 Presenta los aciertos confirmados con las respuestas disponibles, incluso si todavía hay predicciones sin verificar. Añade asterisco y número pendiente; si ninguna es verificable, muestra cero aciertos confirmados sobre cero verificables, sin convertir los pendientes en errores. Sustituye No procede por No hizo predicciones para una selección vacía confirmada. Conserva Pendiente si falta la respuesta propia. Comprueba ambos signos, cero verificables, respuestas parciales y actualización al cambiar estudiante.

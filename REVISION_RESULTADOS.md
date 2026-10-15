@@ -1,5 +1,17 @@
 # Revisión de ISAT
 
+## Actualización 0.10.0 · 15 de octubre de 2026
+
+Se contrasta PBIS 0.10.6 sin alterar sus cambios locales. Se trasladan la comparación contextual con la clase y las explicaciones a demanda; no se trasladan preguntas, escalas ni filtros de acoso que no corresponden al cuestionario ISAT.
+
+Los siete indicadores de bienestar y adaptación académica abren listas que comparten la definición del recuento agregado. Se muestra la respuesta correspondiente aunque las columnas adicionales estén cerradas. La ficha individual compara cuatro medidas de relaciones con la media de los valores numéricos disponibles de la misma clase. Cada medida conserva su base y excluye ausencias, sin excluir ceros.
+
+La carga, las pestañas y las instrucciones se simplifican. Las diez preguntas académicas se agrupan en organización y participación, dificultades y continuidad de los estudios. Se mantienen ayuda, participación, bienestar, relaciones, predicciones, contactos, red e historia. Las aclaraciones se concentran en desplegables y guía; los denominadores y asteriscos siguen junto a las cifras, y la participación al final de cada vista.
+
+Las dos exportaciones privadas del 15 de octubre importan correctamente: 30 clases y 1.547 registros. La auditoría independiente supera 20.111 comprobaciones de relaciones y predicciones; reconcilia las peticiones y menciones de ayuda con la matriz, las listas y las fichas. Un token de relación no interpretable se descarta y se notifica, sin convertirlo en una respuesta válida. Los originales no se modifican ni se incluyen en la publicación.
+
+Verificación final: **117 pruebas automáticas superadas**. En los libros reales se contrastan 210 combinaciones de clase e indicador, 1.032 filas en listas filtradas y 240 valores individuales y de media de clase. Se corrige el orden por columna oculta al regresar desde un filtro académico a la lista completa. Revisión en navegador de ambos archivos, navegación y retorno, escritorio y móvil de 320 px sin desbordamiento de página; consola sin errores. El artefacto público conserva once recursos, sin datos ni capturas de la consulta.
+
 ## Actualización 0.9.2 · 9 de octubre de 2026
 
 La ficha muestra los aciertos confirmados y su denominador verificable, con asterisco y número de comprobaciones pendientes. Cero verificables se presenta como 0* de 0, conservando el valor ausente original en el modelo y sin crear fallos. Las selecciones vacías confirmadas muestran No hizo predicciones; falta de respuesta permanece Pendiente. Se verifican predicciones positivas y negativas, datos de una encuesta en curso y cambio a otra ficha. **106 pruebas automáticas superadas**.

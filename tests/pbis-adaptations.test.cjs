@@ -72,8 +72,8 @@ test("resumen conserva ausencias y explicaciones añadidas de relaciones y predi
   const overview = doc(app).querySelector(".student-overview");
   assert.match(overview.textContent, /Positivas declaradas0/);
   assert.match(
-    doc(app).querySelector(".participation-note").textContent,
-    /no equivale a cero/,
+    app.get("help-dialog").textContent.replace(/\s+/g, " "),
+    /«Pendiente» indica que falta una respuesta necesaria; no equivale a cero ni a «No»/,
   );
   const details = doc(app).querySelector(".expanded-indicators");
   details.open = true;

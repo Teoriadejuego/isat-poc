@@ -73,6 +73,45 @@
   });
   const recognized = (field, value) =>
     categories[field]?.find((label) => norm(label) === norm(value)) ?? null;
+  const indicatorRules = Object.freeze({
+    loneliness: { field: "alone", read: frequency, matches: (v) => v >= 3 },
+    lowEnjoyment: { field: "fun", read: frequency, matches: (v) => v <= 1 },
+    lowUniversity: {
+      field: "general",
+      read: frequency,
+      matches: (v) => v <= 1,
+    },
+    difficulty: {
+      field: "difficulty",
+      read: yesNo,
+      matches: (v) => v === "Sí",
+    },
+    dropout: {
+      field: "dropout",
+      read: (v) => recognized("dropout", v),
+      matches: (v) => v !== "No",
+    },
+    time: {
+      field: "time",
+      read: (v) => recognized("time", v),
+      matches: (v) => ["Mal", "Muy mal"].includes(v),
+    },
+    workload: {
+      field: "workload",
+      read: (v) => recognized("workload", v),
+      matches: (v) => ["Alta", "Muy alta"].includes(v),
+    },
+  });
+  // A null result stays outside both the numerator and the valid-answer base.
+  function indicatorValue(student, key) {
+    if (!Object.hasOwn(indicatorRules, key)) return null;
+    const rule = indicatorRules[key],
+      value = rule.read(student?.responses?.[rule.field]);
+    return value === null || value === undefined ? null : rule.matches(value);
+  }
+  function indicatorMatches(student, key) {
+    return indicatorValue(student, key) === true;
+  }
   const ratio = (n, d) =>
     n === null || !d ? null : Math.round((100 * n) / d) / 10;
   const FIELDS = Object.freeze({
@@ -680,11 +719,13 @@
   }
   function summary(rows) {
     const n = rows.length;
-    const rate = (getter, predicate) => {
+    const rate = (key) => {
       const values = rows
-        .map(getter)
+        .map((s) => indicatorValue(s, key))
         .filter((v) => v !== null && v !== undefined);
-      const count = values.length ? values.filter(predicate).length : null;
+      const count = values.length
+        ? values.filter((v) => v === true).length
+        : null;
       return {
         count,
         denominator: values.length,
@@ -730,34 +771,13 @@
       started: rows.filter((s) => s.status === "En curso").length,
       notStarted: rows.filter((s) => s.status === "Sin iniciar").length,
       relationCoverage: relationRows.length,
-      loneliness: rate(
-        (s) => frequency(s.responses.alone),
-        (v) => v >= 3,
-      ),
-      lowEnjoyment: rate(
-        (s) => frequency(s.responses.fun),
-        (v) => v <= 1,
-      ),
-      lowUniversity: rate(
-        (s) => frequency(s.responses.general),
-        (v) => v <= 1,
-      ),
-      difficulty: rate(
-        (s) => yesNo(s.responses.difficulty),
-        (v) => v === "Sí",
-      ),
-      dropout: rate(
-        (s) => recognized("dropout", s.responses.dropout),
-        (v) => v !== "No",
-      ),
-      time: rate(
-        (s) => recognized("time", s.responses.time),
-        (v) => ["Mal", "Muy mal"].includes(v),
-      ),
-      workload: rate(
-        (s) => recognized("workload", s.responses.workload),
-        (v) => ["Alta", "Muy alta"].includes(v),
-      ),
+      loneliness: rate("loneliness"),
+      lowEnjoyment: rate("lowEnjoyment"),
+      lowUniversity: rate("lowUniversity"),
+      difficulty: rate("difficulty"),
+      dropout: rate("dropout"),
+      time: rate("time"),
+      workload: rate("workload"),
       rejection: {
         count: rejectionCount,
         denominator: peerSlots,
@@ -792,6 +812,7 @@
   return Object.freeze({
     parseTable,
     summary,
+    indicatorMatches,
     careSummary,
     careCategory,
     answer,

@@ -208,7 +208,14 @@ test("frecuencias válidas se normalizan y respuestas desconocidas siguen visibl
   assert.equal(a.lowEnjoyment.denominator, 1);
   const app = createApp(t);
   await app.load(table);
-  assert.match(app.get("consultation-quality").textContent, /2 incidencias/);
+  assert.match(
+    app.get("consultation-quality").textContent,
+    /2 elementos no se han podido interpretar/,
+  );
+  app.get("show-data").click();
+  assert.equal(app.get("data-screen").hidden, false);
+  assert.match(app.get("quality").textContent, /2 incidencias de lectura/);
+  app.get("back-consultation").click();
   app.get("tab-student").click();
   assert.match(
     doc(app).querySelector(".student-overview").textContent,
@@ -268,7 +275,8 @@ test("opciones múltiples se muestran separadas, sin duplicados ni HTML ejecutab
   app.get("tab-student").click();
   const cards = [...doc(app).querySelectorAll(".response-card")];
   const activities = cards.find(
-    (el) => el.querySelector("h4").textContent === "Actividades universitarias",
+    (el) =>
+      el.querySelector("h4, h5").textContent === "Actividades universitarias",
   );
   assert.deepEqual(
     [...activities.querySelectorAll("li")].map((el) => el.textContent),

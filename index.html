@@ -20,11 +20,11 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.9.1" />
-    <script src="src/core.js?v=0.9.1" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.10.0" />
+    <script src="src/core.js?v=0.10.0" defer></script>
     <link rel="stylesheet" href="src/ego-network.css?v=0.7.0" />
-    <script src="src/ego-network.js?v=0.7.0" defer></script>
-    <script src="src/app.js?v=0.9.2" defer></script>
+    <script src="src/ego-network.js?v=0.10.0" defer></script>
+    <script src="src/app.js?v=0.10.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -76,11 +76,10 @@
       <div id="data-screen">
         <div class="workspace-title">
           <span class="eyebrow">PASO 1 · CARGA DE DATOS</span>
-          <h1>Abre el cuestionario ISAT.</h1>
+          <h1>Acompañamiento del estudiante</h1>
           <p>
-            Selecciona el Excel del cuestionario ISAT. Consulta las peticiones
-            propias y las menciones de ayuda en tres vistas: grupo, lista de
-            estudiantes y ficha individual.
+            Carga el Excel de ISAT, consulta el grupo y recorre la lista para
+            conocer las peticiones de ayuda y la situación de cada estudiante.
           </p>
           <button
             id="back-consultation"
@@ -94,11 +93,8 @@
         <section class="upload-area" aria-labelledby="upload-title">
           <div class="upload-title">
             <div>
-              <h2 id="upload-title">Cuestionario ISAT</h2>
-              <p>
-                Selecciona el Excel y revisa la hoja que contiene las
-                respuestas.
-              </p>
+              <h2 id="upload-title">Carga tu cuestionario</h2>
+              <p>Elige el archivo y la hoja de respuestas.</p>
             </div>
             <span class="upload-badge" aria-hidden="true">EXCEL</span>
           </div>
@@ -121,8 +117,8 @@
             </button>
           </div>
           <p class="upload-note">
-            El Excel se procesa en este navegador y no se envía al servidor. El
-            archivo original no se modifica. Formatos .xlsx y .xls, hasta 20 MB.
+            El Excel se procesa en este navegador, sin enviarlo al servidor.
+            Formatos .xlsx y .xls, hasta 20 MB.
           </p>
           <p
             id="status"
@@ -136,8 +132,7 @@
       </div>
       <div id="consultation" hidden>
         <div class="consultation-heading">
-          <span class="eyebrow">PASO 2 · CONSULTA</span>
-          <h1>Consulta las peticiones y menciones de ayuda.</h1>
+          <h1>Ayuda y acompañamiento</h1>
           <p id="dataset-summary"></p>
           <p id="consultation-quality" class="quality-notice" role="note"></p>
         </div>
@@ -149,7 +144,7 @@
             aria-selected="true"
             aria-controls="report"
           >
-            Ficha de grupo</button
+            Grupo</button
           ><button
             id="tab-list"
             role="tab"
@@ -158,7 +153,7 @@
             aria-controls="report"
             tabindex="-1"
           >
-            Lista de estudiantes</button
+            Lista</button
           ><button
             id="tab-student"
             role="tab"
@@ -167,7 +162,7 @@
             aria-controls="report"
             tabindex="-1"
           >
-            Ficha individual
+            Estudiante
           </button>
         </div>
         <div id="filters" class="filters">
@@ -264,17 +259,15 @@
       <ol class="help-steps">
         <li>
           <strong>Carga el Excel.</strong> Elige la hoja Users y pulsa «Abrir
-          fichas». El archivo se lee en tu navegador.
+          fichas».
         </li>
         <li>
-          <strong>Empieza por el grupo.</strong> Consulta las peticiones de
-          ayuda. «Revisar estas fichas» abre los casos; cada celda de la matriz
-          abre su lista.
+          <strong>Consulta el grupo.</strong> Empieza por las peticiones de
+          ayuda. Abre su lista o pulsa una cifra de la matriz.
         </li>
         <li>
-          <strong>Abre cada ficha.</strong> Pulsa un código en la lista y avanza
-          con «Anterior» y «Siguiente». «Ver más indicadores» amplía la
-          información.
+          <strong>Recorre las fichas.</strong> Pulsa un código y avanza con
+          «Anterior» y «Siguiente». Amplía los indicadores cuando lo necesites.
         </li>
       </ol>
       <details class="help-reading">
@@ -285,17 +278,17 @@
           totales no se suman.
         </p>
         <p>
-          Las menciones abarcan todo el Excel, incluidas otras clases. Se
-          muestra su número, nunca quién las emitió. La matriz separa las
-          respuestas Sí, No y las peticiones propias pendientes.
+          Las menciones incluyen otras clases. Se muestra su número, nunca quién
+          las emitió. La matriz conserva por separado las peticiones propias
+          pendientes.
         </p>
       </details>
       <details class="help-reading">
         <summary>Cómo interpretar los indicadores</summary>
         <p>
-          «Pendiente» no equivale a cero ni a «No». Cada porcentaje muestra su
-          base de cálculo. La participación de la clase figura al final de cada
-          vista.
+          «Pendiente» indica que falta una respuesta necesaria; no equivale a
+          cero ni a «No». Los porcentajes se calculan con las respuestas
+          disponibles para cada pregunta.
         </p>
         <p>
           En las preguntas de seleccionar personas, un vacío cuenta como ninguna
@@ -303,17 +296,33 @@
           mismo caso cuenta como «No». Sin respuesta posterior, queda pendiente.
         </p>
         <p>
-          Más soledad es menos favorable; más disfrute y una mejor experiencia
-          universitaria son más favorables. Son tres respuestas independientes.
-        </p>
-        <p>
-          Los recuentos de relaciones se refieren a la clase; la red incluye
-          otras clases. Las predicciones se verifican con las respuestas de
-          otras personas, aunque falte la respuesta propia.
+          Soledad, disfrute y experiencia universitaria son tres respuestas
+          independientes. En soledad se destacan «Casi siempre» y «Siempre»; en
+          disfrute y experiencia universitaria, «Nunca» y «Casi nunca».
         </p>
         <p>
           La información orienta el acompañamiento; no establece diagnósticos ni
           decisiones automáticas.
+        </p>
+      </details>
+      <details class="help-reading">
+        <summary>Relaciones y predicciones</summary>
+        <p>
+          Las relaciones recibidas son las valoraciones de otras personas; las
+          declaradas, las que hace el estudiante; las recíprocas, las que
+          coinciden en ambos sentidos. Las positivas corresponden a «Buena» o
+          «Muy buena relación»; las negativas, a «Mala» o «Muy mala relación».
+        </p>
+        <p>
+          La media de la clase utiliza solo los recuentos disponibles de cada
+          medida, con su propia base de estudiantes. Es una referencia
+          descriptiva: no es una escala ni un umbral de alerta.
+        </p>
+        <p>
+          Las predicciones expresan cómo cree el estudiante que otras personas
+          valoran su relación. Los aciertos se comprueban con las respuestas de
+          esas personas, aunque falte la respuesta propia. El asterisco indica
+          que quedan predicciones por comprobar.
         </p>
       </details>
       <details class="help-reading">
@@ -329,10 +338,10 @@
           incluirlos.
         </p>
         <p>
-          Nada se envía. «Cerrar consulta» retira los datos y permite leer el
-          resumen de revisión antes de cerrarlo. Cambiar de archivo, salir de la
-          página o pasar 15 minutos sin actividad retira también la revisión. El
-          Excel original no se modifica.
+          «Cerrar consulta» retira los datos y permite leer el resumen de
+          revisión. Cambiar de archivo, salir de la página o pasar 15 minutos
+          sin actividad retira también la revisión. Nada se envía y el Excel
+          original no se modifica.
         </p>
       </details>
     </dialog>
