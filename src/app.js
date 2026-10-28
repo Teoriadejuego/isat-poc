@@ -106,6 +106,8 @@
     readingFile = false;
   }
   function removeModel() {
+    $("welcome-screen").hidden = true;
+    $("welcome-back").hidden = true;
     model = null;
     studentQuery = "";
     returnView = "group";
@@ -151,6 +153,7 @@
     $("sheet").disabled = false;
     $("open").disabled = true;
     $("clear").hidden = true;
+    $("welcome-back").hidden = false;
     $("report").setAttribute("aria-busy", "false");
     $("status").textContent =
       "Consulta cerrada. Se han retirado las fichas de esta página.";
@@ -163,6 +166,7 @@
   };
   function showData() {
     closeCellReview(false);
+    $("welcome-screen").hidden = true;
     $("data-screen").hidden = false;
     $("consultation").hidden = true;
     $("report").hidden = true;
@@ -171,6 +175,7 @@
   }
   function showConsultation() {
     if (!model) return;
+    $("welcome-screen").hidden = true;
     $("data-screen").hidden = true;
     $("consultation").hidden = false;
     $("report").hidden = false;
@@ -180,6 +185,13 @@
   }
   $("show-data").onclick = showData;
   $("back-consultation").onclick = showConsultation;
+  $("begin").onclick = showData;
+  $("welcome-back").onclick = () => {
+    if (hasSessionContent()) return;
+    $("data-screen").hidden = true;
+    $("welcome-screen").hidden = false;
+    $("begin").focus();
+  };
   function hasSessionContent() {
     return !!(
       model ||
@@ -255,7 +267,7 @@
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
       readingFile = false;
-      const parser = new Worker("src/parser-worker.js?v=0.11.1");
+      const parser = new Worker("src/parser-worker.js?v=0.12.0");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {

@@ -20,11 +20,11 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.11.1" />
-    <script src="src/core.js?v=0.11.1" defer></script>
-    <link rel="stylesheet" href="src/ego-network.css?v=0.11.1" />
-    <script src="src/ego-network.js?v=0.11.1" defer></script>
-    <script src="src/app.js?v=0.11.1" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.12.0" />
+    <script src="src/core.js?v=0.12.0" defer></script>
+    <link rel="stylesheet" href="src/ego-network.css?v=0.12.0" />
+    <script src="src/ego-network.js?v=0.12.0" defer></script>
+    <script src="src/app.js?v=0.12.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -73,7 +73,44 @@
           Continuar consulta
         </button>
       </aside>
-      <div id="data-screen">
+      <section id="welcome-screen" class="welcome" aria-labelledby="welcome-title">
+        <div class="welcome-hero">
+          <div class="welcome-copy">
+            <span class="eyebrow">ISAT · INFORMACIÓN PARA EL ACOMPAÑAMIENTO</span>
+            <h1 id="welcome-title">Comprender las relaciones.<br /><em>Acompañar a las personas.</em></h1>
+            <p>Una mirada de conjunto para conocer cada clase y atender las necesidades de sus estudiantes.</p>
+            <button id="begin" class="btn welcome-begin" type="button">Comenzar <span aria-hidden="true">→</span></button>
+            <span class="welcome-local">Tu archivo se procesa en este navegador.</span>
+          </div>
+          <div class="welcome-visual" aria-hidden="true">
+            <div class="visual-heading"><span>RELACIONES · PERSPECTIVA DE GRUPO</span><span class="visual-dot"></span></div>
+            <svg class="welcome-network" viewBox="0 0 460 345" fill="none">
+              <defs><pattern id="welcome-grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#8cd1e7" opacity=".2" /></pattern></defs>
+              <rect width="460" height="345" fill="url(#welcome-grid)" />
+              <circle cx="230" cy="170" r="133" stroke="#8cd1e7" stroke-opacity=".15" />
+              <circle cx="230" cy="170" r="83" stroke="#8cd1e7" stroke-opacity=".2" />
+              <g stroke="#8cd1e7" stroke-opacity=".42" stroke-width="1.5">
+                <path d="M92 111 175 67 229 155 92 111 136 224 229 155 328 90 368 208 229 155 270 275 136 224 175 67 328 90 270 275 368 208" />
+                <path d="m66 261 70-37m192-134 53-45M270 275l62 33M92 111 62 53" />
+              </g>
+              <g stroke="#8cd1e7" stroke-width="3"><path d="m175 67 54 88 99-65M136 224l93-69 139 53" /></g>
+              <g fill="#192a67" stroke="#8cd1e7" stroke-width="2">
+                <circle cx="92" cy="111" r="11" /><circle cx="175" cy="67" r="15" /><circle cx="136" cy="224" r="17" /><circle cx="328" cy="90" r="16" /><circle cx="368" cy="208" r="12" /><circle cx="270" cy="275" r="11" />
+              </g>
+              <circle cx="229" cy="155" r="29" fill="#8cd1e7" fill-opacity=".12" /><circle cx="229" cy="155" r="19" fill="#8cd1e7" /><circle cx="229" cy="155" r="6" fill="#192a67" />
+              <g fill="#8cd1e7"><circle cx="66" cy="261" r="4" /><circle cx="381" cy="45" r="4" /><circle cx="332" cy="308" r="4" /><circle cx="62" cy="53" r="4" /></g>
+            </svg>
+            <div class="visual-footer"><span>Observar. Conectar. Acompañar.</span><span>ISAT</span></div>
+          </div>
+        </div>
+        <div class="welcome-path" aria-label="Tres formas de consultar los datos">
+          <div><span class="path-number">01</span><h2>La clase</h2><p>Necesidades de apoyo y relaciones del grupo.</p></div>
+          <div><span class="path-number">02</span><h2>La lista</h2><p>Una vista para comparar y priorizar la consulta.</p></div>
+          <div><span class="path-number">03</span><h2>Cada estudiante</h2><p>Su situación, sus vínculos y su propia historia.</p></div>
+        </div>
+      </section>
+      <div id="data-screen" hidden>
+        <button id="welcome-back" class="back-to-class" type="button">← Inicio</button>
         <div class="workspace-title">
           <span class="eyebrow">PASO 1 · CARGA DE DATOS</span>
           <h1>Acompañamiento del estudiante</h1>

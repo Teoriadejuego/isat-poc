@@ -71,7 +71,16 @@ function changeElement(app, element, value) {
 
 test("carga y consulta son pantallas separadas; volver a datos conserva la vista", async (t) => {
   const app = createApp(t);
+  assert.equal(app.get("welcome-screen").hidden, false);
+  assert.equal(app.get("data-screen").hidden, true);
+  app.get("begin").click();
+  assert.equal(app.get("welcome-screen").hidden, true);
   assert.equal(app.get("data-screen").hidden, false);
+  assert.equal(doc(app).activeElement, app.get("file"));
+  app.get("welcome-back").click();
+  assert.equal(app.get("welcome-screen").hidden, false);
+  assert.equal(app.get("data-screen").hidden, true);
+  app.get("begin").click();
   assert.equal(app.get("report").hidden, true);
   await app.load(listFixture());
   assert.equal(app.get("data-screen").hidden, true);
