@@ -120,6 +120,23 @@ Dirección local: `http://127.0.0.1:8892/`. Para servir la aplicación no hacen 
 Si GitHub no consigue asignar un servidor de ejecución, **Actions → Publicar ISAT → Run workflow** permite seleccionar `macos-15` como alternativa a `ubuntu-latest`. Ambos recorridos ejecutan las pruebas y verifican los mismos once recursos antes del despliegue.
 
 jsdom se utiliza únicamente en las pruebas. SheetJS 0.20.3 se distribuye localmente con su licencia en `vendor/LICENSE-SheetJS.txt`. Los prompts y el cierre de revisión figuran en `REVISION_PROMPTS.md` y `REVISION_RESULTADOS.md`.
+# Resúmenes de universidad y grupo (0.13.0)
+
+Dos pestañas reúnen la matriz de ayuda y cuatro indicadores: peticiones propias,
+proporción de vínculos negativos entre positivos y negativos internos, bienestar
+medio (disfrute + experiencia universitaria + soledad invertida; tres respuestas
+completas, reescaladas a 0–10) e intención de dejar los estudios (cualquier Sí).
+El resumen universitario agrega personas y vínculos, sin promediar porcentajes
+de grupos. Incluye todos los centros presentes en la hoja cargada.
+
+Los destacados requieren al menos 10 respuestas y un 20 % del grupo en el
+indicador correspondiente. Este criterio de cobertura evita destacar resultados
+basados en una sola respuesta; no es un umbral clínico ni una prueba estadística.
+La comparación desplegable conserva todos los grupos y sus denominadores.
+Desde las tarjetas se abre el resumen del grupo, su ficha o su lista. Los datos
+ausentes se conservan como pendientes y los resúmenes se eliminan al retirar el
+archivo o cerrar la consulta.
+
 # Portada de la aplicación (0.12.0)
 
 La entrada presenta ISAT con la paleta azul y celeste de Loyola, una ilustración

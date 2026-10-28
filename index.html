@@ -20,11 +20,11 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.12.0" />
-    <script src="src/core.js?v=0.12.0" defer></script>
-    <link rel="stylesheet" href="src/ego-network.css?v=0.12.0" />
-    <script src="src/ego-network.js?v=0.12.0" defer></script>
-    <script src="src/app.js?v=0.12.0" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.13.0" />
+    <script src="src/core.js?v=0.13.0" defer></script>
+    <link rel="stylesheet" href="src/ego-network.css?v=0.13.0" />
+    <script src="src/ego-network.js?v=0.13.0" defer></script>
+    <script src="src/app.js?v=0.13.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -175,6 +175,10 @@
         </div>
         <div class="tabs" role="tablist" aria-label="Tipo de ficha">
           <button
+            id="tab-university" role="tab" class="tab" aria-selected="false" aria-controls="report" tabindex="-1"
+          >Resumen universidad</button><button
+            id="tab-overview" role="tab" class="tab" aria-selected="false" aria-controls="report" tabindex="-1"
+          >Resumen grupo</button><button
             id="tab-group"
             role="tab"
             class="tab"
@@ -205,7 +209,7 @@
         <div id="filters" class="filters">
           <label id="study-field" class="field" hidden
             >Centro o estudio<select id="study"></select></label
-          ><label class="field"
+          ><label id="class-field" class="field"
             >Clase o titulación<select id="class"></select></label
           ><label id="search-field" class="field" hidden
             >Buscar estudiante<input
@@ -299,8 +303,8 @@
           fichas».
         </li>
         <li>
-          <strong>Consulta el grupo.</strong> Empieza por las peticiones de
-          ayuda. Abre su lista o pulsa una cifra de la matriz.
+          <strong>Consulta los resúmenes.</strong> Compara la universidad y sus
+          grupos. Después abre la ficha del grupo, su lista o una cifra de la matriz.
         </li>
         <li>
           <strong>Recorre las fichas.</strong> Pulsa un código y avanza con

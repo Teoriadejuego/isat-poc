@@ -18,7 +18,9 @@
     activeCell = null,
     lastActivity = null,
     summaryReturn = null;
-  const viewTypes = ["group", "list", "student"];
+  const viewTypes = ["university", "overview", "group", "list", "student"];
+  let overviewSort = "negative";
+  const overviewCache = new Map();
   const PAGE_SIZE = 50;
   const IDLE_LIMIT = 15 * 60 * 1000;
   const expandedStudents = new Set();
@@ -106,6 +108,8 @@
     readingFile = false;
   }
   function removeModel() {
+    overviewCache.clear();
+    overviewSort = "negative";
     $("welcome-screen").hidden = true;
     $("welcome-back").hidden = true;
     model = null;
@@ -267,7 +271,7 @@
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
       readingFile = false;
-      const parser = new Worker("src/parser-worker.js?v=0.12.0");
+      const parser = new Worker("src/parser-worker.js?v=0.13.0");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -432,7 +436,10 @@
     $("report").removeAttribute("aria-label");
     $("report").tabIndex = 0;
     $("report").setAttribute("aria-labelledby", "tab-" + tab);
-    $("search-field").hidden = tab === "group";
+    $("search-field").hidden = !["list", "student"].includes(tab);
+    $("filters").hidden = tab === "university";
+    $("study-field").hidden = tab === "university" || new Set(model?.groups.map((g) => g.study)).size < 2;
+    $("class-field").hidden = tab === "university";
     $("student-field").hidden = tab !== "student";
     $("search").value = tab === "list" ? listState.query : studentQuery;
   }
@@ -571,6 +578,14 @@
     focusReport();
   }
   $("report").addEventListener("change", (event) => {
+    if (event.target.matches("[data-overview-sort]")) {
+      const expanded = event.target.closest("details")?.open;
+      overviewSort = event.target.value;
+      render();
+      $("report").querySelector(".snapshot-all-groups").open = !!expanded;
+      $("report").querySelector("[data-overview-sort]").focus();
+      return;
+    }
     const control = event.target.closest("[data-class-network]");
     if (!control || !model || tab !== "group") return;
     const panel = control.closest(".class-network");
@@ -582,6 +597,17 @@
     N.zoom(panel, "fit");
   });
   $("report").addEventListener("click", (event) => {
+    const overviewLink = event.target.closest("[data-overview-group]");
+    if (overviewLink && model) {
+      const target = model.groups.find((g) => g.key === overviewLink.dataset.overviewGroup);
+      if (!target) return;
+      $("study").value = target.study;
+      updateClasses();
+      $("class").value = target.key;
+      chooseTab(overviewLink.dataset.overviewView || "overview");
+      focusReport();
+      return;
+    }
     const step = event.target.closest("button[data-student-step]");
     if (step && !step.disabled && tab === "student") {
       const g = group(),
@@ -857,16 +883,16 @@
         : `<p class="care-empty">${unavailable}</p>`
     }<button class="btn secondary" type="button" data-open-list>Ver lista de la clase →</button>${readingNote("Qué casos aparecen", `<p>Petición propia o menciones de al menos dos personas. Cada estudiante aparece una vez.</p><p>Menciones a partir de ${care.peerRespondents} respuestas disponibles en todo el Excel, incluidas otras clases.</p>`)}</section>`;
   }
-  function careMatrix(matrix) {
+  function careMatrix(matrix, interactive = true) {
     const value = (scope, label) => {
       const count = matrix[scope];
       const available = matrix.known || matrix.pendingLow || matrix.pendingHigh;
       const content = `<strong>${available ? count : "Pendiente"}</strong><span>${label}</span>`;
-      return available && count > 0
+      return interactive && available && count > 0
         ? `<button type="button" class="matrix-count" data-care-scope="${scope}" aria-label="${E(`${label}: ${count} ${count === 1 ? "estudiante" : "estudiantes"}. Ver lista.`)}">${content}<span class="matrix-action" aria-hidden="true">Ver estudiantes →</span></button>`
         : content;
     };
-    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr>${matrix.pendingLow + matrix.pendingHigh ? `<tr class="matrix-pending"><th scope="row">Sin respuesta propia</th><td>${value("pendingLow", "0–1 menciones")}</td><td>${value("pendingHigh", "2 o más menciones")}</td></tr>` : ""}</tbody></table><p class="care-matrix-note">${matrix.known} con respuesta propia Sí/No; ${matrix.pendingLow + matrix.pendingHigh} sin respuesta propia.${matrix.missing > matrix.pendingLow + matrix.pendingHigh ? ` ${matrix.missing - matrix.pendingLow - matrix.pendingHigh} fuera de la matriz por falta de recuento de menciones.` : ""}</p>${matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Ver casos con datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
+    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr>${matrix.pendingLow + matrix.pendingHigh ? `<tr class="matrix-pending"><th scope="row">Sin respuesta propia</th><td>${value("pendingLow", "0–1 menciones")}</td><td>${value("pendingHigh", "2 o más menciones")}</td></tr>` : ""}</tbody></table><p class="care-matrix-note">${matrix.known} con respuesta propia Sí/No; ${matrix.pendingLow + matrix.pendingHigh} sin respuesta propia.${matrix.missing > matrix.pendingLow + matrix.pendingHigh ? ` ${matrix.missing - matrix.pendingLow - matrix.pendingHigh} fuera de la matriz por falta de recuento de menciones.` : ""}</p>${interactive && matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Ver casos con datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
   }
   function studentCare(s) {
     const care = s.care;
@@ -1345,6 +1371,58 @@
     ${section("04", "Participación y motivos", `<div class="distribution-grid">${["activities", "subjectReasons", "dropoutReasons"].map((f) => dist(f, a.distributions[f])).join("")}</div>${readingNote("Cómo leer las respuestas múltiples", "<p>Cada persona puede marcar varias opciones. Los porcentajes pueden sumar más del 100 %.</p>")}`)}
     </details>${N.classView(g.rows, model.students)}${sheetFeedback("group", g)}</div></article>`;
   }
+  function overviewData(key, rows) {
+    if (!overviewCache.has(key)) overviewCache.set(key, C.overviewSummary(rows));
+    return overviewCache.get(key);
+  }
+  function overviewMetrics(a) {
+    const card = (label, value, detail, key) => `<div class="snapshot-metric" data-snapshot-metric="${key}"><h3>${label}</h3><strong>${value}</strong><p>${detail}</p></div>`;
+    return `<div class="snapshot-metrics">${card("Peticiones propias de ayuda", num(a.care.selfRequests), `${a.care.selfAnswered} respuestas registradas`, "help")}${card("Vínculos negativos", pct(a.negativeLinks.percent), `${a.negativeLinks.count ?? 0} de ${a.negativeLinks.denominator} vínculos positivos o negativos`, "negative")}${card("Bienestar medio", a.wellbeing.mean === null ? "Sin datos" : `${num(a.wellbeing.mean)} <small>/ 10</small>`, `${a.wellbeing.denominator} estudiantes con las tres respuestas`, "wellbeing")}${card("Se plantean dejar los estudios", pct(a.dropout.percent), `${a.dropout.count ?? 0} de ${a.dropout.denominator} respuestas`, "dropout")}</div>`;
+  }
+  function overviewMethods() {
+    return readingNote("Cómo leer el resumen", "<p>Vínculos negativos: Mala o Muy mala relación, sobre los vínculos positivos y negativos registrados entre estudiantes de la misma clase; cada dirección cuenta una vez. No es la densidad de rechazo.</p><p>Bienestar: media de disfrute con sus amistades, experiencia en la universidad y soledad invertida, en escala de 0 a 10. Solo se incluyen estudiantes con las tres respuestas. Es un resumen descriptivo.</p><p>Dejar los estudios: cualquier respuesta afirmativa, incluida «alguna vez». Los porcentajes usan respuestas válidas; la ausencia de respuesta no equivale a cero.</p>");
+  }
+  function overviewHelp(a, interactive) {
+    return `<section class="snapshot-help"><div class="snapshot-section-title"><h3>Peticiones y menciones de ayuda</h3><p>${num(a.care.selfRequests)} peticiones propias · ${num(a.care.peerCases)} estudiantes con menciones de 2 o más personas</p></div>${careMatrix(a.care.matrix, interactive)}</section>`;
+  }
+  const overviewOrders = {
+    negative: { label: "Más vínculos negativos", value: (a) => a.negativeLinks.percent, descending: true },
+    wellbeing: { label: "Menor bienestar", value: (a) => a.wellbeing.mean, descending: false },
+    dropout: { label: "Más intención de dejar los estudios", value: (a) => a.dropout.percent, descending: true },
+    help: { label: "Mayor proporción de peticiones propias", value: (a) => a.care.selfAnswered ? 100 * a.care.selfRequests / a.care.selfAnswered : null, descending: true },
+  };
+  function overviewHighlights(groups) {
+    return `<section><div class="snapshot-section-title"><h3>Grupos que conviene revisar</h3><p>Destacados con al menos 10 respuestas y un 20 % del grupo en ese indicador. Todos los grupos están en la comparación.</p></div><div class="snapshot-groups">${["negative", "wellbeing", "dropout"].map((key) => {
+      const rule = overviewOrders[key];
+      const sorted = groups.filter(({a}) => {
+        const n = key === "negative" ? a.relationCoverage : key === "wellbeing" ? a.wellbeing.denominator : a.dropout.denominator;
+        return rule.value(a) !== null && n >= 10 && n / a.n >= .2;
+      }).sort((x, y) => (rule.descending ? rule.value(y.a) - rule.value(x.a) : rule.value(x.a) - rule.value(y.a)));
+      const first = sorted[0];
+      if (!first) return `<div class="snapshot-group"><h4>${rule.label}</h4><p>Aún no hay grupos con participación suficiente para destacar.</p></div>`;
+      const {g, a} = first, value = rule.value(a);
+      const ties = sorted.filter((item) => rule.value(item.a) === value).length - 1;
+      const denominator = key === "negative" ? `${a.negativeLinks.count} / ${a.negativeLinks.denominator} vínculos` : key === "wellbeing" ? `${a.wellbeing.denominator} estudiantes con las tres respuestas` : `${a.dropout.count} / ${a.dropout.denominator} respuestas`;
+      return `<div class="snapshot-group snapshot-highlight"><p class="eyebrow">${rule.label}</p><h4>${E(className(g))} · ${E(g.study)}</h4><strong>${num(value)}${key === "wellbeing" ? " / 10" : " %"}</strong><p>${denominator}</p><p>${pct(100 * a.completed / a.n)} de encuestas completadas${ties ? ` · ${ties} ${ties === 1 ? "grupo con el mismo valor" : "grupos con el mismo valor"}` : ""}</p><button class="btn secondary" type="button" data-overview-group="${E(g.key)}">Consultar grupo →</button></div>`;
+    }).join("")}</div></section>`;
+  }
+  function universityReport() {
+    const a = overviewData("university", model.students);
+    const rule = overviewOrders[overviewSort] || overviewOrders.negative;
+    const groups = model.groups.map((g) => ({ g, a: overviewData(g.key, g.rows) }));
+    groups.sort((x, y) => {
+      const left = rule.value(x.a), right = rule.value(y.a);
+      if (left === null || right === null) return left === right ? 0 : left === null ? 1 : -1;
+      return (rule.descending ? right - left : left - right) || x.g.key.localeCompare(y.g.key, "es");
+    });
+    const smallMetric = (label, value, basis) => `<div><dt>${label}</dt><dd>${value}</dd><span>${basis}</span></div>`;
+    return `<article class="report snapshot">${hero("La universidad en un vistazo", `${studentsLabel(a.n)} · ${model.groups.length} grupos · Todos los centros del Excel`, "Resumen universidad")}<div class="report-body">${overviewMetrics(a)}${overviewHelp(a, false)}${overviewHighlights(groups)}<details class="snapshot-all-groups"><summary>Comparar todos los grupos (${groups.length})</summary><section><div class="snapshot-section-title snapshot-ranking-title"><div><h3>Dónde mirar primero</h3><p>Compara los grupos y abre su resumen.</p></div><label class="field">Ordenar grupos por<select data-overview-sort>${Object.entries(overviewOrders).map(([key, item]) => `<option value="${key}"${key === overviewSort ? " selected" : ""}>${item.label}</option>`).join("")}</select></label></div><div class="snapshot-groups">${groups.map(({g, a}) => `<section class="snapshot-group" data-summary-group="${E(g.key)}"><p class="eyebrow">${E(g.study)}</p><h4>${E(className(g))}</h4><p class="snapshot-coverage">${studentsLabel(a.n)} · ${pct(a.n ? 100 * a.completed / a.n : null)} completadas</p><dl>${smallMetric("Vínculos negativos", pct(a.negativeLinks.percent), `${a.negativeLinks.count ?? 0} / ${a.negativeLinks.denominator} vínculos`)}${smallMetric("Bienestar", a.wellbeing.mean === null ? "Sin datos" : `${num(a.wellbeing.mean)} / 10`, `${a.wellbeing.denominator} respuestas completas`)}${smallMetric("Dejar los estudios", pct(a.dropout.percent), `${a.dropout.count ?? 0} / ${a.dropout.denominator} respuestas`)}${smallMetric("Piden ayuda", a.care.selfAnswered ? pct(100 * a.care.selfRequests / a.care.selfAnswered) : "Sin datos", `${a.care.selfRequests ?? 0} / ${a.care.selfAnswered} respuestas`)}</dl><button class="btn secondary" data-overview-group="${E(g.key)}" type="button">Ver resumen del grupo →</button></section>`).join("")}</div><p class="snapshot-note">Orden orientativo con las respuestas disponibles. Compara también la participación y las bases de cada dato; no es una clasificación de riesgo.</p></section></details>${overviewMethods()}</div>${participationNote({summary:a})}</article>`;
+  }
+  function groupOverview(g) {
+    const a = overviewData(g.key, g.rows), overall = overviewData("university", model.students);
+    const compare = (label, value, universityValue, suffix) => `<div><h4>${label}</h4><p><strong>${value === null ? "Sin datos" : num(value) + suffix}</strong><span>Universidad: ${universityValue === null ? "Sin datos" : num(universityValue) + suffix}</span></p></div>`;
+    return `<article class="report snapshot">${hero(className(g), `${E(g.study)} · ${studentsLabel(a.n)}`, "Resumen grupo")}<div class="report-body">${overviewMetrics(a)}<section class="snapshot-comparison"><h3>El grupo y la universidad</h3><div>${compare("Vínculos negativos", a.negativeLinks.percent, overall.negativeLinks.percent, " %")}${compare("Bienestar medio", a.wellbeing.mean, overall.wellbeing.mean, " / 10")}${compare("Dejar los estudios", a.dropout.percent, overall.dropout.percent, " %")}</div></section>${overviewHelp(a, true)}<div class="snapshot-actions"><button class="btn" type="button" data-open-list>Ver estudiantes →</button><button class="btn secondary" type="button" data-overview-group="${E(g.key)}" data-overview-view="group">Ficha completa del grupo →</button></div>${overviewMethods()}</div></article>`;
+  }
   function studentOverview(s, g) {
     const rows = (items) =>
       `<dl>${items.map(([label, value]) => `<div class="overview-item"><dt>${E(label)}</dt><dd>${E(value)}</dd></div>`).join("")}</dl>`;
@@ -1436,7 +1514,13 @@
       $("report").innerHTML = empty();
       return;
     }
-    if (tab === "group") {
+    if (tab === "university") {
+      $("report").innerHTML = universityReport();
+      $("view-announcement").textContent = `Resumen de universidad: ${model.groups.length} grupos.`;
+    } else if (tab === "overview") {
+      $("report").innerHTML = groupOverview(g);
+      $("view-announcement").textContent = `Resumen de grupo: ${className(g)}.`;
+    } else if (tab === "group") {
       $("report").innerHTML = groupReport(g);
       $("view-announcement").textContent =
         `Ficha de clase actualizada: ${g.rows.length} estudiantes.`;
@@ -1453,7 +1537,7 @@
         ? `Ficha individual actualizada. ${$("student").options.length} coincidencias. ${s.status === "Completado" ? "Encuesta completada" : s.status === "En curso" ? "Encuesta en curso" : "Sin inicio registrado"}.`
         : "No hay estudiantes que coincidan con la búsqueda en esta clase.";
     }
-    $("report")
+    if (tab !== "university") $("report")
       .querySelector("article.report")
       ?.insertAdjacentHTML("beforeend", participationNote(g));
   }

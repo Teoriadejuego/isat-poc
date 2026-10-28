@@ -85,7 +85,7 @@ test("carga y consulta son pantallas separadas; volver a datos conserva la vista
   await app.load(listFixture());
   assert.equal(app.get("data-screen").hidden, true);
   assert.equal(app.get("report").hidden, false);
-  assert.equal(doc(app).querySelectorAll('[role="tab"]').length, 3);
+  assert.equal(doc(app).querySelectorAll('[role="tab"]').length, 5);
   app.get("tab-list").click();
   app.get("show-data").click();
   assert.equal(app.get("data-screen").hidden, false);

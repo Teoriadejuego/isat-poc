@@ -809,7 +809,27 @@
       ),
     };
   }
+  function overviewSummary(rows) {
+    const base = summary(rows);
+    const links = rows.flatMap((s) => (s.relations || []).filter(
+      (link) => link.sameClass && (link.rating === 1 || link.rating === -1),
+    ));
+    const negativeCount = links.filter((link) => link.rating === -1).length;
+    const wellbeing = rows.map((s) => {
+      const values = [frequency(s.responses.fun), frequency(s.responses.general), frequency(s.responses.alone)];
+      return values.every((v) => v !== null)
+        ? (10 * (values[0] + values[1] + 4 - values[2])) / 12 : null;
+    }).filter((v) => v !== null);
+    return {
+      ...base,
+      negativeLinks: { count: links.length ? negativeCount : null, denominator: links.length,
+        percent: links.length ? 100 * negativeCount / links.length : null },
+      wellbeing: { mean: wellbeing.length ? wellbeing.reduce((a, b) => a + b, 0) / wellbeing.length : null,
+        denominator: wellbeing.length },
+    };
+  }
   return Object.freeze({
+    overviewSummary,
     parseTable,
     summary,
     indicatorMatches,
