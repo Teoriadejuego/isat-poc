@@ -120,3 +120,9 @@ Dirección local: `http://127.0.0.1:8892/`. Para servir la aplicación no hacen 
 Si GitHub no consigue asignar un servidor de ejecución, **Actions → Publicar ISAT → Run workflow** permite seleccionar `macos-15` como alternativa a `ubuntu-latest`. Ambos recorridos ejecutan las pruebas y verifican los mismos once recursos antes del despliegue.
 
 jsdom se utiliza únicamente en las pruebas. SheetJS 0.20.3 se distribuye localmente con su licencia en `vendor/LICENSE-SheetJS.txt`. Los prompts y el cierre de revisión figuran en `REVISION_PROMPTS.md` y `REVISION_RESULTADOS.md`.
+# Redes de clase y lectura de resultados (0.11.1)
+
+La ficha de grupo incluye una red calculada desde las valoraciones del Excel. Permite mostrar relaciones positivas, negativas o mutuas del mismo tipo, incluir otras clases, destacar un estudiante, cambiar la distribución y ampliar. Pulsar un código abre su ficha, también si pertenece a otra clase. Las personas sin vínculos registrados permanecen visibles. La posición no define comunidades ni diagnostica aislamiento.
+
+La revisión de PBIS se ha aplicado a los controles de exploración y la navegación entre red y ficha. Las etiquetas de ISAT distinguen quién valora a quién, formulan las respuestas como frases y evitan motivos pendientes cuando una respuesta «No» hace que no correspondan. Se mantienen los datos y las categorías originales del cuestionario.
+

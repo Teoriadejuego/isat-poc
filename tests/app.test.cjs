@@ -138,8 +138,8 @@ test("grupo distingue tres sentidos de bienestar y muestra estados de participac
   await app.load(fixture());
   app.change("class", '["1","PSI","A"]');
   const report = app.get("report").textContent;
-  assert.match(report, /Poco disfrute con sus amistades/);
-  assert.match(report, /Experiencia universitaria poco positiva/);
+  assert.match(report, /Ha disfrutado poco con sus amistades/);
+  assert.match(report, /Rara vez le ha ido bien en la universidad/);
   assert.match(report, /Nunca o casi nunca/);
   assert.match(report, /Completadas/);
   assert.match(report, /En curso/);

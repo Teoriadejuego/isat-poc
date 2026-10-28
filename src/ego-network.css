@@ -1,3 +1,16 @@
+.class-network-controls { display:flex; flex-wrap:wrap; gap:16px; margin:18px 0; }
+.class-network-controls label { display:flex; flex-direction:column; gap:8px; font-size:14px; flex:1 1 170px; }
+.class-network-controls select { width:100%; min-height:44px; padding:8px; border:1px solid var(--line); border-radius:8px; background:#fff; color:inherit; }
+.class-network-controls .class-network-checkbox { flex-direction:row; align-items:center; }
+.class-network-checkbox input { width:20px; height:20px; }
+.class-network-svg { min-height:450px; }
+.class-network-node circle { fill:#fff; stroke:#183e64; stroke-width:2; }
+.class-network-node text { font:14px Arial,sans-serif; fill:#153857; paint-order:stroke; stroke:white; stroke-width:3px; }
+.class-network-node:focus circle,.class-network-node:hover circle { fill:#d5eef6; stroke-width:4; }
+.class-network-external circle { stroke-dasharray:4 3; }
+.class-network-dim { opacity:.12; }
+.class-network .ego-edge { opacity:.55; }
+.class-network .ego-edge.class-network-dim { opacity:.04; }
 .ego-network {
   margin: 26px 0;
   padding: 24px;

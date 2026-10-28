@@ -51,7 +51,7 @@ test("resumen individual prioriza ayuda y separa detalles sin ocultar la histori
   assert.equal(body.querySelectorAll(".overview-panel").length, 2);
   assert.match(
     body.querySelector(".student-overview").textContent,
-    /Soledad|Disfrute|Cómo le ha ido/,
+    /soledad|disfrutado|Le ha ido bien/i,
   );
   assert.doesNotMatch(
     body.querySelector(".student-overview").textContent,
@@ -70,7 +70,7 @@ test("resumen conserva ausencias y explicaciones añadidas de relaciones y predi
   app.get("tab-student").click();
   app.change("student", "P001");
   const overview = doc(app).querySelector(".student-overview");
-  assert.match(overview.textContent, /Positivas declaradas0/);
+  assert.match(overview.textContent, /Personas que valora positivamente0/);
   assert.match(
     app.get("help-dialog").textContent.replace(/\s+/g, " "),
     /«Pendiente» indica que falta una respuesta necesaria; no equivale a cero ni a «No»/,

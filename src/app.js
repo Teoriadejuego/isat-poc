@@ -25,14 +25,14 @@
   const expandedGroups = new Set();
   const indicatorViews = {
     loneliness: { label: "Soledad frecuente", field: "alone" },
-    lowEnjoyment: { label: "Poco disfrute con sus amistades", field: "fun" },
+    lowEnjoyment: { label: "Ha disfrutado poco con sus amistades", field: "fun" },
     lowUniversity: {
-      label: "Experiencia universitaria poco positiva",
+      label: "Rara vez le ha ido bien en la universidad",
       field: "general",
     },
     difficulty: { label: "Dificultades en asignaturas", field: "difficulty" },
-    dropout: { label: "Se han planteado abandonar", field: "dropout" },
-    time: { label: "Organización del tiempo difícil", field: "time" },
+    dropout: { label: "Se han planteado dejar los estudios", field: "dropout" },
+    time: { label: "Dificultades para organizar el tiempo", field: "time" },
     workload: { label: "Carga de trabajo alta", field: "workload" },
   };
   const listScopes = [
@@ -255,7 +255,7 @@
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
       readingFile = false;
-      const parser = new Worker("src/parser-worker.js?v=0.10.0");
+      const parser = new Worker("src/parser-worker.js?v=0.11.1");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -558,6 +558,17 @@
     render();
     focusReport();
   }
+  $("report").addEventListener("change", (event) => {
+    const control = event.target.closest("[data-class-network]");
+    if (!control || !model || tab !== "group") return;
+    const panel = control.closest(".class-network");
+    const value = (field) => panel.querySelector(`[data-class-network="${field}"]`);
+    panel.querySelector("[data-class-network-body]").innerHTML = N.classBody(group().rows, model.students, {
+      kind: value("kind").value, layout: value("layout").value,
+      focus: value("focus").value, external: value("external").checked,
+    });
+    N.zoom(panel, "fit");
+  });
   $("report").addEventListener("click", (event) => {
     const step = event.target.closest("button[data-student-step]");
     if (step && !step.disabled && tab === "student") {
@@ -823,7 +834,7 @@
         : !care.selfAnswered && !care.peerRespondents
           ? "No hay respuestas interpretables para consultar estos criterios."
           : "Con las respuestas disponibles, ningún estudiante reúne los criterios del listado.";
-    return `<section class="care-panel" aria-labelledby="care-title"><div class="care-heading"><div><h3 id="care-title">Peticiones y menciones de ayuda</h3></div><button class="care-total" type="button" data-care-scope="care">Ver ${studentsLabel(cases.length)} →</button></div><div class="care-stats"><div><h4>Han pedido ayuda</h4><strong>${num(care.selfRequests)}</strong><p>${care.selfRequests === null ? "No hay respuestas «Sí» o «No» registradas para esta pregunta." : `De ${studentsLabel(care.selfAnswered)} con respuesta «Sí» o «No».`}</p></div><div><h4>Con menciones de 2 o más personas</h4><strong>${num(care.peerCases)}</strong><p>${care.peerCases === null ? "No hay respuestas interpretables para contar las menciones de ayuda." : `De ${studentsLabel(g.rows.length)} de la clase.`}</p></div></div>${careMatrix(care.matrix)}${
+    return `<section class="care-panel" aria-labelledby="care-title"><div class="care-heading"><div><h3 id="care-title">Peticiones y menciones de ayuda</h3></div><button class="care-total" type="button" data-care-scope="care">Ver ${studentsLabel(cases.length)} →</button></div><div class="care-stats"><div><h4>Han pedido ayuda</h4><strong>${num(care.selfRequests)}</strong><p>${care.selfRequests === null ? "No hay respuestas «Sí» o «No» registradas para esta pregunta." : `Entre ${studentsLabel(care.selfAnswered)} con respuesta registrada.`}</p></div><div><h4>Con menciones de 2 o más personas</h4><strong>${num(care.peerCases)}</strong><p>${care.peerCases === null ? "No hay respuestas interpretables para contar las menciones de ayuda." : `De ${studentsLabel(g.rows.length)} de la clase.`}</p></div></div>${careMatrix(care.matrix)}${
       cases.length
         ? `<details class="care-details"><summary>${cases.length === 1 ? "Consultar la ficha individual" : `Consultar las ${cases.length} fichas individuales`}</summary><ul class="care-list">${cases
             .map((item) => {
@@ -832,7 +843,7 @@
             })
             .join("")}</ul></details>`
         : `<p class="care-empty">${unavailable}</p>`
-    }<button class="btn secondary" type="button" data-open-list>Ver lista de la clase →</button>${readingNote("Cómo se seleccionan estas fichas", `<p>Petición propia o menciones de al menos dos personas. Cada estudiante aparece una vez.</p><p>Menciones a partir de ${care.peerRespondents} respuestas disponibles en todo el Excel, incluidas otras clases.</p>`)}</section>`;
+    }<button class="btn secondary" type="button" data-open-list>Ver lista de la clase →</button>${readingNote("Qué casos aparecen", `<p>Petición propia o menciones de al menos dos personas. Cada estudiante aparece una vez.</p><p>Menciones a partir de ${care.peerRespondents} respuestas disponibles en todo el Excel, incluidas otras clases.</p>`)}</section>`;
   }
   function careMatrix(matrix) {
     const value = (scope, label) => {
@@ -843,7 +854,7 @@
         ? `<button type="button" class="matrix-count" data-care-scope="${scope}" aria-label="${E(`${label}: ${count} ${count === 1 ? "estudiante" : "estudiantes"}. Ver lista.`)}">${content}<span class="matrix-action" aria-hidden="true">Ver estudiantes →</span></button>`
         : content;
     };
-    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr>${matrix.pendingLow + matrix.pendingHigh ? `<tr class="matrix-pending"><th scope="row">Sin respuesta propia</th><td>${value("pendingLow", "0–1 menciones")}</td><td>${value("pendingHigh", "2 o más menciones")}</td></tr>` : ""}</tbody></table><p class="care-matrix-note">${matrix.known} con respuesta propia Sí/No; ${matrix.pendingLow + matrix.pendingHigh} sin respuesta propia.${matrix.missing > matrix.pendingLow + matrix.pendingHigh ? ` ${matrix.missing - matrix.pendingLow - matrix.pendingHigh} fuera de la matriz por falta de recuento de menciones.` : ""}</p>${matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Consultar datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
+    return `<div class="care-matrix"><table><caption>Petición propia y menciones registradas</caption><thead><tr><th rowspan="2" scope="col">Petición propia</th><th colspan="2" scope="colgroup">Personas distintas que indican que necesita ayuda</th></tr><tr><th scope="col">0 o 1 persona</th><th scope="col">2 o más personas</th></tr></thead><tbody><tr><th scope="row">Sí</th><td class="matrix-own">${value("ownOnly", "Petición propia")}</td><td class="matrix-both">${value("both", "Ambos criterios")}</td></tr><tr><th scope="row">No</th><td>${value("neither", "Sin petición y con 0–1 menciones")}</td><td class="matrix-peer">${value("peerOnly", "Menciones de otras personas")}</td></tr>${matrix.pendingLow + matrix.pendingHigh ? `<tr class="matrix-pending"><th scope="row">Sin respuesta propia</th><td>${value("pendingLow", "0–1 menciones")}</td><td>${value("pendingHigh", "2 o más menciones")}</td></tr>` : ""}</tbody></table><p class="care-matrix-note">${matrix.known} con respuesta propia Sí/No; ${matrix.pendingLow + matrix.pendingHigh} sin respuesta propia.${matrix.missing > matrix.pendingLow + matrix.pendingHigh ? ` ${matrix.missing - matrix.pendingLow - matrix.pendingHigh} fuera de la matriz por falta de recuento de menciones.` : ""}</p>${matrix.missing ? `<button type="button" class="text-button" data-care-scope="missing">Ver casos con datos de ayuda incompletos (${matrix.missing})</button>` : ""}</div>`;
   }
   function studentCare(s) {
     const care = s.care;
@@ -859,6 +870,7 @@
   }
   function responseCard(field, s, heading = "h4") {
     const value = s.responses[field];
+    if (value === null && ((["subjects", "subjectReasons", "subjectOther"].includes(field) && C.yesNo(s.responses.difficulty) === "No") || (["dropoutReasons", "dropoutOther"].includes(field) && C.norm(s.responses.dropout) === "no"))) return "";
     const selections =
       value !== null &&
       ["activities", "subjectReasons", "dropoutReasons"].includes(field)
@@ -1316,19 +1328,19 @@
   function groupReport(g) {
     const a = g.summary;
     return `<article class="report">${hero(className(g), studentsLabel(a.n), "Ficha de grupo")}<div class="report-body">${carePanel(g)}${surveySummary(a)}
-    ${section("01", "Bienestar en la última semana", `<div class="rate-grid">${rateCard("Soledad frecuente", a.loneliness, "Casi siempre o siempre.", "loneliness")}${rateCard("Poco disfrute con sus amistades", a.lowEnjoyment, "Nunca o casi nunca.", "lowEnjoyment")}${rateCard("Experiencia universitaria poco positiva", a.lowUniversity, "Nunca o casi nunca.", "lowUniversity")}</div>`, "neutral")}<details class="expanded-indicators" data-extra-group="${E(g.key)}"${expandedGroups.has(g.key) ? " open" : ""}><summary>Ver más indicadores del grupo<span>Relaciones, adaptación académica y participación</span></summary>${section("02", "Relaciones y bienestar", `<div class="rate-grid single">${rateCard("Relaciones negativas registradas", a.rejection, "Elecciones posibles de quienes han respondido.")}</div><div class="distribution-grid">${["alone", "fun", "general"].map((f) => dist(f, a.distributions[f])).join("")}</div>`)}
-    ${section("03", "Adaptación académica", `<div class="rate-grid four">${rateCard("Dificultades en asignaturas", a.difficulty, "", "difficulty")}${rateCard("Se han planteado abandonar", a.dropout, "", "dropout")}${rateCard("Organización del tiempo difícil", a.time, "Mal o Muy mal.", "time")}${rateCard("Carga de trabajo alta", a.workload, "Alta o Muy alta.", "workload")}</div><div class="distribution-grid">${["time", "workload", "dropout"].map((f) => dist(f, a.distributions[f])).join("")}</div>`, "neutral")}
+    ${section("01", "Bienestar en la última semana", `<div class="rate-grid">${rateCard("Soledad frecuente", a.loneliness, "Casi siempre o siempre.", "loneliness")}${rateCard("Ha disfrutado poco con sus amistades", a.lowEnjoyment, "Nunca o casi nunca.", "lowEnjoyment")}${rateCard("Rara vez le ha ido bien en la universidad", a.lowUniversity, "Nunca o casi nunca.", "lowUniversity")}</div>`, "neutral")}<details class="expanded-indicators" data-extra-group="${E(g.key)}"${expandedGroups.has(g.key) ? " open" : ""}><summary>Ver más indicadores del grupo<span>Relaciones, adaptación académica y participación</span></summary>${section("02", "Relaciones y bienestar", `<div class="rate-grid single">${rateCard("Relaciones negativas registradas", a.rejection, "Sobre todas las valoraciones posibles de quienes responden.")}</div><div class="distribution-grid">${["alone", "fun", "general"].map((f) => dist(f, a.distributions[f])).join("")}</div>`)}
+    ${section("03", "Adaptación académica", `<div class="rate-grid four">${rateCard("Dificultades en asignaturas", a.difficulty, "", "difficulty")}${rateCard("Se han planteado dejar los estudios", a.dropout, "", "dropout")}${rateCard("Dificultades para organizar el tiempo", a.time, "Mal o Muy mal.", "time")}${rateCard("Carga de trabajo alta", a.workload, "Alta o Muy alta.", "workload")}</div><div class="distribution-grid">${["time", "workload", "dropout"].map((f) => dist(f, a.distributions[f])).join("")}</div>`, "neutral")}
     ${section("04", "Participación y motivos", `<div class="distribution-grid">${["activities", "subjectReasons", "dropoutReasons"].map((f) => dist(f, a.distributions[f])).join("")}</div>${readingNote("Cómo leer las respuestas múltiples", "<p>Cada persona puede marcar varias opciones. Los porcentajes pueden sumar más del 100 %.</p>")}`)}
-    </details>${sheetFeedback("group", g)}</div></article>`;
+    </details>${N.classView(g.rows, model.students)}${sheetFeedback("group", g)}</div></article>`;
   }
   function studentOverview(s, g) {
     const rows = (items) =>
       `<dl>${items.map(([label, value]) => `<div class="overview-item"><dt>${E(label)}</dt><dd>${E(value)}</dd></div>`).join("")}</dl>`;
     const comparisons = [
-      ["friendsReceived", "Positivas recibidas"],
-      ["friendsDeclared", "Positivas declaradas"],
-      ["rejectionsReceived", "Negativas recibidas"],
-      ["rejectionsDeclared", "Negativas declaradas"],
+      ["friendsReceived", "Personas que le valoran positivamente"],
+      ["friendsDeclared", "Personas que valora positivamente"],
+      ["rejectionsReceived", "Personas que le valoran negativamente"],
+      ["rejectionsDeclared", "Personas que valora negativamente"],
     ].map(([key, label]) => {
       const values = g.rows
         .map((row) => row.metrics[key])
@@ -1342,7 +1354,7 @@
           : null,
       };
     });
-    const comparison = `<table class="class-comparison"><caption class="sr-only">Relaciones registradas: estudiante y media de su clase</caption><thead><tr><th scope="col">Relaciones</th><th scope="col">Estudiante</th><th scope="col">Media de clase</th></tr></thead><tbody>${comparisons.map(({ key, label, mean }) => `<tr data-compare-metric="${key}"><th scope="row">${label}</th><td class="comparison-student">${num(s.metrics[key])}</td><td class="comparison-average">${num(mean)}</td></tr>`).join("")}</tbody></table>${readingNote("Cómo leer esta comparación", `<p>Compara recuentos disponibles de la misma clase. La media incluye ceros y excluye recuentos pendientes; no es un umbral de alerta.</p><ul>${comparisons.map(({ label, n }) => `<li>${label}: ${studentsLabel(n)} con dato.</li>`).join("")}</ul>`)}`;
+    const comparison = `<table class="class-comparison"><caption class="sr-only">Relaciones registradas: estudiante y media de su clase</caption><thead><tr><th scope="col">Relaciones</th><th scope="col">Estudiante</th><th scope="col">Media de clase</th></tr></thead><tbody>${comparisons.map(({ key, label, mean }) => `<tr data-compare-metric="${key}"><th scope="row">${label}</th><td class="comparison-student">${num(s.metrics[key])}</td><td class="comparison-average">${num(mean)}</td></tr>`).join("")}</tbody></table>${readingNote("Cómo leer esta comparación", `<p>Recuentos de la misma clase. La media usa los datos disponibles.</p><ul>${comparisons.map(({ label, n }) => `<li>${label}: ${studentsLabel(n)} con dato.</li>`).join("")}</ul>`)}`;
     return `<section class="student-overview" aria-labelledby="overview-title"><h3 id="overview-title">En un vistazo</h3><div class="overview-grid"><section class="overview-panel"><h4>Bienestar en la última semana</h4>${rows(["alone", "fun", "general"].map((field) => [C.FIELDS[field], s.responses[field] ?? "Pendiente"]))}</section><section class="overview-panel"><h4>Relaciones en la clase</h4>${comparison}</section></div></section>`;
   }
   $("report").addEventListener(
@@ -1375,10 +1387,10 @@
   function studentReport(s, g) {
     const m = s.metrics;
     const highlighted = s.care.requested === true || s.care.peerReports > 2;
-    return `<article class="report${highlighted ? " report-care" : ""}">${hero(name(s), `${className(g)} · ${studentsLabel(g.rows.length)}`, "Ficha individual", surveyStatus(s))}<div class="report-body">${studentNavigation(s, g)}${studentCare(s)}${s.lastDate ? `<p class="completion-date">Completada el ${E(dateLabel(s.lastDate))}</p>` : ""}
+    return `<article class="report${highlighted ? " report-care" : ""}">${hero(name(s), `${className(g)} · ${studentsLabel(g.rows.length)}`, "Ficha individual", surveyStatus(s))}<div class="report-body">${studentNavigation(s, g)}${studentCare(s)}${s.lastDate ? `<p class="completion-date">Última respuesta: ${E(dateLabel(s.lastDate))}</p>` : ""}
     ${studentOverview(s, g)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, vida universitaria y red de contactos</span></summary>
-    ${section("01", "Relaciones en la clase", `<div class="metric-grid">${metric("Positivas recibidas", m.friendsReceived)}${metric("Positivas declaradas", m.friendsDeclared)}${metric("Positivas recíprocas", m.friendsMutual)}${metric("Negativas recibidas", m.rejectionsReceived)}${metric("Negativas declaradas", m.rejectionsDeclared)}${metric("Negativas recíprocas", m.rejectionsMutual)}</div><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div>${readingNote("Cómo interpretar las relaciones", `<p>Positivas: Buena o Muy buena relación. Negativas: Mala o Muy mala. Recibidas: otras personas le valoran; declaradas: este estudiante les valora; recíprocas: valoración en ambos sentidos.</p><p>Las predicciones expresan cómo cree que otras personas le valoran. Los aciertos se verifican con las respuestas de esas personas.</p>`)}`)}
-    ${section("02", "Reconocimiento y contactos", `<div class="metric-grid">${metric("Menciones como persona popular", m.popularVotes)}${metric("Menciones como conexión entre grupos", m.connectorVotes)}${metric("Personas que ya conocía", s.contacts?.length ?? null)}${metric("Contactos fuera de la clase", s.outsideCount)}</div>`)}
+    ${section("01", "Relaciones en la clase", `<div class="metric-grid">${metric("Personas que le valoran positivamente", m.friendsReceived)}${metric("Personas que valora positivamente", m.friendsDeclared)}${metric("Relaciones positivas mutuas", m.friendsMutual)}${metric("Personas que le valoran negativamente", m.rejectionsReceived)}${metric("Personas que valora negativamente", m.rejectionsDeclared)}${metric("Relaciones negativas mutuas", m.rejectionsMutual)}</div><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div>${readingNote("Cómo interpretar las relaciones", `<p>Positivas: Buena o Muy buena relación. Negativas: Mala o Muy mala. Mutuas: ambas personas se valoran del mismo modo.</p><p>Las predicciones expresan cómo cree que otras personas le valoran. Los aciertos se verifican con las respuestas de esas personas.</p>`)}`)}
+    ${section("02", "Reconocimiento y contactos", `<div class="metric-grid">${metric("Personas que le consideran popular", m.popularVotes)}${metric("Personas que le ven como conexión entre grupos", m.connectorVotes)}${metric("Personas que ya conocía", s.contacts?.length ?? null)}${metric("Personas conocidas fuera de la clase", s.outsideCount)}</div>`)}
     ${section(
       "03",
       "Vida universitaria",

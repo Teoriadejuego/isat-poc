@@ -219,5 +219,76 @@
       stage.scrollTop = 0;
     }
   }
-  return { build, geometry, svg, body, view, zoom };
+  // The class graph uses only recorded ratings. Neutral/unknown ratings are not links.
+  function classBuild(rows, students, filters = {}) {
+    const members = new Set(rows.map((s) => s.id));
+    const byId = new Map(students.map((s) => [s.id, s]));
+    const kind = ["positive", "negative", "mutual"].includes(filters.kind) ? filters.kind : "all";
+    let edges = [];
+    for (const source of students) for (const r of source.relations || []) {
+      if (!byId.has(r.id) || r.id === source.id || ![-1, 1].includes(r.rating)) continue;
+      if (filters.external ? !members.has(source.id) && !members.has(r.id) : !members.has(source.id) || !members.has(r.id)) continue;
+      if (kind === "positive" && r.rating < 0 || kind === "negative" && r.rating > 0) continue;
+      edges.push({ from: source.id, to: r.id, rating: r.rating, intensity: /^(muy buena|muy mala) relacion$/.test(C.norm(r.label)) ? 2 : 1, label: r.label || (r.rating > 0 ? "Buena relación" : "Mala relación") });
+    }
+    if (kind === "mutual") {
+      const pairs = new Set(edges.map((e) => JSON.stringify([e.from, e.to, e.rating])));
+      edges = edges.filter((e) => pairs.has(JSON.stringify([e.to, e.from, e.rating])));
+    }
+    const unique = new Map(edges.map((e) => [JSON.stringify([e.from, e.to]), e]));
+    edges = [...unique.values()];
+    const included = new Set([...members, ...edges.flatMap((e) => [e.from, e.to])]);
+    const degree = new Map([...included].map((id) => [id, 0]));
+    for (const e of edges) { degree.set(e.from, degree.get(e.from) + 1); degree.set(e.to, degree.get(e.to) + 1); }
+    return { nodes: [...included].map((id) => ({ student: byId.get(id), external: !members.has(id), degree: degree.get(id) })).sort((a,b) => a.student.id.localeCompare(b.student.id, "es", {numeric:true})), edges, kind, linked: rows.filter((s) => degree.get(s.id) > 0).length, total: rows.length };
+  }
+  function classSvg(net, layout = "links", focus = "") {
+    const side = Math.max(840, Math.min(5000, Math.ceil(Math.sqrt(net.nodes.length)) * 86));
+    const positions = new Map(net.nodes.map((n, i) => {
+      const angle = 2 * Math.PI * i / Math.max(1, net.nodes.length);
+      return [n.student.id, {x:side/2 + side*.39*Math.cos(angle), y:side/2 + side*.39*Math.sin(angle)}];
+    }));
+    // Bound the expensive layout; larger graphs keep a deterministic circular layout.
+    if (layout === "links" && net.nodes.length > 1 && net.nodes.length <= 220) {
+      const ids = [...positions.keys()];
+      for (let step=0; step<80; step++) {
+        const forces = new Map(ids.map((id) => [id, {x:0,y:0}]));
+        for (let i=0;i<ids.length;i++) for (let j=i+1;j<ids.length;j++) {
+          const a=positions.get(ids[i]), b=positions.get(ids[j]);
+          const dx=a.x-b.x || .1, dy=a.y-b.y || .1, d2=Math.max(80,dx*dx+dy*dy), f=250/d2;
+          forces.get(ids[i]).x+=dx*f; forces.get(ids[i]).y+=dy*f;
+          forces.get(ids[j]).x-=dx*f; forces.get(ids[j]).y-=dy*f;
+        }
+        for (const e of net.edges) {
+          const a=positions.get(e.from), b=positions.get(e.to), k=e.rating>0?.018:.004;
+          forces.get(e.from).x+=(b.x-a.x)*k; forces.get(e.from).y+=(b.y-a.y)*k;
+          forces.get(e.to).x+=(a.x-b.x)*k; forces.get(e.to).y+=(a.y-b.y)*k;
+        }
+        for (const id of ids) {
+          const p=positions.get(id), f=forces.get(id), cool=1-step/100;
+          f.x-=(p.x-side/2)*.015; f.y-=(p.y-side/2)*.015;
+          p.x=Math.max(45,Math.min(side-45,p.x+Math.max(-10,Math.min(10,f.x))*cool));
+          p.y=Math.max(45,Math.min(side-45,p.y+Math.max(-10,Math.min(10,f.y))*cool));
+        }
+      }
+    }
+    const neighbors=new Set([focus]);
+    for (const e of net.edges) if(e.from===focus||e.to===focus){neighbors.add(e.from);neighbors.add(e.to);}
+    return `<svg class="ego-svg class-network-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${side} ${side}" role="img" aria-label="Red de la clase: ${net.total} estudiantes, ${net.linked} con vínculos en esta selección"><defs>${["positive","negative"].map(k=>`<marker id="class-arrow-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 z" class="ego-${k}-fill"/></marker>`).join("")}</defs>${net.edges.map(e=>{
+      const a=positions.get(e.from),b=positions.get(e.to),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len,k=e.rating>0?"positive":"negative";
+      const dim=focus&&e.from!==focus&&e.to!==focus;
+      return `<path class="ego-edge ego-${k}${dim?" class-network-dim":""}" d="M ${fixed(a.x+dx/len*13)} ${fixed(a.y+dy/len*13)} Q ${fixed((a.x+b.x)/2+nx*12)} ${fixed((a.y+b.y)/2+ny*12)} ${fixed(b.x-dx/len*15)} ${fixed(b.y-dy/len*15)}" fill="none" stroke-width="${e.intensity===2?2.8:1.2}" marker-end="url(#class-arrow-${k})"><title>${E(e.from)} → ${E(e.to)}: ${E(e.label)}</title></path>`;
+    }).join("")}${net.nodes.map(n=>{
+      const p=positions.get(n.student.id),dim=focus&&!neighbors.has(n.student.id);
+      return `<a href="#report" data-network-student="${E(n.student.id)}" class="class-network-node${n.external?" class-network-external":""}${dim?" class-network-dim":""}" aria-label="Ver ficha del código ${E(n.student.id)}"><title>${E(n.student.id)} · ${E(classLabel(n.student))}${n.degree?"":" · Sin vínculos registrados en esta selección"}</title><circle cx="${fixed(p.x)}" cy="${fixed(p.y)}" r="${n.student.id===focus?13:9}"/><text x="${fixed(p.x)}" y="${fixed(p.y+25)}" text-anchor="middle">${E(n.student.id)}</text></a>`;
+    }).join("")}</svg>`;
+  }
+  function classBody(rows, students, filters = {}) {
+    const net=classBuild(rows,students,filters);
+    return `<p class="ego-result" role="status">${net.linked} de ${net.total} estudiantes con vínculos · ${net.edges.length} valoraciones · ${net.nodes.filter(n=>n.external).length} personas de otras clases</p>${net.edges.length?"":'<p class="ego-empty">No hay vínculos registrados para esta selección. Esto no permite concluir que no existan relaciones.</p>'}<div class="ego-stage" tabindex="0" role="region" aria-label="Red de la clase. Amplía para recorrerla." data-ego-scale="1">${classSvg(net,filters.layout,filters.focus)}</div>`;
+  }
+  function classView(rows, students) {
+    return `<section class="ego-network class-network" aria-labelledby="class-network-title"><h3 id="class-network-title">Red de la clase</h3><p class="ego-intro">Cada círculo representa un estudiante. Las flechas van desde quien valora hacia la persona valorada. Pulsa un código para abrir su ficha.</p><div class="class-network-controls"><label>Relaciones<select data-class-network="kind"><option value="all">Positivas y negativas</option><option value="positive">Solo positivas</option><option value="negative">Solo negativas</option><option value="mutual">Mutuas del mismo tipo</option></select></label><label>Distribución<select data-class-network="layout"><option value="links">Según los vínculos</option><option value="circle">En círculo</option></select></label><label>Destacar estudiante<select data-class-network="focus"><option value="">Toda la clase</option>${rows.map(s=>`<option value="${E(s.id)}">${E(s.id)}</option>`).join("")}</select></label><label class="class-network-checkbox"><input type="checkbox" data-class-network="external">Incluir vínculos con otras clases</label></div><div class="ego-legend"><span><i class="ego-legend-positive"></i>Positiva</span><span><i class="ego-legend-negative"></i>Negativa</span><span>Mayor grosor: Muy buena o Muy mala</span><span>Borde discontinuo: otra clase</span></div><div class="ego-zoom"><span>Amplía para leer los códigos.</span><div><button type="button" data-ego-zoom="out" disabled aria-label="Reducir la red de clase">−</button><button type="button" data-ego-zoom="in" aria-label="Ampliar la red de clase">+</button><button type="button" data-ego-zoom="fit">Ajustar</button><output data-ego-zoom-label>Ajustado</output></div></div><div data-class-network-body>${classBody(rows,students)}</div><p class="ego-coverage">La posición facilita la lectura; no representa popularidad ni grupos calculados. Un círculo sin vínculos indica ausencia de registros en esta selección.</p></section>`;
+  }
+  return { build, geometry, svg, body, view, zoom, classBuild, classSvg, classBody, classView };
 });

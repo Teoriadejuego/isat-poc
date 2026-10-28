@@ -69,8 +69,8 @@ test("respuestas parciales y de encuestas en curso aportan vínculos, reciprocid
   await app.load(table);
   app.get("tab-student").click();
   for (const title of [
-    "Positivas declaradas",
-    "Positivas recíprocas",
+    "Personas que valora positivamente",
+    "Relaciones positivas mutuas",
     "Aciertos de predicciones positivas",
   ])
     assert.equal(metric(app, title).querySelector("strong").textContent, "1");
@@ -95,12 +95,12 @@ test("finalización al 100 % no convierte falta de respuestas en cero ni predicc
     /Encuesta completada: 100 % · 2 de 2 estudiantes/,
   );
   assert.equal(
-    metric(app, "Positivas recibidas").querySelector("strong").textContent,
+    metric(app, "Personas que le valoran positivamente").querySelector("strong").textContent,
     "1",
   );
   for (const title of [
-    "Positivas declaradas",
-    "Positivas recíprocas",
+    "Personas que valora positivamente",
+    "Relaciones positivas mutuas",
     "Aciertos de predicciones positivas",
   ])
     assert.equal(

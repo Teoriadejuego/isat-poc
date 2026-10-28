@@ -41,7 +41,7 @@ test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t
     app.get("help-dialog").textContent.replace(/\s+/g, " "),
     /no equivale a cero ni a «No»/,
   );
-  const declared = ownMetric(app, "Positivas declaradas");
+  const declared = ownMetric(app, "Personas que valora positivamente");
   assert.equal(declared.querySelector("strong").textContent, "0");
   const readingNote = declared
     .closest(".section-panel")
@@ -52,7 +52,7 @@ test("ficha reconoce ninguna selección tras avanzar y muestra 3 de 8", async (t
   );
   assert.match(
     readingNote.textContent,
-    /recíprocas: valoración en ambos sentidos/,
+    /Mutuas: ambas personas se valoran del mismo modo/,
   );
   const positive = ownMetric(app, "Aciertos de predicciones positivas");
   assert.equal(positive.querySelector("strong").textContent, "3");
@@ -144,7 +144,7 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
   ]);
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.equal(
-    ownMetric(app, "Positivas declaradas").querySelector("strong").textContent,
+    ownMetric(app, "Personas que valora positivamente").querySelector("strong").textContent,
     "0",
   );
   assert.equal(
@@ -155,7 +155,7 @@ test("cero explícito y recuentos parciales de relaciones tienen mensajes distin
   app.change("student", "P002");
   assert.equal(app.get("report").querySelector(".relationship-note"), null);
   assert.equal(
-    ownMetric(app, "Positivas declaradas").querySelector("strong").textContent,
+    ownMetric(app, "Personas que valora positivamente").querySelector("strong").textContent,
     "0",
   );
   assert.equal(

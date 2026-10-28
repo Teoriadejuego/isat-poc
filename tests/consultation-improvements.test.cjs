@@ -276,7 +276,7 @@ test("opciones múltiples se muestran separadas, sin duplicados ni HTML ejecutab
   const cards = [...doc(app).querySelectorAll(".response-card")];
   const activities = cards.find(
     (el) =>
-      el.querySelector("h4, h5").textContent === "Actividades universitarias",
+      el.querySelector("h4, h5").textContent === "En qué actividades participa",
   );
   assert.deepEqual(
     [...activities.querySelectorAll("li")].map((el) => el.textContent),
