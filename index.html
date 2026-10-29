@@ -20,11 +20,12 @@
     <meta property="og:type" content="website" />
     <title>ISAT · Cuidado del estudiante</title>
     <link rel="icon" href="src/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="src/app.css?v=0.13.0" />
-    <script src="src/core.js?v=0.13.0" defer></script>
-    <link rel="stylesheet" href="src/ego-network.css?v=0.13.0" />
-    <script src="src/ego-network.js?v=0.13.0" defer></script>
-    <script src="src/app.js?v=0.13.0" defer></script>
+    <link rel="stylesheet" href="src/app.css?v=0.14.0" />
+    <script src="src/core.js?v=0.14.0" defer></script>
+    <script src="src/communities.js?v=0.14.0" defer></script>
+    <link rel="stylesheet" href="src/ego-network.css?v=0.14.0" />
+    <script src="src/ego-network.js?v=0.14.0" defer></script>
+    <script src="src/app.js?v=0.14.0" defer></script>
   </head>
   <body>
     <a href="#main" class="skip">Saltar al contenido</a>
@@ -104,8 +105,8 @@
           </div>
         </div>
         <div class="welcome-path" aria-label="Tres formas de consultar los datos">
-          <div><span class="path-number">01</span><h2>La clase</h2><p>Necesidades de apoyo y relaciones del grupo.</p></div>
-          <div><span class="path-number">02</span><h2>La lista</h2><p>Una vista para comparar y priorizar la consulta.</p></div>
+          <div><span class="path-number">01</span><h2>La universidad</h2><p>Seis indicadores para orientar el acompañamiento.</p></div>
+          <div><span class="path-number">02</span><h2>El grupo</h2><p>Necesidades, comunidades y lista de estudiantes.</p></div>
           <div><span class="path-number">03</span><h2>Cada estudiante</h2><p>Su situación, sus vínculos y su propia historia.</p></div>
         </div>
       </section>
@@ -176,9 +177,7 @@
         <div class="tabs" role="tablist" aria-label="Tipo de ficha">
           <button
             id="tab-university" role="tab" class="tab" aria-selected="false" aria-controls="report" tabindex="-1"
-          >Resumen universidad</button><button
-            id="tab-overview" role="tab" class="tab" aria-selected="false" aria-controls="report" tabindex="-1"
-          >Resumen grupo</button><button
+          >Universidad</button><button
             id="tab-group"
             role="tab"
             class="tab"
@@ -206,6 +205,7 @@
             Estudiante
           </button>
         </div>
+        <div class="coverage-filter"><label><input id="coverage-filter" type="checkbox" checked /> Solo grupos con al menos un 80 % de estudiantes con vínculos</label><p id="coverage-status"></p></div>
         <div id="filters" class="filters">
           <label id="study-field" class="field" hidden
             >Centro o estudio<select id="study"></select></label

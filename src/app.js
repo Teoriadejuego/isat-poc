@@ -18,14 +18,15 @@
     activeCell = null,
     lastActivity = null,
     summaryReturn = null;
-  const viewTypes = ["university", "overview", "group", "list", "student"];
-  let overviewSort = "negative";
+  const viewTypes = ["university", "group", "list", "student"];
+  let overviewSort = "ownHelp";
   const overviewCache = new Map();
   const PAGE_SIZE = 50;
   const IDLE_LIMIT = 15 * 60 * 1000;
   const expandedStudents = new Set();
   const expandedGroups = new Set();
   const indicatorViews = {
+    ...Object.fromEntries(Object.entries(C.FOCUS_LABELS).map(([key,label]) => [key,{label,field:key}])),
     loneliness: { label: "Soledad frecuente", field: "alone" },
     lowEnjoyment: { label: "Ha disfrutado poco con sus amistades", field: "fun" },
     lowUniversity: {
@@ -39,6 +40,7 @@
   };
   const listScopes = [
     ["all", "Toda la clase"],
+    ["focus", "Alguno de los seis indicadores"],
     ["care", "Peticiones y menciones de ayuda"],
     ["ownOnly", "Petición propia y 0–1 menciones"],
     ["both", "Petición propia y ≥2 menciones"],
@@ -109,7 +111,9 @@
   }
   function removeModel() {
     overviewCache.clear();
-    overviewSort = "negative";
+    overviewSort = "ownHelp";
+    $("coverage-filter").checked = true;
+    $("coverage-status").textContent = "";
     $("welcome-screen").hidden = true;
     $("welcome-back").hidden = true;
     model = null;
@@ -271,7 +275,7 @@
       const bytes = await file.arrayBuffer();
       if (version !== generation) return;
       readingFile = false;
-      const parser = new Worker("src/parser-worker.js?v=0.13.0");
+      const parser = new Worker("src/parser-worker.js?v=0.14.0");
       worker = parser;
       startTimeout(version);
       parser.onmessage = (e) => {
@@ -401,7 +405,7 @@
     $("search").value = "";
     tab = "group";
     setTab();
-    updateClasses();
+    refreshCoverage();
     showConsultation();
     $("clear").hidden = false;
     $("clear").textContent = "Cerrar consulta";
@@ -471,14 +475,28 @@
     };
   }
   function group() {
-    return model?.groups.find((g) => g.key === $("class").value);
+    return visibleGroups().find((g) => g.key === $("class").value);
   }
+  function visibleGroups() {
+    return model?.groups.filter(g => !$("coverage-filter").checked || C.linkCoverage(g.rows).eligible) || [];
+  }
+  function visibleStudents() { return visibleGroups().flatMap(g => g.rows); }
+  function refreshCoverage() {
+    if (!model) return;
+    overviewCache.clear();
+    const gs = visibleGroups(), studies = [...new Set(gs.map(g => g.study))];
+    const old = $("study").value;
+    $("study").innerHTML = options(studies.map(v => [v,v]),studies.includes(old) ? old : studies[0]);
+    $("coverage-status").textContent = `${gs.length} de ${model.groups.length} grupos visibles · La cobertura incluye vínculos entrantes o salientes de todo el Excel.`;
+    setTab(); updateClasses();
+  }
+  $("coverage-filter").onchange = refreshCoverage;
   function updateClasses() {
     studentQuery = "";
     listState.query = "";
     listState.page = 0;
     $("search").value = "";
-    const gs = model.groups.filter((g) => g.study === $("study").value);
+    const gs = visibleGroups().filter((g) => g.study === $("study").value);
     $("class").innerHTML = options(
       gs.map((g) => [
         g.key,
@@ -557,7 +575,7 @@
   }
   function openNetworkStudent(id) {
     const s = model?.students.find((student) => student.id === id);
-    const targetGroup = s && model.groups.find((g) => g.rows.includes(s));
+    const targetGroup = s && visibleGroups().find((g) => g.rows.includes(s));
     if (!targetGroup) return;
     if (targetGroup.key === group()?.key) {
       openCareStudent(id);
@@ -582,8 +600,8 @@
       const expanded = event.target.closest("details")?.open;
       overviewSort = event.target.value;
       render();
-      $("report").querySelector(".snapshot-all-groups").open = !!expanded;
-      $("report").querySelector("[data-overview-sort]").focus();
+
+    $("report").querySelector("[data-overview-sort]").focus();
       return;
     }
     const control = event.target.closest("[data-class-network]");
@@ -599,12 +617,12 @@
   $("report").addEventListener("click", (event) => {
     const overviewLink = event.target.closest("[data-overview-group]");
     if (overviewLink && model) {
-      const target = model.groups.find((g) => g.key === overviewLink.dataset.overviewGroup);
+      const target = visibleGroups().find((g) => g.key === overviewLink.dataset.overviewGroup);
       if (!target) return;
       $("study").value = target.study;
       updateClasses();
       $("class").value = target.key;
-      chooseTab(overviewLink.dataset.overviewView || "overview");
+      chooseTab("group");
       focusReport();
       return;
     }
@@ -996,6 +1014,10 @@
       label: "Menciones de ayuda",
       value: (s) => s.care.peerReports,
     },
+    ...["imminent","lowHappiness","noFriends","negativeBalance"].map(key=>({
+      key,label:C.FOCUS_LABELS[key],value:s=>s.focus[key]===null?null:Number(s.focus[key]),
+      display:s=>s.focus[key]===null?"Pendiente":s.focus[key]?"Sí":"No",
+    })),
     ...["alone", "fun", "general"].map((key) => ({
       key,
       label: C.FIELDS[key],
@@ -1037,6 +1059,7 @@
       (s) =>
         C.norm(name(s) + " " + s.id).includes(q) &&
         (listState.scope === "all" ||
+          (listState.scope === "focus" && Object.keys(C.FOCUS_LABELS).some(key=>s.focus[key]===true)) ||
           (listState.scope.startsWith("indicator:")
             ? C.indicatorMatches(s, listState.scope.slice(10))
             : listState.scope === "care"
@@ -1108,7 +1131,7 @@
         col.key === indicatorField ||
         (!col.indicatorOnly && (!col.extra || listState.extra)),
     );
-    return `<article class="report list-report">${hero(className(g), `${g.rows.length} estudiantes · ${g.summary.care.cases.length} fichas para consultar`, "Lista de estudiantes")}<div class="report-body"><p class="list-intro">Pulsa un código para abrir su ficha o un dato para valorarlo.</p><div class="list-tools"><label class="field">Mostrar<select id="list-scope" aria-label="Mostrar">${options(
+    return `<article class="report list-report">${hero(className(g), `${g.rows.length} estudiantes · ${rows.length} en esta lista`, "Lista de estudiantes")}<div class="report-body"><p class="list-intro">Pulsa un código para abrir su ficha o un dato para valorarlo.</p><div class="list-tools"><label class="field">Mostrar<select id="list-scope" aria-label="Mostrar">${options(
       listScopes,
       listState.scope,
     )}</select></label><label class="column-toggle"><input id="list-extra" type="checkbox"${listState.extra ? " checked" : ""}>Bienestar y relaciones</label><button class="btn secondary" type="button" data-prioritize>Priorizar ayuda</button></div><div class="student-table-wrap" role="region" aria-label="Lista de estudiantes: tabla desplazable horizontalmente" tabindex="0"><table class="student-table"><caption>${rows.length} de ${g.rows.length} estudiantes${listState.sort === "care" ? " · Peticiones y menciones de ayuda primero" : ""}</caption><thead><tr>${columns.map((col) => `<th scope="col" aria-sort="${listState.sort === col.key ? (listState.direction > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-sort="${col.key}">${E(col.label)}<span aria-hidden="true">${listState.sort === col.key ? (listState.direction > 0 ? " ↑" : " ↓") : " ↕"}</span></button></th>`).join("")}</tr></thead><tbody>${
@@ -1117,7 +1140,7 @@
             .slice(start, start + PAGE_SIZE)
             .map(
               (s) =>
-                `<tr data-list-student="${E(s.id)}"${needsConsultation(s) ? ' class="priority-row"' : ""}>${columns.map((col) => `<${col.key === "student" ? 'th scope="row"' : "td"}>${listCell(s, col)}</${col.key === "student" ? "th" : "td"}>`).join("")}</tr>`,
+                `<tr data-list-student="${E(s.id)}"${Object.keys(C.FOCUS_LABELS).some(key=>s.focus[key]===true) ? ' class="priority-row"' : ""}>${columns.map((col) => `<${col.key === "student" ? 'th scope="row"' : "td"}>${listCell(s, col)}</${col.key === "student" ? "th" : "td"}>`).join("")}</tr>`,
             )
             .join("")
         : `<tr><td colspan="${columns.length}" class="list-empty">No hay estudiantes que coincidan con esta búsqueda y filtro.</td></tr>`
@@ -1364,64 +1387,43 @@
     closeSummary();
   });
   function groupReport(g) {
-    const a = g.summary;
-    return `<article class="report">${hero(className(g), studentsLabel(a.n), "Ficha de grupo")}<div class="report-body">${carePanel(g)}${surveySummary(a)}
-    ${section("01", "Bienestar en la última semana", `<div class="rate-grid">${rateCard("Soledad frecuente", a.loneliness, "Casi siempre o siempre.", "loneliness")}${rateCard("Ha disfrutado poco con sus amistades", a.lowEnjoyment, "Nunca o casi nunca.", "lowEnjoyment")}${rateCard("Rara vez le ha ido bien en la universidad", a.lowUniversity, "Nunca o casi nunca.", "lowUniversity")}</div>`, "neutral")}<details class="expanded-indicators" data-extra-group="${E(g.key)}"${expandedGroups.has(g.key) ? " open" : ""}><summary>Ver más indicadores del grupo<span>Relaciones, adaptación académica y participación</span></summary>${section("02", "Relaciones y bienestar", `<div class="rate-grid single">${rateCard("Relaciones negativas registradas", a.rejection, "Sobre todas las valoraciones posibles de quienes responden.")}</div><div class="distribution-grid">${["alone", "fun", "general"].map((f) => dist(f, a.distributions[f])).join("")}</div>`)}
-    ${section("03", "Adaptación académica", `<div class="rate-grid four">${rateCard("Dificultades en asignaturas", a.difficulty, "", "difficulty")}${rateCard("Se han planteado dejar los estudios", a.dropout, "", "dropout")}${rateCard("Dificultades para organizar el tiempo", a.time, "Mal o Muy mal.", "time")}${rateCard("Carga de trabajo alta", a.workload, "Alta o Muy alta.", "workload")}</div><div class="distribution-grid">${["time", "workload", "dropout"].map((f) => dist(f, a.distributions[f])).join("")}</div>`, "neutral")}
-    ${section("04", "Participación y motivos", `<div class="distribution-grid">${["activities", "subjectReasons", "dropoutReasons"].map((f) => dist(f, a.distributions[f])).join("")}</div>${readingNote("Cómo leer las respuestas múltiples", "<p>Cada persona puede marcar varias opciones. Los porcentajes pueden sumar más del 100 %.</p>")}`)}
-    </details>${N.classView(g.rows, model.students)}${sheetFeedback("group", g)}</div></article>`;
+    const a=g.summary;
+    return `<article class="report snapshot">${hero(className(g), `${g.study} · ${studentsLabel(a.n)} · ${pct(C.linkCoverage(g.rows).percent)} con vínculos`, "Grupo")}<div class="report-body">${focusCards(g.rows,true)}${carePanel(g)}${surveySummary(a)}${window.IsatCommunities.view(g.rows,model.students)}<details class="expanded-indicators" data-extra-group="${E(g.key)}"${expandedGroups.has(g.key)?" open":""}><summary>Ver todas las respuestas del grupo<span>Bienestar, relaciones y vida universitaria</span></summary><div class="rate-grid">${rateCard("Soledad frecuente",a.loneliness,"Casi siempre o siempre.","loneliness")}${rateCard("Ha disfrutado poco con sus amistades",a.lowEnjoyment,"Nunca o casi nunca.","lowEnjoyment")}${rateCard("Rara vez le ha ido bien en la universidad",a.lowUniversity,"Nunca o casi nunca.","lowUniversity")}${rateCard("Dificultades en asignaturas",a.difficulty,"","difficulty")}${rateCard("Se han planteado dejar los estudios",a.dropout,"","dropout")}${rateCard("Dificultades para organizar el tiempo",a.time,"Mal o Muy mal.","time")}${rateCard("Carga de trabajo alta",a.workload,"Alta o Muy alta.","workload")}${rateCard("Relaciones negativas registradas",a.rejection,"")}</div><div class="distribution-grid">${["alone","fun","general","time","workload","dropout","activities","subjectReasons","dropoutReasons"].map(f=>dist(f,a.distributions[f])).join("")}</div></details>${sheetFeedback("group",g)}</div></article>`;
   }
+  function focusCards(rows, interactive) {
+    const data=C.focusSummary(rows);
+    return `<div class="snapshot-metrics focus-metrics">${Object.entries(C.FOCUS_LABELS).map(([key,label])=>{
+      const a=data[key];
+      return `<section class="snapshot-metric" data-focus-metric="${key}"><h3>${E(label)}</h3><strong>${a.count===null?"Pendiente":a.count}<small> · ${pct(a.percent)}</small></strong><p>${a.denominator} estudiantes con dato</p>${interactive&&a.count>0?`<button class="text-button" type="button" data-indicator-scope="${key}">Ver estudiantes →</button>`:""}</section>`;
+    }).join("")}</div>`;
+  }
+
   function overviewData(key, rows) {
     if (!overviewCache.has(key)) overviewCache.set(key, C.overviewSummary(rows));
     return overviewCache.get(key);
   }
-  function overviewMetrics(a) {
-    const card = (label, value, detail, key) => `<div class="snapshot-metric" data-snapshot-metric="${key}"><h3>${label}</h3><strong>${value}</strong><p>${detail}</p></div>`;
-    return `<div class="snapshot-metrics">${card("Peticiones propias de ayuda", num(a.care.selfRequests), `${a.care.selfAnswered} respuestas registradas`, "help")}${card("Vínculos negativos", pct(a.negativeLinks.percent), `${a.negativeLinks.count ?? 0} de ${a.negativeLinks.denominator} vínculos positivos o negativos`, "negative")}${card("Bienestar medio", a.wellbeing.mean === null ? "Sin datos" : `${num(a.wellbeing.mean)} <small>/ 10</small>`, `${a.wellbeing.denominator} estudiantes con las tres respuestas`, "wellbeing")}${card("Se plantean dejar los estudios", pct(a.dropout.percent), `${a.dropout.count ?? 0} de ${a.dropout.denominator} respuestas`, "dropout")}</div>`;
-  }
   function overviewMethods() {
-    return readingNote("Cómo leer el resumen", "<p>Vínculos negativos: Mala o Muy mala relación, sobre los vínculos positivos y negativos registrados entre estudiantes de la misma clase; cada dirección cuenta una vez. No es la densidad de rechazo.</p><p>Bienestar: media de disfrute con sus amistades, experiencia en la universidad y soledad invertida, en escala de 0 a 10. Solo se incluyen estudiantes con las tres respuestas. Es un resumen descriptivo.</p><p>Dejar los estudios: cualquier respuesta afirmativa, incluida «alguna vez». Los porcentajes usan respuestas válidas; la ausencia de respuesta no equivale a cero.</p>");
+    return readingNote("Criterios de los indicadores", "<p>Ayuda: petición propia y menciones de al menos dos personas distintas. Abandono actual: «Sí, lo estoy considerando actualmente».</p><p>Felicidad: disfrute + experiencia universitaria + soledad invertida, en escala de 0 a 10 y con las tres respuestas; se destaca un valor menor que 5.</p><p>Sin amistades señaladas: ninguna elección positiva y pregunta interpretable, incluida una selección vacía confirmada por una respuesta posterior. Balance negativo: más valoraciones negativas que positivas recibidas, incluidas otras clases.</p>");
   }
+
   function overviewHelp(a, interactive) {
     return `<section class="snapshot-help"><div class="snapshot-section-title"><h3>Peticiones y menciones de ayuda</h3><p>${num(a.care.selfRequests)} peticiones propias · ${num(a.care.peerCases)} estudiantes con menciones de 2 o más personas</p></div>${careMatrix(a.care.matrix, interactive)}</section>`;
   }
-  const overviewOrders = {
-    negative: { label: "Más vínculos negativos", value: (a) => a.negativeLinks.percent, descending: true },
-    wellbeing: { label: "Menor bienestar", value: (a) => a.wellbeing.mean, descending: false },
-    dropout: { label: "Más intención de dejar los estudios", value: (a) => a.dropout.percent, descending: true },
-    help: { label: "Mayor proporción de peticiones propias", value: (a) => a.care.selfAnswered ? 100 * a.care.selfRequests / a.care.selfAnswered : null, descending: true },
-  };
-  function overviewHighlights(groups) {
-    return `<section><div class="snapshot-section-title"><h3>Grupos que conviene revisar</h3><p>Destacados con al menos 10 respuestas y un 20 % del grupo en ese indicador. Todos los grupos están en la comparación.</p></div><div class="snapshot-groups">${["negative", "wellbeing", "dropout"].map((key) => {
-      const rule = overviewOrders[key];
-      const sorted = groups.filter(({a}) => {
-        const n = key === "negative" ? a.relationCoverage : key === "wellbeing" ? a.wellbeing.denominator : a.dropout.denominator;
-        return rule.value(a) !== null && n >= 10 && n / a.n >= .2;
-      }).sort((x, y) => (rule.descending ? rule.value(y.a) - rule.value(x.a) : rule.value(x.a) - rule.value(y.a)));
-      const first = sorted[0];
-      if (!first) return `<div class="snapshot-group"><h4>${rule.label}</h4><p>Aún no hay grupos con participación suficiente para destacar.</p></div>`;
-      const {g, a} = first, value = rule.value(a);
-      const ties = sorted.filter((item) => rule.value(item.a) === value).length - 1;
-      const denominator = key === "negative" ? `${a.negativeLinks.count} / ${a.negativeLinks.denominator} vínculos` : key === "wellbeing" ? `${a.wellbeing.denominator} estudiantes con las tres respuestas` : `${a.dropout.count} / ${a.dropout.denominator} respuestas`;
-      return `<div class="snapshot-group snapshot-highlight"><p class="eyebrow">${rule.label}</p><h4>${E(className(g))} · ${E(g.study)}</h4><strong>${num(value)}${key === "wellbeing" ? " / 10" : " %"}</strong><p>${denominator}</p><p>${pct(100 * a.completed / a.n)} de encuestas completadas${ties ? ` · ${ties} ${ties === 1 ? "grupo con el mismo valor" : "grupos con el mismo valor"}` : ""}</p><button class="btn secondary" type="button" data-overview-group="${E(g.key)}">Consultar grupo →</button></div>`;
-    }).join("")}</div></section>`;
-  }
+  const overviewOrders=Object.fromEntries(Object.entries(C.FOCUS_LABELS).map(([key,label])=>[key,{label}]));
   function universityReport() {
-    const a = overviewData("university", model.students);
-    const rule = overviewOrders[overviewSort] || overviewOrders.negative;
-    const groups = model.groups.map((g) => ({ g, a: overviewData(g.key, g.rows) }));
-    groups.sort((x, y) => {
-      const left = rule.value(x.a), right = rule.value(y.a);
-      if (left === null || right === null) return left === right ? 0 : left === null ? 1 : -1;
-      return (rule.descending ? right - left : left - right) || x.g.key.localeCompare(y.g.key, "es");
+    const rows=visibleStudents(),a=overviewData("university",rows);
+    const groups=visibleGroups().map(g=>({g,signals:C.focusSummary(g.rows)}));
+    const key=Object.hasOwn(overviewOrders,overviewSort)?overviewSort:"ownHelp";
+    groups.sort((x,y)=>{
+      const l=x.signals[key].percent,r=y.signals[key].percent;
+      return l===null||r===null?l===r?0:l===null?1:-1:r-l||x.g.key.localeCompare(y.g.key,"es");
     });
-    const smallMetric = (label, value, basis) => `<div><dt>${label}</dt><dd>${value}</dd><span>${basis}</span></div>`;
-    return `<article class="report snapshot">${hero("La universidad en un vistazo", `${studentsLabel(a.n)} · ${model.groups.length} grupos · Todos los centros del Excel`, "Resumen universidad")}<div class="report-body">${overviewMetrics(a)}${overviewHelp(a, false)}${overviewHighlights(groups)}<details class="snapshot-all-groups"><summary>Comparar todos los grupos (${groups.length})</summary><section><div class="snapshot-section-title snapshot-ranking-title"><div><h3>Dónde mirar primero</h3><p>Compara los grupos y abre su resumen.</p></div><label class="field">Ordenar grupos por<select data-overview-sort>${Object.entries(overviewOrders).map(([key, item]) => `<option value="${key}"${key === overviewSort ? " selected" : ""}>${item.label}</option>`).join("")}</select></label></div><div class="snapshot-groups">${groups.map(({g, a}) => `<section class="snapshot-group" data-summary-group="${E(g.key)}"><p class="eyebrow">${E(g.study)}</p><h4>${E(className(g))}</h4><p class="snapshot-coverage">${studentsLabel(a.n)} · ${pct(a.n ? 100 * a.completed / a.n : null)} completadas</p><dl>${smallMetric("Vínculos negativos", pct(a.negativeLinks.percent), `${a.negativeLinks.count ?? 0} / ${a.negativeLinks.denominator} vínculos`)}${smallMetric("Bienestar", a.wellbeing.mean === null ? "Sin datos" : `${num(a.wellbeing.mean)} / 10`, `${a.wellbeing.denominator} respuestas completas`)}${smallMetric("Dejar los estudios", pct(a.dropout.percent), `${a.dropout.count ?? 0} / ${a.dropout.denominator} respuestas`)}${smallMetric("Piden ayuda", a.care.selfAnswered ? pct(100 * a.care.selfRequests / a.care.selfAnswered) : "Sin datos", `${a.care.selfRequests ?? 0} / ${a.care.selfAnswered} respuestas`)}</dl><button class="btn secondary" data-overview-group="${E(g.key)}" type="button">Ver resumen del grupo →</button></section>`).join("")}</div><p class="snapshot-note">Orden orientativo con las respuestas disponibles. Compara también la participación y las bases de cada dato; no es una clasificación de riesgo.</p></section></details>${overviewMethods()}</div>${participationNote({summary:a})}</article>`;
+    return `<article class="report snapshot">${hero("Dónde centrar el acompañamiento",`${studentsLabel(rows.length)} · ${groups.length} grupos visibles`,"Universidad")}<div class="report-body">${focusCards(rows,false)}${overviewHelp(a,false)}<section><div class="snapshot-section-title snapshot-ranking-title"><div><h3>Comparar los grupos</h3><p>Primero los porcentajes más altos del indicador seleccionado.</p></div><label class="field">Ordenar por<select data-overview-sort>${Object.entries(overviewOrders).map(([k,v])=>`<option value="${k}"${k===key?" selected":""}>${E(v.label)}</option>`).join("")}</select></label></div><div class="snapshot-groups">${groups.map(({g,signals})=>`<section class="snapshot-group" data-summary-group="${E(g.key)}"><p class="eyebrow">${E(g.study)}</p><h4>${E(className(g))}</h4><p class="snapshot-coverage">${studentsLabel(g.rows.length)} · ${pct(C.linkCoverage(g.rows).percent)} con vínculos</p><dl>${Object.entries(signals).map(([k,v])=>`<div${k===key?' class="focus-selected"':""}><dt>${E(C.FOCUS_LABELS[k])}</dt><dd>${num(v.count)} <small>· ${pct(v.percent)}</small></dd><span>${v.denominator} con dato</span></div>`).join("")}</dl><button class="btn secondary" data-overview-group="${E(g.key)}" type="button">Abrir grupo →</button></section>`).join("")}</div><p class="snapshot-note">Los porcentajes usan estudiantes con dato para cada indicador. Una persona puede aparecer en varios; no se suman. La cobertura de vínculos no equivale a encuesta completada.</p></section>${overviewMethods()}</div>${participationNote({summary:a})}</article>`;
   }
-  function groupOverview(g) {
-    const a = overviewData(g.key, g.rows), overall = overviewData("university", model.students);
-    const compare = (label, value, universityValue, suffix) => `<div><h4>${label}</h4><p><strong>${value === null ? "Sin datos" : num(value) + suffix}</strong><span>Universidad: ${universityValue === null ? "Sin datos" : num(universityValue) + suffix}</span></p></div>`;
-    return `<article class="report snapshot">${hero(className(g), `${E(g.study)} · ${studentsLabel(a.n)}`, "Resumen grupo")}<div class="report-body">${overviewMetrics(a)}<section class="snapshot-comparison"><h3>El grupo y la universidad</h3><div>${compare("Vínculos negativos", a.negativeLinks.percent, overall.negativeLinks.percent, " %")}${compare("Bienestar medio", a.wellbeing.mean, overall.wellbeing.mean, " / 10")}${compare("Dejar los estudios", a.dropout.percent, overall.dropout.percent, " %")}</div></section>${overviewHelp(a, true)}<div class="snapshot-actions"><button class="btn" type="button" data-open-list>Ver estudiantes →</button><button class="btn secondary" type="button" data-overview-group="${E(g.key)}" data-overview-view="group">Ficha completa del grupo →</button></div>${overviewMethods()}</div></article>`;
+
+  function studentFocus(s) {
+    const labels = {ownHelp:"Ha pedido ayuda",peerHelp:"Al menos dos personas indican que necesita ayuda",imminent:"Considera dejar la universidad actualmente",lowHappiness:"Felicidad inferior a 5",noFriends:"No ha señalado amistades",negativeBalance:"Recibe más vínculos negativos que positivos"};
+    return `<section class="student-focus"><h3>Claves para el acompañamiento</h3><div class="response-grid">${Object.entries(C.FOCUS_LABELS).map(([key,label])=>`<div class="response-card${s.focus[key]===true?' focus-yes':""}"><h4>${E(labels[key])}</h4><p class="response-value">${s.focus[key]===null?"Pendiente":s.focus[key]?"Sí":"No"}</p>${key==="lowHappiness"?`<p>Felicidad: ${num(s.focus.happiness)} / 10</p>`:key==="negativeBalance"?`<p>${num(s.focus.receivedNegative)} negativos · ${num(s.focus.receivedPositive)} positivos recibidos</p>`:key==="peerHelp"?`<p>${num(s.care.peerReports)} personas</p>`:""}</div>`).join("")}</div></section>`;
   }
   function studentOverview(s, g) {
     const rows = (items) =>
@@ -1476,9 +1478,9 @@
   );
   function studentReport(s, g) {
     const m = s.metrics;
-    const highlighted = s.care.requested === true || s.care.peerReports > 2;
+    const highlighted = Object.keys(C.FOCUS_LABELS).some(key => s.focus[key] === true);
     return `<article class="report${highlighted ? " report-care" : ""}">${hero(name(s), `${className(g)} · ${studentsLabel(g.rows.length)}`, "Ficha individual", surveyStatus(s))}<div class="report-body">${studentNavigation(s, g)}${studentCare(s)}${s.lastDate ? `<p class="completion-date">Última respuesta: ${E(dateLabel(s.lastDate))}</p>` : ""}
-    ${studentOverview(s, g)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, vida universitaria y red de contactos</span></summary>
+    ${studentFocus(s)}${studentOverview(s, g)}<details class="expanded-indicators" data-extra-student="${E(s.id)}"${expandedStudents.has(s.id) ? " open" : ""}><summary>Ver más indicadores<span>Relaciones, vida universitaria y red de contactos</span></summary>
     ${section("01", "Relaciones en la clase", `<div class="metric-grid">${metric("Personas que le valoran positivamente", m.friendsReceived)}${metric("Personas que valora positivamente", m.friendsDeclared)}${metric("Relaciones positivas mutuas", m.friendsMutual)}${metric("Personas que le valoran negativamente", m.rejectionsReceived)}${metric("Personas que valora negativamente", m.rejectionsDeclared)}${metric("Relaciones negativas mutuas", m.rejectionsMutual)}</div><div class="metric-grid compact">${predictionMetric(s, "friend")}${predictionMetric(s, "rejection")}</div>${readingNote("Cómo interpretar las relaciones", `<p>Positivas: Buena o Muy buena relación. Negativas: Mala o Muy mala. Mutuas: ambas personas se valoran del mismo modo.</p><p>Las predicciones expresan cómo cree que otras personas le valoran. Los aciertos se verifican con las respuestas de esas personas.</p>`)}`)}
     ${section("02", "Reconocimiento y contactos", `<div class="metric-grid">${metric("Personas que le consideran popular", m.popularVotes)}${metric("Personas que le ven como conexión entre grupos", m.connectorVotes)}${metric("Personas que ya conocía", s.contacts?.length ?? null)}${metric("Personas conocidas fuera de la clase", s.outsideCount)}</div>`)}
     ${section(
@@ -1510,16 +1512,13 @@
     if (!model) return;
     syncReviewButton();
     const g = group();
-    if (!g) {
-      $("report").innerHTML = empty();
+    if (!g && tab !== "university") {
+      $("report").innerHTML = '<section class="empty-state"><h2>No hay grupos con esta cobertura.</h2><p>No se muestra ningún grupo por debajo del 80 % con vínculos. Puedes revisar el filtro de cobertura.</p></section>';
       return;
     }
     if (tab === "university") {
       $("report").innerHTML = universityReport();
-      $("view-announcement").textContent = `Resumen de universidad: ${model.groups.length} grupos.`;
-    } else if (tab === "overview") {
-      $("report").innerHTML = groupOverview(g);
-      $("view-announcement").textContent = `Resumen de grupo: ${className(g)}.`;
+      $("view-announcement").textContent = `Resumen de universidad: ${visibleGroups().length} grupos visibles.`;
     } else if (tab === "group") {
       $("report").innerHTML = groupReport(g);
       $("view-announcement").textContent =

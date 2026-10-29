@@ -85,7 +85,7 @@ test("carga y consulta son pantallas separadas; volver a datos conserva la vista
   await app.load(listFixture());
   assert.equal(app.get("data-screen").hidden, true);
   assert.equal(app.get("report").hidden, false);
-  assert.equal(doc(app).querySelectorAll('[role="tab"]').length, 5);
+  assert.equal(doc(app).querySelectorAll('[role="tab"]').length, 4);
   app.get("tab-list").click();
   app.get("show-data").click();
   assert.equal(app.get("data-screen").hidden, false);
@@ -139,7 +139,7 @@ test("orden numérico en ambos sentidos, ausencias siempre al final y tres ítem
   );
   for (const field of ["alone", "fun", "general"])
     assert.ok(cell(app, "S01", field));
-  assert.doesNotMatch(app.get("report").textContent, /Felicidad|Índice global/);
+  assert.match(app.get("report").textContent, /Felicidad por debajo de 5/);
 });
 
 test("se muestran códigos y ficha y retorno conservan búsqueda y filtro", async (t) => {

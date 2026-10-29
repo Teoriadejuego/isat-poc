@@ -27,15 +27,15 @@ test('red de clase vacía y ampliada no inventa vínculos ni coordenadas inváli
  }
  assert.match(N.classBody([sample()[3]],[sample()[3]]),/No hay vínculos registrados/);
 });
-test('filtros de clase actualizan solo la red y un nodo abre su ficha',async t=>{
+test('las comunidades sustituyen la red densa y sus integrantes abren fichas',async t=>{
  const app=createApp(t);await app.load(fixture());
- const panel=app.window.document.querySelector('.class-network');assert.ok(panel);
- const kind=panel.querySelector('[data-class-network="kind"]');kind.value='negative';kind.dispatchEvent(new app.window.Event('change',{bubbles:true}));
- assert.equal(panel.querySelectorAll('.ego-positive').length,0);
- assert.equal(panel.querySelector('[data-ego-zoom-label]').textContent,'Ajustado');
- const link=panel.querySelector('[data-network-student]');const id=link.dataset.networkStudent;link.dispatchEvent(new app.window.MouseEvent('click',{bubbles:true}));
+ const panel=app.window.document.querySelector('.community-map');assert.ok(panel);
+ assert.equal(app.window.document.querySelector('.class-network'),null);
+ const link=panel.querySelector('[data-network-student]');const id=link.dataset.networkStudent;
+ link.dispatchEvent(new app.window.MouseEvent('click',{bubbles:true}));
  assert.equal(app.get('student').value,id);assert.equal(app.get('tab-student').getAttribute('aria-selected'),'true');
 });
+
 test('recibidas y declaradas se distinguen en las etiquetas de recuentos',async t=>{
  const app=createApp(t);await app.load(fixture());app.get('tab-student').click();
  const overview=app.window.document.querySelector('.student-overview');

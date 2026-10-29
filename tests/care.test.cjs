@@ -134,7 +134,7 @@ test("recuentos y matriz son el primer bloque y diferencian las cuatro combinaci
   assert.equal(
     app.window.document.querySelector(".report-body").firstElementChild
       .className,
-    "care-panel",
+    "snapshot-metrics focus-metrics",
   );
   assert.match(
     app.window.document.querySelector(".care-stats").textContent,

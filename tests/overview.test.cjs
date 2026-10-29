@@ -22,49 +22,19 @@ test('resumen usa vínculos internos dirigidos, excluye neutros y bienestar exig
   assert.equal(empty.wellbeing.mean, null);
   assert.equal(empty.negativeLinks.percent, null);
 });
-test('universidad incluye todos los grupos, ordena y permite pasar al resumen y a los casos', async t => {
-  const app = createApp(t);
-  await app.load(data());
-  app.get('tab-university').click();
-  assert.equal(app.get('class-field').hidden, true);
-  assert.equal(app.get('search-field').hidden, true);
-  assert.match(app.get('report').textContent, /4 estudiantes · 2 grupos/);
-  assert.equal(app.get('report').querySelectorAll('[data-care-scope]').length, 0);
-  assert.equal(app.get('report').querySelectorAll('.snapshot-highlight').length, 0, 'no destaca grupos con bases de una o dos respuestas');
-  let cards = [...app.get('report').querySelectorAll('[data-summary-group]')];
-  assert.match(cards[0].textContent, /A/);
-  const select = app.get('report').querySelector('[data-overview-sort]');
-  select.closest('details').open = true;
-  select.value = 'wellbeing';
-  select.dispatchEvent(new app.window.Event('change', {bubbles:true}));
-  assert.equal(app.get('report').querySelector('.snapshot-all-groups').open, true);
-  cards = [...app.get('report').querySelectorAll('[data-summary-group]')];
-  cards[1].querySelector('button').click();
-  assert.equal(app.get('tab-overview').getAttribute('aria-selected'), 'true');
-  assert.equal(app.get('class-field').hidden, false);
-  assert.match(app.get('report').textContent, /El grupo y la universidad/);
-  app.get('report').querySelector('[data-open-list]').click();
-  assert.equal(app.get('tab-list').getAttribute('aria-selected'), 'true');
-  assert.match(app.get('report').textContent, /B1/);
-  app.get('clear').click();
-  await app.load([headers, row({'Usuario Id':'N1', Curso:'Nuevo', Estudio:'Otro', Grupo:'1'})]);
-  app.get('tab-university').click();
-  assert.doesNotMatch(app.get('report').textContent, /Sevilla/);
-  assert.match(app.get('report').textContent, /Nuevo/);
-});
-test('los destacados omiten el cien por cien de una sola respuesta y permiten consultar los grupos con base suficiente', async t => {
-  const app = createApp(t);
-  const table = [headers, ...Array.from({length:20}, (_,i) => row({
-    'Usuario Id': `P${i}`, Estudio:'Centro', Curso:i < 10 ? 'Base suficiente' : 'Una respuesta', Grupo:'1',
-    abandono:i < 10 ? log(i < 3 ? 'Sí, alguna vez' : 'No') : i === 10 ? log('Sí, alguna vez') : null,
-  }))];
-  await app.load(table);
-  app.get('tab-university').click();
-  const highlight = app.get('report').querySelector('.snapshot-highlight');
-  assert.match(highlight.textContent, /Base suficiente/);
-  assert.match(highlight.textContent, /30 %/);
-  assert.match(highlight.textContent, /3 \/ 10 respuestas/);
-  highlight.querySelector('button').click();
-  assert.equal(app.get('tab-overview').getAttribute('aria-selected'), 'true');
-  assert.match(app.get('report').textContent, /Base suficiente/);
+test('universidad ordena por los seis indicadores y abre la única ficha de grupo',async t=>{
+ const app=createApp(t);await app.load(data());app.get('tab-university').click();
+ assert.equal(app.get('class-field').hidden,true);
+ assert.equal(app.get('report').querySelectorAll('[data-focus-metric]').length,6);
+ const select=app.get('report').querySelector('[data-overview-sort]');select.value='ownHelp';
+ select.dispatchEvent(new app.window.Event('change',{bubbles:true}));
+ const cards=[...app.get('report').querySelectorAll('[data-summary-group]')];
+ assert.match(cards[0].textContent,/A/);cards[1].querySelector('button').click();
+ assert.equal(app.get('tab-group').getAttribute('aria-selected'),'true');
+ assert.equal(app.get('tab-overview'),null);
+ app.get('report').querySelector('[data-open-list]').click();
+ assert.equal(app.get('tab-list').getAttribute('aria-selected'),'true');
+ app.get('clear').click();await app.load([headers,row({'Usuario Id':'N1',Curso:'Nuevo',Estudio:'Otro',Grupo:'1'})]);
+ app.get('tab-university').click();assert.doesNotMatch(app.get('report').textContent,/Sevilla/);
+ assert.match(app.get('report').textContent,/Nuevo/);
 });

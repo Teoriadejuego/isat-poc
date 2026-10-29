@@ -200,7 +200,7 @@ test("las relaciones salientes a otra clase entran y los enlaces cambian de clas
   assert.match(d.querySelector("#ego-svg-title").textContent, /R014/);
   assert.equal(d.querySelectorAll(".ego-edge").length, 2);
 });
-test("el color de ayuda sigue la petición propia o más de dos menciones y se actualiza al cambiar de ficha", async (t) => {
+test("el color sigue los seis criterios de acompañamiento y se actualiza al cambiar de ficha", async (t) => {
   const app = createApp(t),
     table = egoFixture();
   // Internal boundary cases; they are never loaded into the delivered preview.
@@ -218,9 +218,9 @@ test("el color de ayuda sigue la petición propia o más de dos menciones y se a
       .classList.contains("report-care");
   };
   assert.equal(highlighted("R001"), true, "Own request is enough");
-  assert.equal(highlighted("R004"), false, "Two mentions do not exceed two");
+  assert.equal(highlighted("R004"), true, "Two mentions meet the care threshold");
   assert.equal(highlighted("R005"), true, "Three distinct mentions exceed two");
-  assert.equal(highlighted("R006"), false, "No request and no mentions");
+  assert.equal(highlighted("R006"), Object.keys(C.FOCUS_LABELS).some(k=>C.parseTable(table).students.find(s=>s.id==="R006").focus[k]===true), "All six indicators determine the emphasis");
   assert.equal(
     highlighted("R001"),
     true,

@@ -94,7 +94,7 @@ test("cada indicador abre su lista y muestra la respuesta que justifica el filtr
   const app = createApp(t);
   await app.load(table);
   assert.equal(
-    report(app).querySelectorAll("[data-indicator-scope]").length,
+    report(app).querySelector(".expanded-indicators").querySelectorAll("[data-indicator-scope]").length,
     7,
   );
   for (const [key, field] of Object.entries(indicators)) {
@@ -151,12 +151,12 @@ test("indicadores sin casos o sin respuestas no ofrecen un enlace a casos inexis
   const app = createApp(t);
   await app.load([table[0], table[3], table[4], table[5]]);
   assert.equal(
-    report(app).querySelectorAll("[data-indicator-scope]").length,
+    report(app).querySelector(".expanded-indicators").querySelectorAll("[data-indicator-scope]").length,
     0,
   );
   await app.load([table[0], table[5]]);
   assert.equal(
-    report(app).querySelectorAll("[data-indicator-scope]").length,
+    report(app).querySelector(".expanded-indicators").querySelectorAll("[data-indicator-scope]").length,
     0,
   );
 });

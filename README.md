@@ -120,7 +120,35 @@ Dirección local: `http://127.0.0.1:8892/`. Para servir la aplicación no hacen 
 Si GitHub no consigue asignar un servidor de ejecución, **Actions → Publicar ISAT → Run workflow** permite seleccionar `macos-15` como alternativa a `ubuntu-latest`. Ambos recorridos ejecutan las pruebas y verifican los mismos once recursos antes del despliegue.
 
 jsdom se utiliza únicamente en las pruebas. SheetJS 0.20.3 se distribuye localmente con su licencia en `vendor/LICENSE-SheetJS.txt`. Los prompts y el cierre de revisión figuran en `REVISION_PROMPTS.md` y `REVISION_RESULTADOS.md`.
-# Resúmenes de universidad y grupo (0.13.0)
+# Acompañamiento y comunidades (0.14.0)
+
+La navegación unifica las fichas en Universidad, Grupo, Lista y Estudiante.
+Las vistas principales comparten seis indicadores:
+
+- Petición propia de ayuda.
+- Menciones de ayuda de dos o más personas distintas.
+- Abandono actual: respuesta exacta «Sí, lo estoy considerando actualmente».
+- Felicidad menor que 5: disfrute + experiencia universitaria + soledad invertida,
+  reescaladas a 0–10 y con las tres respuestas disponibles.
+- Ninguna amistad declarada, solo si la respuesta de relaciones es interpretable;
+  admite vacío confirmado por preguntas posteriores y excluye listas ilegibles.
+- Más vínculos negativos que positivos recibidos de todo el Excel.
+
+El filtro de cobertura está activado por defecto. Solo muestra grupos con al
+menos el 80 % de estudiantes con algún vínculo positivo o negativo entrante o
+saliente, incluidas otras clases. Los resúmenes agregan solo grupos visibles.
+Es posible desactivar el filtro para revisar el archivo completo. Esto no mide
+la proporción de encuestas finalizadas. El filtro se restablece al retirar datos.
+
+El grupo muestra comunidades estimadas mediante fusión voraz con mejora de
+modularidad de la red positiva no dirigida. Las valoraciones Muy buenas pesan
+dos y las Buenas uno; las elecciones recíprocas se acumulan. Las valoraciones
+negativas no intervienen en la partición: después se suman dentro y entre
+agrupaciones, y con otras clases. Las personas sin comunidad positiva asignada
+figuran aparte. No se presentan como comunidades confirmadas. Las respuestas
+individuales se conservan en sus bloques, junto con los seis criterios.
+
+# Resúmenes de universidad y grupo (0.13.0; histórico)
 
 Dos pestañas reúnen la matriz de ayuda y cuatro indicadores: peticiones propias,
 proporción de vínculos negativos entre positivos y negativos internos, bienestar

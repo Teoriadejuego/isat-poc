@@ -59,7 +59,7 @@ function createApp(t, options = {}) {
     }
   }
   window.Worker = TestWorker;
-  for (const file of ["src/core.js", "src/ego-network.js", "src/app.js"])
+  for (const file of ["src/core.js", "src/communities.js", "src/ego-network.js", "src/app.js"])
     window.eval(fs.readFileSync(path.join(root, file), "utf8"));
   const get = (id) => window.document.getElementById(id);
   async function selectFile(
@@ -85,6 +85,12 @@ function createApp(t, options = {}) {
       ],
     });
     get("open").click();
+    // Existing tests exercise individual views independently of coverage.
+    // Tests of the production default opt in with coverageFilter: true.
+    if (!options.coverageFilter && get("coverage-filter").checked) {
+      get("coverage-filter").checked = false;
+      get("coverage-filter").dispatchEvent(new window.Event("change"));
+    }
     return worker;
   }
   function change(id, value) {

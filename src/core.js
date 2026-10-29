@@ -104,6 +104,7 @@
   });
   // A null result stays outside both the numerator and the valid-answer base.
   function indicatorValue(student, key) {
+    if (Object.hasOwn(student?.focus || {}, key)) return student.focus[key];
     if (!Object.hasOwn(indicatorRules, key)) return null;
     const rule = indicatorRules[key],
       value = rule.read(student?.responses?.[rule.field]);
@@ -645,6 +646,7 @@
           a.course.localeCompare(b.course, "es", { numeric: true }) ||
           a.group.localeCompare(b.group, "es"),
       );
+    prepareFocus(students);
     return { students, groups, warnings };
   }
   function careCategory(care) {
@@ -828,7 +830,54 @@
         denominator: wellbeing.length },
     };
   }
+  const FOCUS_LABELS = Object.freeze({
+    ownHelp: "Piden ayuda",
+    peerHelp: "Con menciones de ayuda de 2 o más personas",
+    imminent: "Consideran dejar la universidad ahora",
+    lowHappiness: "Felicidad por debajo de 5",
+    noFriends: "No han señalado amistades",
+    negativeBalance: "Reciben más vínculos negativos que positivos",
+  });
+  function prepareFocus(students) {
+    const incoming = new Map(students.map(s => [s.id, {positive:0, negative:0}]));
+    const linked = new Set();
+    const respondents = students.filter(s => s.relations !== null).length;
+    for (const s of students) for (const link of s.relations || []) {
+      if (!incoming.has(link.id) || ![-1,1].includes(link.rating)) continue;
+      incoming.get(link.id)[link.rating === 1 ? "positive" : "negative"]++;
+      linked.add(s.id); linked.add(link.id);
+    }
+    for (const s of students) {
+      const f = [frequency(s.responses.fun),frequency(s.responses.general),frequency(s.responses.alone)];
+      const happiness = f.every(v => v !== null) ? 10*(f[0]+f[1]+4-f[2])/12 : null;
+      const received = incoming.get(s.id);
+      const known = respondents - (s.relations !== null ? 1 : 0) > 0;
+      s.focus = {
+        ownHelp: s.care.requested,
+        peerHelp: s.care.peerReports === null ? null : s.care.peerReports >= 2,
+        imminent: s.responses.dropout === null ? null : norm(s.responses.dropout) === norm("Sí, lo estoy considerando actualmente"),
+        lowHappiness: happiness === null ? null : happiness < 5,
+        noFriends: s.relations === null || !s.quality.relations.complete ? null : !s.relations.some(r => r.rating > 0),
+        negativeBalance: known ? received.negative > received.positive : null,
+        happiness, receivedPositive: known ? received.positive : null, receivedNegative: known ? received.negative : null,
+        linked: linked.has(s.id),
+      };
+    }
+  }
+  function focusSummary(rows) {
+    return Object.fromEntries(Object.keys(FOCUS_LABELS).map(key => {
+      const values = rows.map(s => s.focus[key]).filter(v => typeof v === "boolean");
+      const count = values.filter(Boolean).length;
+      return [key,{count:values.length ? count : null, denominator:values.length,
+        percent:values.length ? 100*count/values.length : null}];
+    }));
+  }
+  function linkCoverage(rows) {
+    const count = rows.filter(s => s.focus?.linked).length;
+    return {count, total:rows.length, percent:rows.length ? 100*count/rows.length : 0, eligible:rows.length > 0 && count*5 >= rows.length*4};
+  }
   return Object.freeze({
+    FOCUS_LABELS, focusSummary, linkCoverage,
     overviewSummary,
     parseTable,
     summary,
